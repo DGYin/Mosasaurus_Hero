@@ -6,7 +6,7 @@ uint16_t pwm = 2700;	//调整音色
 
 void Buzzer_Task(int S_Cnt, int MS_Cnt)
 {
-	Power_On_Beep(S_Cnt,MS_Cnt);//开机提示音
+	if (S_Cnt<=3) Power_On_Beep(S_Cnt,MS_Cnt);//开机提示音
 	
 }
 

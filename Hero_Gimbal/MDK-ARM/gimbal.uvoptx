@@ -161,34 +161,50 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>10</LineNumber>
+          <LineNumber>43</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134251146</Address>
+          <Address>134233248</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\APP\buzzer.c</Filename>
+          <Filename>..\TASK\TIM3_cnt_task.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\gimbal\../APP/buzzer.c\10</Expression>
+          <Expression>\\gimbal\../TASK/TIM3_cnt_task.c\43</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>4</LineNumber>
+          <LineNumber>228</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
+          <Address>134222602</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>..\TASK\shoot_task.h</Filename>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression></Expression>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\228</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>226</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134222594</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\226</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
