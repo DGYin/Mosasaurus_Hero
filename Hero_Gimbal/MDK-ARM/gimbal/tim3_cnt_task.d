@@ -55,3 +55,4 @@ gimbal\tim3_cnt_task.o: ../APP/can_receive.h
 gimbal\tim3_cnt_task.o: ../BSP/BSP_CAN/bsp_can.h
 gimbal\tim3_cnt_task.o: ../Core/Inc/can.h
 gimbal\tim3_cnt_task.o: ..\TASK\sent_task.h
+gimbal\tim3_cnt_task.o: ..\TASK\buzzer_task.h

@@ -585,6 +585,11 @@
               <FileType>1</FileType>
               <FilePath>..\APP\blueteeth.c</FilePath>
             </File>
+            <File>
+              <FileName>buzzer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\buzzer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -669,6 +674,11 @@
               <FileName>lk_pitch_turn.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\TASK\lk_pitch_turn.c</FilePath>
+            </File>
+            <File>
+              <FileName>buzzer_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TASK\buzzer_task.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -1,7 +1,0 @@
---c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O1 -Otime --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../APP -I ../BSP/BSP_CAN -I ../BSP/BSP_TIM -I ../TASK -I ../Core/Src -I ../BSP/BSP_IMU -I ../components/algorithm -I ../components/devices -I ../BSP/BSP_SPI -I ../BSP/BSP_UART -I ../components/controller
--I.\RTE\_gimbal
--IC:\Users\Sai\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include
--IC:\Users\Sai\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
--IC:\Users\Sai\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.0\Device\Include
--D__UVISION_VERSION="530" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx
--o gimbal\stm32f4xx_hal_i2c.o --omf_browse gimbal\stm32f4xx_hal_i2c.crf --depend gimbal\stm32f4xx_hal_i2c.d "../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c"
