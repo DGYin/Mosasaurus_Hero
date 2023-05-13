@@ -14,17 +14,18 @@ float TriggerAngle[5] 	= {0.4f,			0.0f,			0.00015f,		4000,			0.0f};  //²¦µ¯ÂÖ½Ç¶
 
 float FricLeftSpeed[5] 	= {10.0f,			0.5f,			0.0f,				15000.0f,			5000.0f};  //×óÄ¦²ÁÂÖËÙ¶È»·
 float FricRightSpeed[5] = {10.0f,			0.5f,			0.0f,				15000.0f,			5000.0f};  //ÓÒÄ¦²ÁÂÖËÙ¶È»·
-int16_t ttt;
 
 //Ä¦²ÁÂÖPID¼ÆËã
 static void fric_pid(void);
 static int16_t speed_counter=0;
+extern int Shoot_Flag_For_Buzzer;
 void shoot_task(void)
 {
 	fric_pid();
 	canTX_fric(rc_shoot.left_fric.set_currunt,rc_shoot.right_fric.set_currunt);
 	if(canTX_trigger(rc_shoot.trigger.target_angle))
 		rc_shoot.trigger.target_angle = 0;
+	Shoot_Flag_For_Buzzer = rc_shoot.trigger.target_angle;
 
 }
 

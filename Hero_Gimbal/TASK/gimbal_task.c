@@ -302,13 +302,14 @@ static void YawPitch_PIDinit(void)
 	* @ param				none
 	* @ retvel      none
 */
+extern int Gimbal_Zero_Force_Flag;
 static void GIMBAL_Set_Mode(void)
 {
     if (gimbal_set_mode == NULL)
     {
         return;
     }
-
+	Gimbal_Zero_Force_Flag = 0;
     //电机模式选择
     if(gimbal_set_mode == GIMBAL_INIT)
     {
@@ -317,6 +318,7 @@ static void GIMBAL_Set_Mode(void)
     }
     else if(gimbal_set_mode == GIMBAL_ZERO_FORCE)
     {
+		Gimbal_Zero_Force_Flag = 1;
         gimbal_y.gimbal_motor_mode = GIMBAL_MOTOR_RAW;
         gimbal_p.gimbal_motor_mode = GIMBAL_MOTOR_RAW;
     }

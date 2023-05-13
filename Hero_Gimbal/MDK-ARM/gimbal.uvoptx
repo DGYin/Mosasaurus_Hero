@@ -161,50 +161,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>43</LineNumber>
+          <LineNumber>7214</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134233248</Address>
+          <Address>134235608</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\TASK\TIM3_cnt_task.c</Filename>
+          <Filename>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\gimbal\../TASK/TIM3_cnt_task.c\43</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>228</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134222602</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\TASK\gimbal_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\gimbal\../TASK/gimbal_task.c\228</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>226</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134222594</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\TASK\gimbal_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\gimbal\../TASK/gimbal_task.c\226</Expression>
+          <Expression>\\gimbal\../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c\7214</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -446,7 +414,17 @@
         <Ww>
           <count>47</count>
           <WinNumber>1</WinNumber>
-          <ItemText>htim4</ItemText>
+          <ItemText>Start_MS</ItemText>
+        </Ww>
+        <Ww>
+          <count>48</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>End_MS</ItemText>
+        </Ww>
+        <Ww>
+          <count>49</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>hi2c</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -1128,7 +1106,7 @@
 
   <Group>
     <GroupName>devices</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
