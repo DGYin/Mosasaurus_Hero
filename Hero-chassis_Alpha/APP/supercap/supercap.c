@@ -1,5 +1,6 @@
 #include "supercap.h"
 #include "referee.h"
+int Relay_State = 1; //继电器控制值。1为电容供电，0为电池供电。
 uint16_t power_limit = 0;
 uint16_t supercap_volt = 0; //超级电容电压
 float supercap_per = 0; //超级电容电量百分比
@@ -12,39 +13,11 @@ uint8_t send_data[4] = {0};
 	* @param[out]    代表不同功率的字符
   * @retval        none
   */
+extern void UartTX_Super_Capacitor(int Power_Limitation,int Relay_State);
 void supercap(void)
 {
     get_chassis_power_limit(&power_limit);  //获取裁判系统数据
-    //	power_limit=68;
-    //	power_limit++;
-    //	if(power_limit>999)power_limit=0;
-    send_data[0] = ((uint8_t)(power_limit / 100)) % 10; //百位
-    send_data[1] = ((uint8_t)(power_limit / 10)) % 10; //十位
-    send_data[2] = ((uint8_t)power_limit) % 10;    //个位
-    send_data[3] = '#';                            //结束帧
-    HAL_UART_Transmit(&huart1, send_data, 4, 100);
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if(huart->Instance == USART1) //判断为超级电容串口中断
-    {
-        /*数据处理*/
-        if(rec_super != '#')
-        {
-            if(cnt <= 1)
-            {
-                recvStr[cnt] = rec_super; //电压 电量
-                cnt++;
-            }
-        }
-        else
-        {
-            get_supercap_data();
-            cnt = 0;
-        }
-        HAL_UART_Receive_IT(&huart1, &rec_super, 1); //进入中断后再次手动开启接收中断
-    }
+	UartTX_Super_Capacitor(power_limit, Relay_State);
 }
 
 
