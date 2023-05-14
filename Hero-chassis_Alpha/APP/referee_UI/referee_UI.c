@@ -383,7 +383,7 @@ void UI_character_draw_data(char imagename[3],uint32_t Graph_Operate,uint32_t Gr
 	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.width=Graph_Width;
 	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.start_x=Start_x;
 	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.start_y=Start_y;
-		
+	
 	for(i=0;i<Graph_Digit;i++)
 	{	
 		ext_student_interactive_header_data_character.ext_client_custom_character.data[i]=*Char_Data;
@@ -403,7 +403,7 @@ void UI_Init(void)
 void UI_Display(void)
 {
 	UI_draw_Float("090",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH/3,SCREEN_WIDTH/4,supercap_volt);
-	UI_draw_Float("091",UI_Graph_ADD,1,UI_Color_Yellow,24,3,2,SCREEN_LENGTH*2/3,SCREEN_WIDTH/2,pich_angle);
+	UI_draw_Float("091",UI_Graph_Change,1,UI_Color_Yellow,24,3,2,SCREEN_LENGTH*2/3,SCREEN_WIDTH/2,pich_angle);
 	UI_draw_Float("092",UI_Graph_ADD,1,UI_Color_Yellow,28,1,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/2+180,mode_now);
 	//UI_draw_Float("092",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/4,shoot_data_t.bullet_speed);
     UI_draw_Line("080",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
@@ -418,7 +418,7 @@ void UI_Display(void)
 	UI_draw_Float("091",UI_Graph_Change,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3,SCREEN_WIDTH/4,pich_angle);
 	UI_draw_Float("092",UI_Graph_Change,1,UI_Color_Yellow,28,1,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/2+180,mode_now);
 //	UI_draw_Float("092",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/4,shoot_data_t.bullet_speed);
-  //  UI_draw_Line("080",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
+//  UI_draw_Line("080",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
 	UI_draw_Line("080",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
 	UI_draw_Line("081",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-34,SCREEN_WIDTH/2-170,SCREEN_LENGTH/2+34,SCREEN_WIDTH/2-170);
 	UI_draw_Line("082",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-40,SCREEN_WIDTH/2-140,SCREEN_LENGTH/2+40,SCREEN_WIDTH/2-140);

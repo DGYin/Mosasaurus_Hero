@@ -11,12 +11,15 @@
 #define Briter_Encoder3_TypeCode 3
 #define Briter_Encoder4_TypeCode 4	
 
-#define Trigger_TypeCode 11
-#define Chassis_Motor_Current_TypeCode 5
-#define Shoot_Info_TypeCode 6
-#define Yaw_Data_Trans_Typecode  7
-#define YAW_CONTROL_TypeCode 	  8
-#define WheelVel_TypeCode 9
+#define Chassis_Motor_Current_TypeCode  5
+#define Shoot_Info_TypeCode 			6
+#define Yaw_Data_Trans_Typecode  		7
+#define YAW_CONTROL_TypeCode 	  		8
+#define WheelVel_TypeCode 				9
+#define Trigger_TypeCode 				11
+#define Super_Cap_RX_Typecode 			12
+#define SuperCap_Power_TX_Typecode		13
+
 
 #define Yaw_Control_Current_Mode	   1
 #define Yaw_Control_Target_Angle_Mode  2

@@ -100,7 +100,6 @@ int main(void)
 	Motor_Zero_Position_Init();
 	chassis_center.switch_mode_angle=(float)GIMBAL_HEAD_ANGLE;
     Init_Encoder_Struct();
-	HAL_UART_Receive_IT(&huart1,&rec_super,1);
   /* USER CODE END 2 */
 
   /* Infinite loop */

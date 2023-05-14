@@ -51,32 +51,36 @@ void USART1_IRQHandler(void)
         {
             if(dma_rx_buff[j] == ';')//结束接收
             {
-//				uint8_t Temp[8];
-//				for (int i=1; i<=8; i++)
-//					Temp[i-1] = receive_data[i];
-//				switch(receive_data[0]) //判断是什么类型的数据
-//				{
-//					case Briter_Encoder2_TypeCode:
-//						Encoder_Data_Process(Temp, &Briter_Encoder2,&Chassis_MotorB);
-//					break;
-//
-//					case Briter_Encoder4_TypeCode:
-//						Encoder_Data_Process(Temp, &Briter_Encoder4,&Chassis_MotorD);
-//					break;
-//					case Yaw_Data_Trans_Typecode:
-//						float Angle, Speed;
-//						Angle = (uint16_t) ((Temp[0]<<8)|(Temp[1]));
-//						Angle = Angle / 100.0f;
-//						temp_1 = Angle;
-//						Speed = (uint16_t) ((Temp[2]<<8)|(Temp[3]));
-//						record_yaw_callback(Angle,Speed);
-//					break;
-//            	}
+				uint8_t Temp[8];
+				for (int i=1; i<=8; i++)
+					Temp[i-1] = receive_data[i];
+				switch(receive_data[0]) //判断是什么类型的数据
+				{
+					case Briter_Encoder2_TypeCode:
+						Encoder_Data_Process(Temp, &Briter_Encoder2,&Chassis_MotorB);
+					break;
+
+					case Briter_Encoder4_TypeCode:
+						Encoder_Data_Process(Temp, &Briter_Encoder4,&Chassis_MotorD);
+					break;
+					case Yaw_Data_Trans_Typecode:
+						float Angle, Speed;
+						Angle = (uint16_t) ((Temp[0]<<8)|(Temp[1]));
+						Angle = Angle / 100.0f;
+						temp_1 = Angle;
+						Speed = (uint16_t) ((Temp[2]<<8)|(Temp[3]));
+						record_yaw_callback(Angle, Speed);
+					break;
+					case Super_Cap_RX_Typecode:
+						extern uint16_t supercap_volt; //超级电容电压
+						extern float supercap_per; //超级电容电量百分比
+						extern int Relay_State;
+						Relay_State   = Temp[0];
+						supercap_per  = Temp[1];
+					break;
+            	}
 				//超电数据处理
-				extern uint16_t supercap_volt; //超级电容电压
-				extern float supercap_per; //超级电容电量百分比
-				supercap_volt = receive_data[1];
-				supercap_per  = receive_data[2];
+
 				//接收完毕，复位
                 memset(receive_data, 0, sizeof(receive_data));
                 start_receive_flag = 0;
@@ -109,16 +113,26 @@ void USART1_IRQHandler(void)
 //}
 uint8_t Buffer[11];
 
-void UartTX_Super_Capacitor(int Power_Limitation, int Relay_State)
+void UartTX_Super_Capacitor(int Power_Limitation, fp32 Power)
 {
-    Buffer[0] = '*';
-    Buffer[1] = (uint8_t)Power_Limitation / 100;
-    Buffer[2] = (uint8_t)Power_Limitation / 10;
-    Buffer[3] = (uint8_t)Power_Limitation % 10;
-    Buffer[4] = (uint8_t)Relay_State;
-	Buffer[5] = ';';
+	int IntIze_Power;
+	IntIze_Power = (int) (Power*10);
+    Buffer[0] =  '*';
+	Buffer[1] =  SuperCap_Power_TX_Typecode;
+    Buffer[2] =  (uint8_t)(Power_Limitation / 100);
+	Power_Limitation = Power_Limitation - Buffer[2]*100;
+    Buffer[3] =  (uint8_t)(Power_Limitation / 10);
+    Buffer[4] =  (uint8_t)(Power_Limitation % 10);
+    Buffer[5] =  (uint8_t)(IntIze_Power/1000);
+	IntIze_Power=IntIze_Power- Buffer[5]*1000;
+	Buffer[6] =  (uint8_t)(IntIze_Power/100);
+	IntIze_Power=IntIze_Power- Buffer[6]*100;
+	Buffer[7] =  (uint8_t)(IntIze_Power/10);
+	Buffer[8] =  (uint8_t)(IntIze_Power%10);
+	Buffer[9] = 0; //预留位，暂时没用
+	Buffer[10] = ';';
     uint8_t status;
-    status = HAL_UART_Transmit(&huart1, Buffer, 6, 0xff);
+    status = HAL_UART_Transmit(&huart1, Buffer, 11, 0xff);
 }
 
 void DMA_Send(void)

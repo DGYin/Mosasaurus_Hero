@@ -65,7 +65,7 @@ static void power_limitation_jugement(void);
 static float chassis_buffer_loop(uint16_t buffer);
 static void chassis_fly(uint16_t buffer);
 static float chassis_power_loop(uint16_t target_power, float actual_power, float last_power);
-
+void Buffer_Loop(void);
 /*Function prototype End*******************************************************/
 /*
  * **************************************************************************
@@ -193,7 +193,10 @@ void chassis_move(void)//底盘移动过程
 
     chassis_move_mode(); //对应模式的底盘状态赋值
     get_chassis_power_and_buffer_and_max(&power, &buffer, &max_power);
-    //power_limitation_jugement(); //功率判断与限制
+	
+	extern int Relay_State;
+	if (Relay_State==0) Buffer_Loop();
+		//power_limitation_jugement(); //功率判断与限制
     //vpid_chassis_realize(); //pid计算
     vpid_chassis_realize_F();
     can_send_chassis_current();	//输出底盘电流值
@@ -369,6 +372,24 @@ static float Get_chassis_theta(void)//读取底盘相对云台转角（需要云台陀螺仪）
     return Theta;
 }
 
+void Buffer_Loop(void)
+{
+	fp32 power;
+	uint16_t  buffer, max_power;
+	float Scale1=1, Scale2;
+	get_chassis_power_and_buffer_and_max(&power, &buffer, &max_power);
+//	if (power>max_power && buffer<60)
+//		Scale1 = 0.9;
+//	else Scale1 = 1;
+	Scale2 = (buffer-10)/60.f;
+	if (Scale2<0) Scale2 = 0;
+	Chassis_Motor1.Target_Speed =  Chassis_Motor1.Target_Speed*Scale1*Scale2;
+	Chassis_Motor2.Target_Speed =  Chassis_Motor2.Target_Speed*Scale1*Scale2;
+	Chassis_Motor3.Target_Speed =  Chassis_Motor3.Target_Speed*Scale1*Scale2;
+	Chassis_Motor4.Target_Speed =  Chassis_Motor4.Target_Speed*Scale1*Scale2;
+	
+
+}
 /**
   * @breif         麦轮时代的底盘功率限制
   * @param[in]     none
@@ -400,7 +421,7 @@ static void power_limitation_jugement(void)
     //	else if(power<max_power*1.6)CHASSIS_vPID_max=8000;
     if(buffer < BUFFER_MAX * 0.15f) CHASSIS_vPID_max = 500;
     if(buffer < BUFFER_MAX * 0.25f && buffer >= BUFFER_MAX * 0.15f) CHASSIS_vPID_max = 900;
-    if(buffer < BUFFER_MAX * 0.36f && CHASSIS_vPID_max <= 8000) CHASSIS_vPID_max = 4000; //原来是1200
+    if(buffer < BUFFER_MAX * 0.36f && CHASSIS_vPID_max <= 8000) CHASSIS_vPID_max = 1200; //原来是1200
     if(CHASSIS_vPID_max <= 1900 && buffer >= BUFFER_MAX * 0.55f ) CHASSIS_vPID_max = 1600;
     if(CHASSIS_vPID_max <= 2100 && buffer >= BUFFER_MAX * 0.75f ) CHASSIS_vPID_max = 3200;
     if(CHASSIS_vPID_max <= 4500 && buffer >= BUFFER_MAX * 0.96f ) CHASSIS_vPID_max = 8000;

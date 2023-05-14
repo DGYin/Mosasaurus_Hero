@@ -71,8 +71,8 @@ void CHASSIS_TASK()//TIM3定时器中断控制战车（已经过宏定义）
 	{
 		Get_Encoder_Position(4);
 	} 	
-//	if(MS_Count%400==0)
-//		UI_Display();
+	if(MS_Count%400==0)
+		UI_Display();
 	if (MS_Count % 100 == 0)
 		supercap();
 	if(MS_Count>=1000)			//清除计数标志    1s
