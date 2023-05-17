@@ -95,19 +95,19 @@ void Power_On_Beep(int S_Cnt, int MS_Cnt)
 		psc = 4;
 		if (MS_Cnt==0)
 		buzzer_on(psc, pwm);
-		if (MS_Cnt==100)
+		if (MS_Cnt==80)
 		buzzer_off();
 		
 		psc = 3;
-		if (MS_Cnt==200)
+		if (MS_Cnt==160)
 			buzzer_on(psc, pwm);
-		if (MS_Cnt==300)
+		if (MS_Cnt==240)
 			buzzer_off();	
 		
 		psc = 3;
-		if (MS_Cnt==400)
+		if (MS_Cnt==320)
 			buzzer_on(psc, pwm);
-		if (MS_Cnt==500)
+		if (MS_Cnt==400)
 			buzzer_off();	
 	}
 	if (S_Cnt == 1)
@@ -115,13 +115,13 @@ void Power_On_Beep(int S_Cnt, int MS_Cnt)
 		psc = 4;
 		if (MS_Cnt==0)
 		buzzer_on(psc, pwm);
-		if (MS_Cnt==100)
+		if (MS_Cnt==80)
 		buzzer_off();
 		
 		psc = 3;
-		if (MS_Cnt==200)
+		if (MS_Cnt==160)
 			buzzer_on(psc, pwm);
-		if (MS_Cnt==300)
+		if (MS_Cnt==240)
 			buzzer_off();		
 	}	
 	

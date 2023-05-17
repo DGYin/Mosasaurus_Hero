@@ -18,6 +18,7 @@ int MOUSE_pre_left_cnt=0;
 int Gimbal_Reverse_Bottom_Delay_Cnt = 0;
 int Chassis_Reverse_Bottom_Delay_Cnt = 0;
 int Gimbal_Precision_Mode_Delay_Cnt = 0;
+int Chassis_TurnAround_Delay_Cnt = 0;
 KEY_CONTROL KEY_MODE=KEY_OFF;
 extern int Sent_dataC;
 //修改外部模式变量
@@ -149,8 +150,8 @@ void key_control_data(void)
 			rc_sent.y_speed=KEY_Y_SPEED_MINN;
 		if(KEY_board & KEY_PRESSED_OFFSET_D)
 			rc_sent.y_speed=KEY_Y_SPEED_MAXX;
-		rc_sent.yaw.target_angle=-limits_change(KEY_YAW_ANGLE_MAXX_RUN,KEY_YAW_ANGLE_MINN_RUN,MOUSE_x,KEY_MAXX,KEY_MINN);
-		rc_sent.pitch.target_angle=-limits_change(KEY_PITCH_ANGLE_MAXX_RUN,KEY_PITCH_ANGLE_MINN_RUN,MOUSE_y,KEY_MAXX,KEY_MINN);
+		rc_sent.yaw.target_angle=limits_change(KEY_YAW_ANGLE_MAXX_RUN,KEY_YAW_ANGLE_MINN_RUN,MOUSE_x,KEY_MAXX,KEY_MINN);
+		rc_sent.pitch.target_angle=limits_change(KEY_PITCH_ANGLE_MAXX_RUN,KEY_PITCH_ANGLE_MINN_RUN,MOUSE_y,KEY_MAXX,KEY_MINN);
 	}
 	else
 	{
@@ -221,29 +222,35 @@ void key_control_data(void)
 //		}
 	}
 
-   	if(MOUSE_pre_right==1) 
-    {			
-        vision_mode=VISION_ON;
-		gimbal_set_mode=GIMBAL_RELATIVE_ANGLE;
-		gimbal_y.target_angle=gimbal_y.CAN_Total_Angle;
-	    vision_pitch=gimbal_y.IMU_actual_angle;
-	}
-	else 
-	{
-		//gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
-//		gimbal_y.target_angle=gimbal_y.IMU_actual_angle;
-	    vision_mode=VISION_OFF;
-	}
+//   	if(MOUSE_pre_right==1) 
+//    {			
+//        vision_mode=VISION_ON;
+//		gimbal_set_mode=GIMBAL_RELATIVE_ANGLE;
+//		gimbal_y.target_angle=gimbal_y.CAN_Total_Angle;
+//	    vision_pitch=gimbal_y.IMU_actual_angle;
+//	}
+//	else 
+//	{
+//		//gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
+////		gimbal_y.target_angle=gimbal_y.IMU_actual_angle;
+//	    vision_mode=VISION_OFF;
+//	}
 //	rc_sent.yaw.target_angle=limits_change(KEY_YAW_ANGLE_MAXX_ON,KEY_YAW_ANGLE_MINN_ON,MOUSE_x,KEY_MAXX,KEY_MINN);
 //    if(deadline_judge(MOUSE_y)==0)
 //	rc_sent.pitch.target_angle=-limits_change(KEY_PITCH_ANGLE_MAXX_ON,KEY_PITCH_ANGLE_MINN_ON,MOUSE_y,KEY_MAXX,KEY_MINN);
 //	    
+	//一键掉头
 	if(KEY_PRESSED_OFFSET_C&KEY_board)
 	{
-		
-			VISION_RESET_FLAG=ON_RESET;
+		if (Chassis_TurnAround_Delay_Cnt == 0) 
+		{
+			if (gimbal_y.Bool_Invert_Flag == 0) gimbal_y.Bool_Invert_Flag = 1;
+			else if (gimbal_y.Bool_Invert_Flag == 1) gimbal_y.Bool_Invert_Flag = 0;
+			gimbal_y.Valuence_Invert_Flag = -gimbal_y.Valuence_Invert_Flag;
+			Chassis_TurnAround_Delay_Cnt = 100;
+		}
 	}
-	//180度掉头
+	//云台头部反转180度
 	if(KEY_PRESSED_OFFSET_X&KEY_board)
 	{ 
 		
@@ -251,7 +258,7 @@ void key_control_data(void)
 		if ((gimbal_y.Bool_Invert_Flag == 1)&&(Gimbal_Reverse_Bottom_Delay_Cnt == 0)) {gimbal_y.Bool_Invert_Flag = 0; Gimbal_Reverse_Bottom_Delay_Cnt = 100;}
 		
 	}
-	//底盘零点增加180度
+	//底盘运动方向反转
 	if(KEY_PRESSED_OFFSET_Z&KEY_board)
 	{ 
 		if (Chassis_Reverse_Bottom_Delay_Cnt == 0) 
@@ -272,7 +279,7 @@ void key_control_data(void)
 			if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1) Gimbal_Precision_Activated_Flag = 1;
 			if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)Gimbal_Precision_Inactivated_Flag = 1;
 			//计时重置
-			Gimbal_Precision_Mode_Delay_Cnt = 70;
+			Gimbal_Precision_Mode_Delay_Cnt = 100;
 		}
 		Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
 	}
@@ -280,6 +287,7 @@ void key_control_data(void)
 	if (Gimbal_Precision_Mode_Delay_Cnt > 0)  Gimbal_Precision_Mode_Delay_Cnt--;
 	if (Gimbal_Reverse_Bottom_Delay_Cnt > 0)  Gimbal_Reverse_Bottom_Delay_Cnt--; 
 	if (Chassis_Reverse_Bottom_Delay_Cnt > 0) Chassis_Reverse_Bottom_Delay_Cnt--;
+	if (Chassis_TurnAround_Delay_Cnt>0)		  Chassis_TurnAround_Delay_Cnt--;
 }
 /**
 	* @brief       幅度判断函数

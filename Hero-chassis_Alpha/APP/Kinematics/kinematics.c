@@ -438,6 +438,8 @@ void Speed_Limitation(void)
 			temp = Float_Abs(Chassis_Motor3.Target_Speed);
 	if(Float_Abs(Chassis_Motor4.Target_Speed) > temp)
 			temp = Float_Abs(Chassis_Motor4.Target_Speed);
+	extern int Power_Mode;
+	if (Power_Mode == 0) temp = 7000;
 	//按比例减小速度，防止直线跑歪
     if(temp>MAX_MOTOR_SPEED)
     {

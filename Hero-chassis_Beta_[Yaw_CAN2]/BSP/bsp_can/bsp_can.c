@@ -276,13 +276,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)//CAN接收函数
 			case YAW_CONTROL_ID: //YAW轴电机电流值接收
 				gimbal_y.Target_Angle=(int16_t)((gdata[0]<<8)|gdata[1]);//接收角度值
 				gimbal_y.given_current = (int16_t)((gdata[2]<<8)|gdata[3]);
-			break;
+				break;
 			case Chassis_Motor_Speed_ID:
 				Chassis_Motor1.Target_Speed=(int16_t)((gdata[0]<<8)|gdata[1]);
 				Chassis_Motor2.Target_Speed=(int16_t)((gdata[2]<<8)|gdata[3]);
 				Chassis_Motor3.Target_Speed=(int16_t)((gdata[4]<<8)|gdata[5]);
 				Chassis_Motor4.Target_Speed=(int16_t)((gdata[6]<<8)|gdata[7]);
-			break;
+				break;
 			case TRIGGER_CONTROL_ID: //是否发射
 				if(gdata[0]==1) 
 				{
@@ -290,8 +290,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)//CAN接收函数
 					shoot_angle_clc();
 					gdata[0]=0;
 				}
-			break;	
-			
+				break;	
+			case CAN_Beta_Power_Limit_ID:
+				extern int Power_Mode;
+				Power_Mode = gdata[0];
+				break;
 
         }
     }

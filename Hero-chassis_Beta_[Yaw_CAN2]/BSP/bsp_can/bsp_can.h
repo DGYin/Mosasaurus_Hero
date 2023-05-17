@@ -28,6 +28,7 @@
 #define CAN_RefereeData_ID        0x011
 #define Chassis_Motor_Speed_ID	  0x013
 #define CAN_Yaw_Raw_Angle		  0x014
+#define CAN_Beta_Power_Limit_ID	  0x016
 
 #define YAW_ID 0x209
 #define Briter_Encoder1_ID 0x0A

@@ -196,14 +196,15 @@ void chassis_move(void)//底盘移动过程
 	can_send_chassis_current();	//输出底盘电流值
 }
 
+int Power_Mode;
 void vpid_chassis_realize_F(void)
 {
     switch_flag=CHASSIS;  
 	//控制电机的加速度
-	Chassis_Motor1.Target_Speed = Target_Velocity_Smoothen(Chassis_Motor1.Target_Speed, Chassis_Motor1.actual_speed, Ease_Out);
-	Chassis_Motor2.Target_Speed = Target_Velocity_Smoothen(Chassis_Motor2.Target_Speed, Chassis_Motor2.actual_speed, Ease_Out);
-	Chassis_Motor3.Target_Speed = Target_Velocity_Smoothen(Chassis_Motor3.Target_Speed, Chassis_Motor3.actual_speed, Ease_Out);
-	Chassis_Motor4.Target_Speed = Target_Velocity_Smoothen(Chassis_Motor4.Target_Speed, Chassis_Motor4.actual_speed, Ease_Out);
+	Chassis_Motor1.Target_Speed = Target_Velocity_Smoothen(Chassis_Motor1.Target_Speed, Chassis_Motor1.actual_speed, Ease_Out, Power_Mode);
+	Chassis_Motor2.Target_Speed = Target_Velocity_Smoothen(Chassis_Motor2.Target_Speed, Chassis_Motor2.actual_speed, Ease_Out, Power_Mode);
+	Chassis_Motor3.Target_Speed = Target_Velocity_Smoothen(Chassis_Motor3.Target_Speed, Chassis_Motor3.actual_speed, Ease_Out, Power_Mode);
+	Chassis_Motor4.Target_Speed = Target_Velocity_Smoothen(Chassis_Motor4.Target_Speed, Chassis_Motor4.actual_speed, Ease_Out, Power_Mode);
 	
 	//PID参数注入
 	Chassis_Motor1.pid.speed_loop.vpid.Target_Speed = Chassis_Motor1.Target_Speed;
@@ -415,7 +416,7 @@ int Time_Cnt;
 *@date		:2023-04-05
 ***********************************************************/
 
-int Target_Velocity_Smoothen(int Target_Speed, int Current_Speed, int Smoothen_Method)
+int Target_Velocity_Smoothen(int Target_Speed, int Current_Speed, int Smoothen_Method, int Power_Mode)
 {
 	Time_Cnt++;
 	int Delta;
@@ -442,10 +443,23 @@ int Target_Velocity_Smoothen(int Target_Speed, int Current_Speed, int Smoothen_M
 			if (Target_Speed != 0)
 			{
 				//分段选择缓动参数
-				float Parameter_C;
-				if (abs(Target_Speed - Current_Speed) < 500)
-					Parameter_C = Ease_Out_C2;
-				else Parameter_C = Ease_Out_C1;
+				float Parameter_C; //范围0~1，越接近1加速越快
+				if (Power_Mode == High_Voltage_Mode)
+				{
+					if (abs(Target_Speed - Current_Speed) < 500)
+						Parameter_C = 0.03;
+					else Parameter_C = 0.17 ;
+				}
+				if (Power_Mode == Medium_Voltage_Mode)
+				{
+					if (abs(Target_Speed - Current_Speed) < 500)
+						Parameter_C = 0.03;
+					else Parameter_C = 0.14 ;
+				}
+				if (Power_Mode == Low_Voltage_Mode)
+				{
+					Parameter_C = 0.05;
+				}
 				//缓出公式
 				Delta = (Target_Speed - Current_Speed)*Parameter_C;
 				

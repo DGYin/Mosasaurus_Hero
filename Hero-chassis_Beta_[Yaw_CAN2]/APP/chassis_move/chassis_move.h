@@ -38,13 +38,15 @@
 #define GIMBAL_HEAD_ANGLE  0 
 
 /*Target_Velocity_Smoothen函数相关的宏定义*/
+#define Low_Voltage_Mode 		0
+#define Medium_Voltage_Mode		1
+#define High_Voltage_Mode 		2
+
 #define Smoothen_Off 0 //不进行曲线平缓
 #define Uniform_Acceleration 1 //匀加速模式，用于平滑速度曲线
 #define Ease_Out 2 //缓出模式
 
 #define Acceleration 300 //加速度，用于平滑速度曲线的匀加速模式
-#define Ease_Out_C1 0.17 //缓出效果的控制参数，范围为0~1
-#define Ease_Out_C2 0.03 //缓出效果的控制参数，范围为0~1
 
 #define POWER_LIMIT         80.0f
 #define WARNING_POWER       40.0f   
@@ -128,6 +130,6 @@ extern BUFFER_PID_t b_pid;
 extern int shoot_flag;
 void vpid_chassis_realize_F(void);
 void chassis_move(void);
-int Target_Velocity_Smoothen(int Target_Speed, int Current_Speed, int Smoothen_Method);
+int Target_Velocity_Smoothen(int Target_Speed, int Current_Speed, int Smoothen_Method, int Power_Mode);
 #endif
 

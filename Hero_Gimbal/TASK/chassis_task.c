@@ -15,8 +15,8 @@ void remote_chassis(void)
 {
 	if (rc_sent.r_speed > 2) rc_sent.r_speed =2; if (rc_sent.r_speed < -2) rc_sent.r_speed = -2;
 	rc_sent.r_speed = rc_sent.r_speed*10.0f;
-	//rc_sent.x_speed = rc_sent.x_speed*gimbal_y.Valuence_Invert_Flag;
-	//rc_sent.y_speed = rc_sent.y_speed*gimbal_y.Valuence_Invert_Flag;
+	rc_sent.x_speed = rc_sent.x_speed*gimbal_y.Valuence_Invert_Flag;
+	rc_sent.y_speed = rc_sent.y_speed*gimbal_y.Valuence_Invert_Flag;
 	if (!Gimbal_Precision_Mode)
 	{
 		if(gimbal_set_mode == GIMBAL_ZERO_FORCE || gimbal_set_mode == GIMBAL_RELATIVE_ANGLE)//ÎŞÁ¦

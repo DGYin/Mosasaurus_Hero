@@ -49,7 +49,7 @@ float YawGyroPIDSpeed[5]    = {3000.0f,	70.0f,	0.0f, 15000.0f,	7500.0f};	//imu速
 float YawEncondePidSpeed[5] = {170.0f,	0.2f,	0.0f, 15000.0f,	7500.0f};   //编码器速度环
 float YawSpeedPid[5] 		= {2100.0f,	300.0f,	0.0f, 13000.0f,	7000.0f};     //速度环int test_set_speed = 10;
 
-float PitchGyroPid[6] 		  = {45.f,		0.0f,			0.0f,		200.0f,			0.0f,	0.1f};  	//imu角度环
+float PitchGyroPid[6] 		  = {45.f,		5.0f,			0.0f,		200.0f,			0.0f,	0.1f};  	//imu角度环
 float PitchEncondePid[6] 	  = {0.0f,		0.0f,			0.0f,		0.0f,		0.0f,		0.0f}; //编码器角度环
 float PitchEncondePidSpeed[6] = {0.0f,	0.0f,		0.0f,	0.0f,	0.0f, 	0.0f}; //编码器速度环
 //float PitchSpeedPid[6] 	  = {0.2f,		0.03f,			0.8f,		12.0f,	8.0f, 0.0f};    //
@@ -195,23 +195,23 @@ void Pitch_Encoder_PID(GIMBAL_t *gimbal_);
 --*/
 void Gimbal_Task(void)
 {
-	Get_Pitch_Motor_SingleRound_Angle();	
-	for (int i=0; i<11000; i++)
-		i=i;
+//	Send_Pitch_Motor_Start_Instruction();
+//	for (int i=0; i<11000; i++)
+//		i=i;
     Pitch_Motor_Model = MOTOR_LKTECH;//选择Pitch电机型号
     GIMBAL_CALBACK_GET(); //处理电机数据
     GIMBAL_Set_Mode();//模式选择
     GIMBAL_Set_Contorl();//模式控制
     GIMBAL_PID();//PID计算
     //Pitch角度限制，防止云台角度过阈破坏机械结构
-    if(gimbal_p.IMU_actual_angle <= -17)
+    if(gimbal_p.IMU_actual_angle <= -19)
     {
-        gimbal_p.target_angle = -17;
+        gimbal_p.target_angle = -19;
         gimbal_p.target_speed = 0;
     }
-    if(gimbal_p.IMU_actual_angle >= 27)
+    if(gimbal_p.IMU_actual_angle >= 29)
     {
-        gimbal_p.target_angle = 27;
+        gimbal_p.target_angle = 29;
         gimbal_p.target_speed = 0;
     }
 	//云台电机数据发送
@@ -482,11 +482,11 @@ static void GIMBAL_PID(void)
 	/**************************/
     /**** Pitch电机PID计算 ****/
 	/**************************/
-
+	
 	if(gimbal_p.gimbal_motor_mode == GIMBAL_MOTOR_RAW)
 	{
 		gimbal_motor_raw_pid(&gimbal_p);
-		Send_Pitch_Motor_Shutdown_Instruction();
+		//Send_Pitch_Motor_Shutdown_Instruction();
 	}
 
 	if(gimbal_p.gimbal_motor_mode == GIMBAL_MOTOR_GYRO)

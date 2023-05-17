@@ -72,11 +72,12 @@ void USART1_IRQHandler(void)
 						record_yaw_callback(Angle, Speed);
 					break;
 					case Super_Cap_RX_Typecode:
-						extern uint16_t supercap_volt; //超级电容电压
+						extern int supercap_volt; //超级电容电压
 						extern float supercap_per; //超级电容电量百分比
-						extern int Relay_State;
-						Relay_State   = Temp[0];
+						extern int Capacitor_State;
+						Capacitor_State   = Temp[0];
 						supercap_per  = Temp[1];
+						supercap_volt = Temp[2];
 					break;
             	}
 				//超电数据处理
@@ -115,14 +116,17 @@ uint8_t Buffer[11];
 
 void UartTX_Super_Capacitor(int Power_Limitation, fp32 Power)
 {
+	//小数转换
 	int IntIze_Power;
 	IntIze_Power = (int) (Power*10);
-    Buffer[0] =  '*';
-	Buffer[1] =  SuperCap_Power_TX_Typecode;
+    Buffer[0] =  '*';	//起始帧
+	Buffer[1] =  SuperCap_Power_TX_Typecode;	//功率发送标志位
+	//发送功率限制值
     Buffer[2] =  (uint8_t)(Power_Limitation / 100);
 	Power_Limitation = Power_Limitation - Buffer[2]*100;
     Buffer[3] =  (uint8_t)(Power_Limitation / 10);
     Buffer[4] =  (uint8_t)(Power_Limitation % 10);
+	//发送当前功率
     Buffer[5] =  (uint8_t)(IntIze_Power/1000);
 	IntIze_Power=IntIze_Power- Buffer[5]*1000;
 	Buffer[6] =  (uint8_t)(IntIze_Power/100);
@@ -130,7 +134,7 @@ void UartTX_Super_Capacitor(int Power_Limitation, fp32 Power)
 	Buffer[7] =  (uint8_t)(IntIze_Power/10);
 	Buffer[8] =  (uint8_t)(IntIze_Power%10);
 	Buffer[9] = 0; //预留位，暂时没用
-	Buffer[10] = ';';
+	Buffer[10] = ';';	//结束帧
     uint8_t status;
     status = HAL_UART_Transmit(&huart1, Buffer, 11, 0xff);
 }

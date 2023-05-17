@@ -487,6 +487,23 @@ void canTX_To_Gimbal_Yaw_Callback(int16_t Angle,int16_t Speed,int16_t shoot_flag
 	status=HAL_CAN_AddTxMessage(&hcan2,&CAN_TxHeaderStruct,data,&pTxMailbox);
 }
 
+void canTX_To_Beta_Power_Limit(int Power_Mode)
+{
+	uint8_t data[8];
+	uint8_t status;
+	CAN_TxHeaderTypeDef CAN_TxHeaderStruct;
+	uint32_t  pTxMailbox;
+	
+	CAN_TxHeaderStruct.StdId=CAN_Beta_Power_Limit_ID;
+	CAN_TxHeaderStruct.ExtId=0;
+	CAN_TxHeaderStruct.DLC=8;
+	CAN_TxHeaderStruct.IDE=CAN_ID_STD;
+	CAN_TxHeaderStruct.RTR=CAN_RTR_DATA;
+	CAN_TxHeaderStruct.TransmitGlobalTime=DISABLE;
+	data[0]=Power_Mode;
+	status=HAL_CAN_AddTxMessage(&hcan2,&CAN_TxHeaderStruct,data,&pTxMailbox);
+}
+
 void canTX_Briter_Encoder(Briter_Encoder_t Paramater,CAN_HandleTypeDef *hcan)
 {
 	uint8_t data[8];

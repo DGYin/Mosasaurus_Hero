@@ -65,7 +65,9 @@ static void power_limitation_jugement(void);
 static float chassis_buffer_loop(uint16_t buffer);
 static void chassis_fly(uint16_t buffer);
 static float chassis_power_loop(uint16_t target_power, float actual_power, float last_power);
+void Power_Loop(float Power, int Max_Power);
 void Buffer_Loop(void);
+void Cap_Volt_Loop(void);
 /*Function prototype End*******************************************************/
 /*
  * **************************************************************************
@@ -194,10 +196,12 @@ void chassis_move(void)//底盘移动过程
     chassis_move_mode(); //对应模式的底盘状态赋值
     get_chassis_power_and_buffer_and_max(&power, &buffer, &max_power);
 	
-	extern int Relay_State;
-	if (Relay_State==0) Buffer_Loop();
+	extern int Capacitor_State;
+	Cap_Volt_Loop();
+	//if (Capacitor_State==0)
+		//Power_Loop(power, max_power);
+	//Buffer_Loop();
 		//power_limitation_jugement(); //功率判断与限制
-    //vpid_chassis_realize(); //pid计算
     vpid_chassis_realize_F();
     can_send_chassis_current();	//输出底盘电流值
 }
@@ -322,7 +326,9 @@ static void chassis_move_mode(void)
 		//旋转模式时
 		case CHASSIS_SPIN:
 //			chassis_spin(&vx, &vy);
-			wz = 1.5f;
+			if (vx==0 && vy==0)
+				wz = 3.0f;
+			else wz = 1.5f;
 		break;
 	}
     chassis_speed_control(vx, vy, wz, Gimbal_Chassis_Relative_Angle);
@@ -372,10 +378,42 @@ static float Get_chassis_theta(void)//读取底盘相对云台转角（需要云台陀螺仪）
     return Theta;
 }
 
+/***********************************************************
+*@fuction	:Cap_Volt_Loop
+*@brief		:
+*@param		:--
+*@return	:void
+*@author	:DGYin
+*@date		:2023-05-16
+***********************************************************/
+
+void Cap_Volt_Loop(void)
+{
+	float Scale1=1, Scale2=1;
+	extern int supercap_volt;
+	if (supercap_volt<180)
+		Scale2 = (supercap_volt-130)/50.f;
+	if (Scale2<0) Scale2 = 0;
+	Chassis_Motor1.Target_Speed =  Chassis_Motor1.Target_Speed*Scale1*Scale2;
+	Chassis_Motor2.Target_Speed =  Chassis_Motor2.Target_Speed*Scale1*Scale2;
+	Chassis_Motor3.Target_Speed =  Chassis_Motor3.Target_Speed*Scale1*Scale2;
+	Chassis_Motor4.Target_Speed =  Chassis_Motor4.Target_Speed*Scale1*Scale2;
+}
+
+
+/***********************************************************
+*@fuction	:Buffer_Loop
+*@brief		:
+*@param		:--
+*@return	:void
+*@author	:DGYin
+*@date		:2023-05-16
+***********************************************************/
+fp32 power;
+uint16_t  buffer, max_power;
 void Buffer_Loop(void)
 {
-	fp32 power;
-	uint16_t  buffer, max_power;
+
 	float Scale1=1, Scale2;
 	get_chassis_power_and_buffer_and_max(&power, &buffer, &max_power);
 //	if (power>max_power && buffer<60)
@@ -407,16 +445,16 @@ static void power_limitation_jugement(void)
     get_chassis_power_and_buffer_and_max(&power, &buffer, &max_power);
     canTX_RefereeData(&power, &buffer, &max_power);
 
-    power_scale = chassis_power_loop(max_power - 8, power, last_power);
+    power_scale = chassis_power_loop(max_power - 10, power, last_power);
     buffer_scale = chassis_buffer_loop(buffer);
-    temp1 = Chassis_Motor1.pid.speed_loop.vpid.Target_Speed * buffer_scale * power_scale;
-    Chassis_Motor1.pid.speed_loop.vpid.Target_Speed = (int16_t)temp1;
-    temp1 = Chassis_Motor2.pid.speed_loop.vpid.Target_Speed * buffer_scale * power_scale;
-    Chassis_Motor2.pid.speed_loop.vpid.Target_Speed = (int16_t)temp1;
-    temp1 = Chassis_Motor3.pid.speed_loop.vpid.Target_Speed * buffer_scale * power_scale;
-    Chassis_Motor3.pid.speed_loop.vpid.Target_Speed = (int16_t)temp1;
-    temp1 = Chassis_Motor4.pid.speed_loop.vpid.Target_Speed * buffer_scale * power_scale;
-    Chassis_Motor4.pid.speed_loop.vpid.Target_Speed = (int16_t)temp1;
+    temp1 = Chassis_Motor1.Target_Speed * buffer_scale * power_scale;
+    Chassis_Motor1.Target_Speed = (int16_t)temp1;
+    temp1 = Chassis_Motor2.Target_Speed * buffer_scale * power_scale;
+    Chassis_Motor2.Target_Speed = (int16_t)temp1;
+    temp1 = Chassis_Motor3.Target_Speed * buffer_scale * power_scale;
+    Chassis_Motor3.Target_Speed = (int16_t)temp1;
+    temp1 = Chassis_Motor4.Target_Speed * buffer_scale * power_scale;
+    Chassis_Motor4.Target_Speed = (int16_t)temp1;
     //	if(power>max_power*2)CHASSIS_vPID_max=5000;
     //	else if(power<max_power*1.6)CHASSIS_vPID_max=8000;
     if(buffer < BUFFER_MAX * 0.15f) CHASSIS_vPID_max = 500;

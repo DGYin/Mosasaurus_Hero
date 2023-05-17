@@ -32,6 +32,7 @@
 #define Chassis_Motor_Speed_ID	  	  0x013
 #define CAN_Yaw_Raw_Angle		  	  0x014
 #define CAN_Yaw_Invert_Flag_Trans_ID  0x015
+#define CAN_Beta_Power_Limit_ID		  0x016
 
 #define Briter_Encoder1_ID 0x0A
 #define Briter_Encoder2_ID 0x0B
@@ -54,7 +55,8 @@ void UartTX_To_BetaBoard_Briter_Encoder(Briter_Encoder_t Encoder,int Typecode);
 void canTX_To_BetaBoard_WheelVel(void);
 void canTX_AGV_Chassis_Motor_Current(void);
 void record_yaw_callback(float angle,float speed);
-
+void canTX_To_Beta_Power_Limit(int Power_Mode);
+	
 extern float pich_angle;
 extern int mode_now;
 extern char M_DAta[5];
