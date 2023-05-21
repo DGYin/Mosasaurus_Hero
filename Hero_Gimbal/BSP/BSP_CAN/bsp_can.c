@@ -5,8 +5,8 @@
 	* @ retvel  ״ֵ̬
 */
 
-uint8_t LK_Pitch_Motor_Receive_Data[7];
-uint8_t LK_Pitch_Motor_Send_Data[7];
+uint8_t LK_Pitch_Motor_Receive_Data[8];
+uint8_t LK_Pitch_Motor_Send_Data[8];
 
 uint8_t Bsp_canInit(void)    
 {

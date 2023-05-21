@@ -396,38 +396,48 @@ void UI_character_draw_data(char imagename[3],uint32_t Graph_Operate,uint32_t Gr
 float super_cap=1.332f;
 void UI_Init(void)
 {
-	UI_draw_Float("090",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH/3,SCREEN_WIDTH/4,supercap_volt); //超电电压
-	UI_draw_Float("091",UI_Graph_ADD,1,UI_Color_Yellow,24,3,2,SCREEN_LENGTH*2/3,SCREEN_WIDTH/2,pich_angle);//Pitch角度
+//	UI_draw_Float("090",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH/3,SCREEN_WIDTH/4,supercap_volt); //超电电压
+	pich_angle = 1.23f;
+	UI_draw_Float("091", UI_Graph_ADD, 1, UI_Color_Yellow, 2, 3, 2,SCREEN_LENGTH*2/3	, SCREEN_WIDTH/4	, pich_angle);//Pitch角度
 	UI_draw_Float("092",UI_Graph_ADD,1,UI_Color_Yellow,28,1,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/2+180,mode_now);//模式显示
-//	UI_draw_Float("090",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH/3,SCREEN_WIDTH/4,supercap_volt);
-//	UI_draw_Float("091",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3,SCREEN_WIDTH/4,supercap_per);
-}
-
-void UI_Display(void)
-{
-	
-	//UI_draw_Float("092",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/4,shoot_data_t.bullet_speed);
-	//参考线
-    UI_draw_Line("080",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
+	UI_draw_Float("090",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH/3,SCREEN_WIDTH/4,supercap_volt);
+	UI_draw_Float("091",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3,SCREEN_WIDTH/4,supercap_per);
+	UI_draw_Line("080",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
 	UI_draw_Line("081",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-34,SCREEN_WIDTH/2-170,SCREEN_LENGTH/2+34,SCREEN_WIDTH/2-170);
 	UI_draw_Line("082",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-40,SCREEN_WIDTH/2-140,SCREEN_LENGTH/2+40,SCREEN_WIDTH/2-140);
 	UI_draw_Line("083",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-30,SCREEN_WIDTH/2-110,SCREEN_LENGTH/2+30,SCREEN_WIDTH/2-110);
 	UI_draw_Line("085",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-27,SCREEN_WIDTH/2-80,SCREEN_LENGTH/2+27,SCREEN_WIDTH/2-80);
 	UI_draw_Line("084",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2,SCREEN_WIDTH/2-10,SCREEN_LENGTH/2,SCREEN_WIDTH/2-200);
+}
+
+void UI_Display(int MS_Cnt)
+{
 	
+	//UI_draw_Float("092",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/4,shoot_data_t.bullet_speed);
+	//参考线
+
+		//            name,  Operate,       Layer, Color,     Size, Digit, Width, Start_x,     Start_y,            Float
+	pich_angle = 1.23f;
+	UI_draw_Float("090", UI_Graph_Change, 1, UI_Color_Yellow, 20, 3, 2,SCREEN_LENGTH/3		, SCREEN_WIDTH/4	, supercap_volt);
+	UI_draw_Float("091", UI_Graph_Change, 1, UI_Color_Yellow, 2, 3, 2,SCREEN_LENGTH*2/3	, SCREEN_WIDTH/4	, pich_angle);
+	UI_draw_Float("092", UI_Graph_Change, 1, UI_Color_Yellow, 28, 1, 2,SCREEN_LENGTH*2/3+100, SCREEN_WIDTH/2+180, mode_now);
+	UI_draw_Float("092", UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/4,shoot_data_t.bullet_speed);
 	
-	UI_draw_Float("090",UI_Graph_Change,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH/3,SCREEN_WIDTH/4,supercap_volt);
-	UI_draw_Float("091",UI_Graph_Change,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3,SCREEN_WIDTH/4,pich_angle);
-	UI_draw_Float("092",UI_Graph_Change,1,UI_Color_Yellow,28,1,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/2+180,mode_now);
-//	UI_draw_Float("092",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/4,shoot_data_t.bullet_speed);
-//  UI_draw_Line("080",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
+	UI_draw_Line("080",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
+	UI_draw_Line("081",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-34,SCREEN_WIDTH/2-170,SCREEN_LENGTH/2+34,SCREEN_WIDTH/2-170);
+	UI_draw_Line("082",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-40,SCREEN_WIDTH/2-140,SCREEN_LENGTH/2+40,SCREEN_WIDTH/2-140);
+	UI_draw_Line("083",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-30,SCREEN_WIDTH/2-110,SCREEN_LENGTH/2+30,SCREEN_WIDTH/2-110);
+	UI_draw_Line("085",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-27,SCREEN_WIDTH/2-80,SCREEN_LENGTH/2+27,SCREEN_WIDTH/2-80);
+	UI_draw_Line("084",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2,SCREEN_WIDTH/2-10,SCREEN_LENGTH/2,SCREEN_WIDTH/2-200);
+
+	UI_draw_Line("080",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
 	UI_draw_Line("080",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
 	UI_draw_Line("081",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-34,SCREEN_WIDTH/2-170,SCREEN_LENGTH/2+34,SCREEN_WIDTH/2-170);
 	UI_draw_Line("082",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-40,SCREEN_WIDTH/2-140,SCREEN_LENGTH/2+40,SCREEN_WIDTH/2-140);
 	UI_draw_Line("083",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-30,SCREEN_WIDTH/2-110,SCREEN_LENGTH/2+30,SCREEN_WIDTH/2-110);
 	UI_draw_Line("085",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-27,SCREEN_WIDTH/2-80,SCREEN_LENGTH/2+27,SCREEN_WIDTH/2-80);
 	UI_draw_Line("084",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2,SCREEN_WIDTH/2-10,SCREEN_LENGTH/2,SCREEN_WIDTH/2-200);
-	
+
 }
 
 //void UI_graphic_init(uint16_t sender_ID,uint16_t receiver_ID)

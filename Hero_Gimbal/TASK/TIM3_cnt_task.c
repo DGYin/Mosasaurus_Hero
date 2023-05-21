@@ -40,7 +40,7 @@ void TIM3_CNT_TASK()
     }
     if(MS_Count % 7 == 2 && start_flag == 1)
     {
-        Gimbal_Task();		//控制云台
+        Gimbal_Task(S_Count, MS_Count);		//控制云台
         shoot_task();		//控制拨弹轮、摩擦轮的运动
         DMA_Send();			//向上位机发送数据
         remote_chassis();	//控制底盘的模式和运动

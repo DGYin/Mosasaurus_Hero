@@ -49,7 +49,7 @@ float YawGyroPIDSpeed[5]    = {3000.0f,	70.0f,	0.0f, 15000.0f,	7500.0f};	//imu速
 float YawEncondePidSpeed[5] = {170.0f,	0.2f,	0.0f, 15000.0f,	7500.0f};   //编码器速度环
 float YawSpeedPid[5] 		= {2100.0f,	300.0f,	0.0f, 13000.0f,	7000.0f};     //速度环int test_set_speed = 10;
 
-float PitchGyroPid[6] 		  = {45.f,		5.0f,			0.0f,		200.0f,			0.0f,	0.1f};  	//imu角度环
+float PitchGyroPid[6] 		  = {25.f,		90.0f,			0.0f,		200.0f,			0.0f,	0.0f};  	//imu角度环
 float PitchEncondePid[6] 	  = {0.0f,		0.0f,			0.0f,		0.0f,		0.0f,		0.0f}; //编码器角度环
 float PitchEncondePidSpeed[6] = {0.0f,	0.0f,		0.0f,	0.0f,	0.0f, 	0.0f}; //编码器速度环
 //float PitchSpeedPid[6] 	  = {0.2f,		0.03f,			0.8f,		12.0f,	8.0f, 0.0f};    //
@@ -193,9 +193,9 @@ void Pitch_Encoder_PID(GIMBAL_t *gimbal_);
          :,, , ::::::::i:::i:::i:i::,,,,,:,::i:i:::iir;@Secbone.ii:::
 
 --*/
-void Gimbal_Task(void)
+void Gimbal_Task(int S_Cnt, int MS_Cnt)
 {
-//	Send_Pitch_Motor_Start_Instruction();
+	if (MS_Cnt==51) Get_Pitch_Motor_Error_Status();//每秒将电机启动一次，防止掉电。
 //	for (int i=0; i<11000; i++)
 //		i=i;
     Pitch_Motor_Model = MOTOR_LKTECH;//选择Pitch电机型号

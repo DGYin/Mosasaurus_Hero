@@ -68,7 +68,8 @@
 #define SCREEN_WIDTH 1080
 #define SCREEN_LENGTH 1920
 
-void UI_Init(void);
-void UI_Display(void);
 
+extern int16_t vision_mode;
+void UI_Display(int MS_Cnt);
+void referee_usart_task();
 #endif

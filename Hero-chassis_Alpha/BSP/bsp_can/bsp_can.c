@@ -540,7 +540,6 @@ void canTX_To_BetaBoard_WheelVel(void)
     CAN_TxHeaderStruct.IDE=CAN_ID_STD;
     CAN_TxHeaderStruct.RTR=CAN_RTR_DATA;
     CAN_TxHeaderStruct.TransmitGlobalTime=DISABLE;
-	
 	data[0]=(Chassis_Motor1.Target_Speed)>>8;
 	data[1]=(Chassis_Motor1.Target_Speed)&0xFF;
 	data[2]=(Chassis_Motor2.Target_Speed)>>8;

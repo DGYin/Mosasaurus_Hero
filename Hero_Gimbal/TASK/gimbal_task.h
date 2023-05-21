@@ -69,7 +69,7 @@ extern int Pitch_Motor_Model;
 
 void Start_UP_Forward(void);
 void Start_UP_Backward(void);
-void Gimbal_Task(void);
+void Gimbal_Task(int S_Cnt, int MS_Cnt);
 void Gimbal_Init(void);
 
 #endif
