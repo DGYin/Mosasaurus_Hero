@@ -103,7 +103,7 @@
         <bEvRecOn>1</bEvRecOn>
         <bSchkAxf>0</bSchkAxf>
         <bTchkAxf>0</bTchkAxf>
-        <nTsel>3</nTsel>
+        <nTsel>4</nTsel>
         <sDll></sDll>
         <sDllPa></sDllPa>
         <sDlgDll></sDlgDll>
@@ -114,7 +114,7 @@
         <tDlgDll></tDlgDll>
         <tDlgPa></tDlgPa>
         <tIfile></tIfile>
-        <pMon>BIN\CMSIS_AGDI.dll</pMon>
+        <pMon>Segger\JL2CM3.dll</pMon>
       </DebugOpt>
       <TargetDriverDllRegistry>
         <SetRegEntry>
@@ -125,7 +125,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name></Name>
+          <Name>d</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -169,7 +169,7 @@
           <Type>0</Type>
           <LineNumber>7214</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134235612</Address>
+          <Address>134235752</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -477,92 +477,122 @@
         <Ww>
           <count>7</count>
           <WinNumber>2</WinNumber>
-          <ItemText>gimbal_p,0x0A</ItemText>
+          <ItemText>KEY_MODE,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>2</WinNumber>
-          <ItemText>KEY_MODE,0x0A</ItemText>
+          <ItemText>gimbal_set_mode,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>2</WinNumber>
-          <ItemText>gimbal_set_mode,0x0A</ItemText>
+          <ItemText>rc_ctrl.mouse.x,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>2</WinNumber>
-          <ItemText>rc_ctrl.mouse.x,0x0A</ItemText>
+          <ItemText>rc_ctrl.key.v,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>2</WinNumber>
-          <ItemText>rc_ctrl.key.v,0x0A</ItemText>
+          <ItemText>rc_ctrl.mouse.y,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>2</WinNumber>
-          <ItemText>rc_ctrl.mouse.y,0x0A</ItemText>
+          <ItemText>rc_sent.yaw.target_angle,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>2</WinNumber>
-          <ItemText>rc_sent.yaw.target_angle,0x0A</ItemText>
+          <ItemText>rc_sent.pitch.target_angle</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>2</WinNumber>
-          <ItemText>rc_sent.pitch.target_angle</ItemText>
+          <ItemText>yu</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>2</WinNumber>
-          <ItemText>yu</ItemText>
+          <ItemText>IMU_cnt,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>2</WinNumber>
-          <ItemText>IMU_cnt,0x0A</ItemText>
+          <ItemText>rc_ctrl.mouse.x,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>17</count>
           <WinNumber>2</WinNumber>
-          <ItemText>rc_ctrl.mouse.x,0x0A</ItemText>
+          <ItemText>vision_mode</ItemText>
         </Ww>
         <Ww>
           <count>18</count>
           <WinNumber>2</WinNumber>
-          <ItemText>vision_mode</ItemText>
+          <ItemText>rc_sent,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>19</count>
           <WinNumber>2</WinNumber>
-          <ItemText>rc_sent,0x0A</ItemText>
+          <ItemText>yaw_can_rx,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>20</count>
           <WinNumber>2</WinNumber>
-          <ItemText>yaw_can_rx,0x0A</ItemText>
+          <ItemText>gimbal_set_mode</ItemText>
         </Ww>
         <Ww>
           <count>21</count>
           <WinNumber>2</WinNumber>
-          <ItemText>gimbal_set_mode</ItemText>
+          <ItemText>F_flag</ItemText>
         </Ww>
         <Ww>
           <count>22</count>
           <WinNumber>2</WinNumber>
-          <ItemText>F_flag</ItemText>
+          <ItemText>rc_ctrl.key.v</ItemText>
         </Ww>
         <Ww>
           <count>23</count>
           <WinNumber>2</WinNumber>
-          <ItemText>rc_ctrl.key.v</ItemText>
+          <ItemText>shoot_flag,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>24</count>
           <WinNumber>2</WinNumber>
-          <ItemText>shoot_flag,0x0A</ItemText>
+          <ItemText>Gimbal_Precision_Mode</ItemText>
+        </Ww>
+        <Ww>
+          <count>25</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>Gimbal_Precision_Activated_Flag</ItemText>
+        </Ww>
+        <Ww>
+          <count>26</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>\\gimbal\../TASK/gimbal_task.c\gimbal_p.gimbal_enconde_pid_speed</ItemText>
+        </Ww>
+        <Ww>
+          <count>27</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>\\gimbal\../TASK/lk_pitch_turn.c\LK_Pitch_Motor</ItemText>
+        </Ww>
+        <Ww>
+          <count>28</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>gimbal_p</ItemText>
+        </Ww>
+        <Ww>
+          <count>29</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>Pitch_Target_Angle</ItemText>
+        </Ww>
+        <Ww>
+          <count>30</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>LK_Pitch_Motor.SingleRound_Angle,0x0A</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>

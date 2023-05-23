@@ -13,6 +13,8 @@ typedef struct
     uint32_t Tatget_Speed;
     uint32_t Send_Status;
 	uint64_t SingleRound_Angle;
+	uint64_t Last_SingleRound_Angle;
+	uint64_t Total_Angle;
 } LK_Pitch_Motor_t;
 
 typedef struct

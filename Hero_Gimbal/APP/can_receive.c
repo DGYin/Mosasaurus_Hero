@@ -54,6 +54,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 					LK_Pitch_Motor_Receive_Data[i] = rxData[i];
 				if (rxData[0] == Get_MultiRound_Angle_ID)
 					LK_Pitch_Motor.SingleRound_Angle =(int16_t) rxData[4] | rxData[5]<<8 | rxData[6]<<16 | rxData[7]<<24;
+					if (LK_Pitch_Motor.SingleRound_Angle - LK_Pitch_Motor.Last_SingleRound_Angle)
+					LK_Pitch_Motor.Last_SingleRound_Angle = LK_Pitch_Motor.SingleRound_Angle;
 				if (rxData[0] == 0x9A)
 					LK_Pitch_Motor.Tempreture = rxData[1];
 				break;

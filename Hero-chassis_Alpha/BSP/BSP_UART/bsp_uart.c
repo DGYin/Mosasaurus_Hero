@@ -78,6 +78,7 @@ void USART1_IRQHandler(void)
 						Capacitor_State   = Temp[0];
 						supercap_per  = Temp[1];
 						supercap_volt = Temp[2];
+					
 					break;
             	}
 				//超电数据处理

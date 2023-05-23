@@ -49,8 +49,8 @@ float YawGyroPIDSpeed[5]    = {3000.0f,	70.0f,	0.0f, 15000.0f,	7500.0f};	//imu速
 float YawEncondePidSpeed[5] = {170.0f,	0.2f,	0.0f, 15000.0f,	7500.0f};   //编码器速度环
 float YawSpeedPid[5] 		= {2100.0f,	300.0f,	0.0f, 13000.0f,	7000.0f};     //速度环int test_set_speed = 10;
 
-float PitchGyroPid[6] 		  = {25.f,		90.0f,			0.0f,		200.0f,			0.0f,	0.0f};  	//imu角度环
-float PitchEncondePid[6] 	  = {0.0f,		0.0f,			0.0f,		0.0f,		0.0f,		0.0f}; //编码器角度环
+float PitchGyroPid[6] 		  = {20.f,		120.0f,			0.0f,		300.0f,			0.0f,	0.03f};  	//imu角度环
+float PitchEncondePid[6] 	  = {0.1f,		0.0f,			0.0f,		10.0f,		0.0f,		0.0f}; //编码器角度环
 float PitchEncondePidSpeed[6] = {0.0f,	0.0f,		0.0f,	0.0f,	0.0f, 	0.0f}; //编码器速度环
 //float PitchSpeedPid[6] 	  = {0.2f,		0.03f,			0.8f,		12.0f,	8.0f, 0.0f};    //
 float PitchSpeedPid[6] 		  = {12000.0f,		500.0f,			5000.0f,		3000.0f,	700.0f,		0.2f};    //8900.0f,		320.0f,			0.0f
@@ -195,37 +195,55 @@ void Pitch_Encoder_PID(GIMBAL_t *gimbal_);
 --*/
 void Gimbal_Task(int S_Cnt, int MS_Cnt)
 {
-	if (MS_Cnt==51) Get_Pitch_Motor_Error_Status();//每秒将电机启动一次，防止掉电。
+	if (MS_Cnt==51) Get_Pitch_Motor_Error_Status();//读取温度
 //	for (int i=0; i<11000; i++)
 //		i=i;
+	Get_Pitch_Motor_SingleRound_Angle();
+	for (int i=0; i<11000; i++)
+	i=i;
     Pitch_Motor_Model = MOTOR_LKTECH;//选择Pitch电机型号
     GIMBAL_CALBACK_GET(); //处理电机数据
     GIMBAL_Set_Mode();//模式选择
     GIMBAL_Set_Contorl();//模式控制
     GIMBAL_PID();//PID计算
     //Pitch角度限制，防止云台角度过阈破坏机械结构
-    if(gimbal_p.IMU_actual_angle <= -19)
-    {
-        gimbal_p.target_angle = -19;
-        gimbal_p.target_speed = 0;
-    }
-    if(gimbal_p.IMU_actual_angle >= 29)
-    {
-        gimbal_p.target_angle = 29;
-        gimbal_p.target_speed = 0;
-    }
+	if (Gimbal_Precision_Mode == 0)
+	{
+		if(gimbal_p.IMU_actual_angle <= -20.f)
+		{
+			gimbal_p.target_angle = -20.f;
+			gimbal_p.target_speed = 0;
+		}
+		if(gimbal_p.IMU_actual_angle >= 29)
+		{
+			gimbal_p.target_angle = 29;
+			gimbal_p.target_speed = 0;
+		}
+	}
+	else if (Gimbal_Precision_Mode)
+	{
+		if(gimbal_p.IMU_actual_angle <= -20.f || gimbal_p.IMU_actual_angle >= 29)
+			Gimbal_Precision_Mode = 0;
+		//初次切换标志
+		if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1) Gimbal_Precision_Activated_Flag = 1;
+		if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)Gimbal_Precision_Inactivated_Flag = 1;
+		Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
+
+	}
 	//云台电机数据发送
 	if (gimbal_set_mode != GIMBAL_ZERO_FORCE)//非无力模式
 	{
 		if (Gimbal_Precision_Mode == 0)
 		{
 			canTX_Yaw_Current(gimbal_y.given_current);
+			Send_Pitch_Motor_Add_Angle(-gimbal_p.gimbal_gyro_pid.out);//电机编码器角度低头是减，抬头是加；与IMU相反
 		}
 		else 
 		{
 			canTX_Yaw_Current(gimbal_y.given_current);
+			Send_Pitch_Motor_Add_Angle(gimbal_p.gimbal_enconde_pid.out);
 		}
-		Send_Pitch_Motor_Add_Angle(-gimbal_p.gimbal_gyro_pid.out);//电机编码器角度低头是减，抬头是加；与IMU相反
+		
 	}
 		
 	//Send_Pitch_Motor_Add_Angle(1000);
@@ -361,7 +379,7 @@ static void GIMBAL_Set_Contorl(void)
 		if (Gimbal_Precision_Mode)
 		{
 			gimbal_y.target_angle += gimbal_y.add_angle/3.0f;
-			gimbal_p.target_angle += gimbal_p.add_angle/3.0f;
+			gimbal_p.target_angle += -gimbal_p.add_angle*50.0f;
 		}
 		else 
 		{
@@ -438,11 +456,13 @@ static void GIMBAL_PID(void)
 	if (Gimbal_Precision_Activated_Flag)
 	{
 		gimbal_y.target_angle = gimbal_y.CAN_Total_Angle;
+		gimbal_p.target_angle = LK_Pitch_Motor.SingleRound_Angle;
 		Gimbal_Precision_Activated_Flag = 0;
 	}
 	if (Gimbal_Precision_Inactivated_Flag)
 	{
 		gimbal_y.target_angle = -gimbal_y.IMU_actual_angle + 180*gimbal_y.Bool_Invert_Flag ;
+		gimbal_p.target_angle = gimbal_p.IMU_actual_angle;
 		Gimbal_Precision_Inactivated_Flag = 0;
 	}
 	/**************************/
@@ -474,35 +494,25 @@ static void GIMBAL_PID(void)
 			while(Yaw_Target_Angle - Yaw_IMU_Angle < -180) Yaw_Target_Angle += 360;
 			Yaw_Gyro_PID(&gimbal_y);
 		}
+		
+		/**************************/
+		/**** Pitch电机PID计算 ****/
+		/**************************/
+		if(gimbal_p.gimbal_motor_mode == GIMBAL_MOTOR_RAW)
+		{
+			gimbal_motor_raw_pid(&gimbal_p);
+			//Send_Pitch_Motor_Shutdown_Instruction();
+		}
+
+		if(gimbal_p.gimbal_motor_mode == GIMBAL_MOTOR_GYRO)
+		{
+			Pitch_Gyro_PID(&gimbal_p);
+		}
 	}
 	else
 	{
+		Pitch_Encoder_PID(&gimbal_p);
 		Yaw_Encoder_PID(&gimbal_y);
-	}
-	/**************************/
-    /**** Pitch电机PID计算 ****/
-	/**************************/
-	
-	if(gimbal_p.gimbal_motor_mode == GIMBAL_MOTOR_RAW)
-	{
-		gimbal_motor_raw_pid(&gimbal_p);
-		//Send_Pitch_Motor_Shutdown_Instruction();
-	}
-
-	if(gimbal_p.gimbal_motor_mode == GIMBAL_MOTOR_GYRO)
-	{
-		Pitch_Gyro_PID(&gimbal_p);
-	}
-	if(gimbal_p.gimbal_motor_mode == GIMBAL_MOTOR_ENCONDE)
-	{
-		Send_Pitch_Motor_Start_Instruction();
-		Yaw_Encoder_PID(&gimbal_p);
-		LK_Pitch_Motor_PID.Position_Kp = PitchEncondePid[1];
-		LK_Pitch_Motor_PID.Position_Ki = PitchEncondePid[2];
-		LK_Pitch_Motor_PID.Speed_Kp = PitchSpeedPid[1];
-		LK_Pitch_Motor_PID.Speed_Ki = PitchSpeedPid[2];
-		LK_Pitch_Motor_PID.Max_Speed = PitchSpeedPid[4];
-
 	}
 
 }

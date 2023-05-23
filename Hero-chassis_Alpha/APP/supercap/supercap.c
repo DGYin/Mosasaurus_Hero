@@ -24,7 +24,7 @@ void supercap(void)
 	//UART_TX_Power_Max = 60; //调试用
 	UartTX_Super_Capacitor(UART_TX_Power_Max, UART_TX_Power);
 	//控制Beta板的加速度
-	
+	supercap_volt = 240;
 	if (supercap_volt>20)
 		Power_Mode = High_Voltage_Mode;
 	if (supercap_volt<=15)

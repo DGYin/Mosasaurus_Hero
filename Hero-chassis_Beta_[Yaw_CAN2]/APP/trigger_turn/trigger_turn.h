@@ -8,6 +8,7 @@
 
 
 #define SHOOT_NUM 1          //·¢Éä1·¢
+#define Reduction_Ratio 50.895
 
 typedef struct{
 	

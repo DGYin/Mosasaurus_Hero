@@ -33,18 +33,22 @@ void TIM3_CNT_TASK()
     MS_Count++;
 	//IMU任务
     INS_task();
+	if (start_flag == 1)
+	{
+	    if(MS_Count % 7 == 2)
+		{
+			Gimbal_Task(S_Count, MS_Count);		//控制云台
+			shoot_task();		//控制拨弹轮、摩擦轮的运动
+			DMA_Send();			//向上位机发送数据
+			remote_chassis();	//控制底盘的模式和运动
+		}
+	}
     if(MS_Count % 20 == 0)
     {
         control_mode_judge();
         //DMA_Send();
     }
-    if(MS_Count % 7 == 2 && start_flag == 1)
-    {
-        Gimbal_Task(S_Count, MS_Count);		//控制云台
-        shoot_task();		//控制拨弹轮、摩擦轮的运动
-        DMA_Send();			//向上位机发送数据
-        remote_chassis();	//控制底盘的模式和运动
-    }
+
     if(MS_Count % 7 == 0)
     {
         //remote_chassis();

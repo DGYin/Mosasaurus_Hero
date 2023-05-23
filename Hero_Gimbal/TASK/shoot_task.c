@@ -12,8 +12,8 @@ shoot_task_t rc_shoot;
 float TriggerSpeed[5] 	= {3.0f,			0.1f,			0.1f,				8000,			500};  //拨弹轮速度环
 float TriggerAngle[5] 	= {0.4f,			0.0f,			0.00015f,		4000,			0.0f};  //拨弹轮角度环
 
-float FricLeftSpeed[5] 	= {10.0f,			0.5f,			0.0f,				15000.0f,			5000.0f};  //左摩擦轮速度环
-float FricRightSpeed[5] = {10.0f,			0.5f,			0.0f,				15000.0f,			5000.0f};  //右摩擦轮速度环
+float FricLeftSpeed[5] 	= {18.0f,			0.1f,			0.0f,				15000.0f,			4000.0f};  //左摩擦轮速度环
+float FricRightSpeed[5] = {18.0f,			0.1f,			0.0f,				15000.0f,			4000.0f};  //右摩擦轮速度环
 
 //摩擦轮PID计算
 static void fric_pid(void);
