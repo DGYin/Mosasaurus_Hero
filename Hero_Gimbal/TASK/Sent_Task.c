@@ -30,7 +30,7 @@ uint8_t canTX_chassis(int16_t x, int16_t y, int8_t z, int8_t deviation)
     return temp;
 }
 
-uint8_t canTX_mode(uint8_t mode)
+uint8_t CAN_Tx_Mode(uint8_t mode, int Precision_Mode)
 {
     CAN_TxHeaderTypeDef canFrame;
     uint8_t data[8] = {0};
@@ -42,7 +42,7 @@ uint8_t canTX_mode(uint8_t mode)
     canFrame.DLC = 8;
     canFrame.TransmitGlobalTime = DISABLE;
     data[0] = mode;
-    data[1] = 0;
+    data[1] = Precision_Mode;
     data[2] = 0;
     data[3] = 0;
     data[4] = 0;

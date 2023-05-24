@@ -35,7 +35,7 @@ typedef enum
     STUDENT_INTERACTIVE_DATA_CMD_ID   = 0x0301,
     IDCustomData,
 }referee_cmd_id_t;
-typedef  struct
+typedef  __packed struct
 {
   uint8_t SOF;
   uint16_t data_length;

@@ -17,6 +17,7 @@ int IMU_cnt = 0, start_flag = 0, S_Count = 0;
 	* @ param				none
 	* @ retvel      none
 */
+extern int Gimbal_Precision_Mode;
 void TIM3_CNT_TASK()
 {
 	Buzzer_Task(S_Count,MS_Count);
@@ -28,7 +29,7 @@ void TIM3_CNT_TASK()
     else
     {
         canTX_chassis(0, 0, 0, 0);
-        canTX_mode(CHASSIS_REMOTE_CLOSE);
+        CAN_Tx_Mode(CHASSIS_REMOTE_CLOSE, Gimbal_Precision_Mode);
     }
     MS_Count++;
 	//IMUÈÎÎñ

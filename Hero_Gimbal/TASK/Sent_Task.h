@@ -9,7 +9,7 @@ uint8_t canTX_trigger(uint8_t trigger);
 uint8_t canTX_pitch(int16_t pitch);
 uint8_t canTX_yaw(int16_t yaw,int16_t yaw_current);
 uint8_t canTX_Yaw_Current(int16_t yaw_current);
-uint8_t canTX_mode(uint8_t mode);
+uint8_t CAN_Tx_Mode(uint8_t mode, int Precision_Mode);
 void canTX_Invert_Flag(uint8_t Bool_Invert_Flag);
 
 void canTX_LK_Pitch_Motor(void);

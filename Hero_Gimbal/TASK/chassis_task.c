@@ -22,23 +22,23 @@ void remote_chassis(void)
 		if(gimbal_set_mode == GIMBAL_ZERO_FORCE || gimbal_set_mode == GIMBAL_RELATIVE_ANGLE)//无力
 		{
 			canTX_chassis(rc_sent.x_speed, rc_sent.y_speed, 0, 0);
-			canTX_mode(CHASSIS_REMOTE_CLOSE);
+			CAN_Tx_Mode(CHASSIS_REMOTE_CLOSE, Gimbal_Precision_Mode);
 		}
 		else if(gimbal_set_mode == GIMBAL_TOP_ANGLE)//小陀螺
 		{
 			canTX_chassis(rc_sent.x_speed, rc_sent.y_speed, rc_sent.r_speed, 0);
-			canTX_mode(CHASSIS_SPIN);
+			CAN_Tx_Mode(CHASSIS_SPIN, Gimbal_Precision_Mode);
 		}
 		else if(gimbal_set_mode == GIMBAL_ABSOLUTE_ANGLE)//正常
 		{
 			canTX_chassis(rc_sent.x_speed, rc_sent.y_speed, rc_sent.r_speed, 0);
-			canTX_mode(CHASSIS_NORMAL);
+			CAN_Tx_Mode(CHASSIS_NORMAL, Gimbal_Precision_Mode);
 		}
 	}
 	else//吊射模式
 	{
 		canTX_chassis(0, 0, 0, 0);
-		canTX_mode(CHASSIS_REMOTE_CLOSE);
+		CAN_Tx_Mode(CHASSIS_REMOTE_CLOSE, Gimbal_Precision_Mode);
 	}
 	canTX_Invert_Flag(gimbal_y.Bool_Invert_Flag);
 }

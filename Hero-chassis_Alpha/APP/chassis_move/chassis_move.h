@@ -113,6 +113,7 @@ typedef struct
 	int16_t vy_set;
 	int16_t wz_set;
 	uint8_t chassis_mode;
+	int Precision_Mode;
 	uint8_t last_chassis_mode;
 	uint16_t gimbal_6020_angle;
 }CHASSIS_CONTROL_ORDER_t;

@@ -269,7 +269,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)//CAN接收函数
 		switch(CAN_RxHeaderStruct.StdId)
 		{
 			case MODE_RECEIVE_ID:
-				chassis_control_order.chassis_mode=(uint8_t)gdata[0];
+				chassis_control_order.chassis_mode		=	(uint8_t)gdata[0];
+				chassis_control_order.Precision_Mode 	= 	(uint8_t)gdata[1];
 				chassis_control_order.last_chassis_mode=chassis_control_order.chassis_mode;
 			break;		
 			case GIMBAL_CONTROL_ID: //遥控值接收

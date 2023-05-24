@@ -186,7 +186,6 @@ void key_control_data(void)
 		gimbal_set_mode=GIMBAL_RELATIVE_ANGLE;
 		F_flag=1;
 		gimbal_y.target_angle=gimbal_y.CAN_Total_Angle;
-		
 	}
 
 	//∑¢…‰º∞∑¢…‰—”≥Ÿ

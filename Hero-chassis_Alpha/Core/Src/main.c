@@ -101,7 +101,7 @@ int main(void)
 	chassis_center.switch_mode_angle=(float)GIMBAL_HEAD_ANGLE;
     Init_Encoder_Struct();
 	extern void UI_Init(void);
-	UI_Init();
+	//UI_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */

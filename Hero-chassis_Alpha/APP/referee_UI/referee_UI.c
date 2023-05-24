@@ -7,576 +7,645 @@
 #include "referee.h"
 #include "bsp_referee.h"
 #include "supercap.h"
-#include "bsp_can.h"
-ext_student_interactive_header_data_graphic_t ext_student_interactive_header_data_graphic;
-ext_student_interactive_header_data_character_t ext_student_interactive_header_data_character;
 
-uint8_t seq=0;
+extern int time2;
+#define Max(a,b) ((a) > (b) ? (a) : (b))
+#define Robot_ID_Current Robot_ID_Red_Infantry3
+/* 绘制UI专用结构体 */
+UI_Graph1_t UI_Graph1;
+UI_Graph2_t UI_Graph2;
+UI_Graph5_t UI_Graph5;
+UI_Graph7_t UI_Graph7;
+UI_String_t UI_String;
+UI_String_t UI_String1;
+UI_Delete_t UI_Delete;
+uint8_t seq = 0;
+//-------------------------
+uint8_t UI_AutoAim_Flag = 0;    //是否开启自瞄标志位
+float   UI_Kalman_Speed = 0;    //卡尔曼预测速度
+float   UI_Gimbal_Pitch = 1.000f; //云台Pitch轴角度
+float   UI_Gimbal_Yaw   = 0.0f; //云台Yaw轴角度
+uint8_t UI_Capacitance  = 50;   //电容剩余容量
+uint8_t UI_fric_is_on   = 0;    //摩擦轮是否开启
+char vision_mode_[1] = "v";
+char chassis_mode_[12] = "chassis_mode";
 
+/* 中央标尺高度变量 */
+uint16_t y01 = 455;
+uint16_t y02 = 420;
+uint16_t y03 = 280;
+uint16_t y04 = 230;
 
-static void referee_data_pack_handle(uint8_t sof,uint16_t cmd_id, uint8_t *p_data, uint16_t len)
+uint8_t autoaim_mode;//2:normal,3:small energy,4:big energy
+uint8_t autoaim_armor;//0x10:auto,0x20:big,0x30:small
+uint8_t if_predict;
+//----------------------------
+
+static void referee_data_pack_handle(uint8_t sof, uint16_t cmd_id, uint8_t *p_data, uint16_t len)
 {
-	unsigned char i=i;
-	
-	uint8_t tx_buff[MAX_SIZE];
+    unsigned char i = i;
 
-	uint16_t frame_length = frameheader_len + cmd_len + len + crc_len;   //数据帧长度	
+    uint8_t tx_buff[MAX_SIZE];
 
-	memset(tx_buff,0,frame_length);  //存储数据的数组清零
-	
-	/*****帧头打包*****/
-	tx_buff[0] = sof;//数据帧起始字节
-	memcpy(&tx_buff[1],(uint8_t*)&len, sizeof(len));//数据帧中data的长度
-	tx_buff[3] = seq;//包序号
-	append_CRC8_check_sum(tx_buff,frameheader_len);  //帧头校验CRC8
+    uint16_t frame_length = frameheader_len + cmd_len + len + crc_len;   //数据帧长度
 
-	/*****命令码打包*****/
-	memcpy(&tx_buff[frameheader_len],(uint8_t*)&cmd_id, cmd_len);
-	
-	/*****数据打包*****/
-	memcpy(&tx_buff[frameheader_len+cmd_len], p_data, len);
-	append_CRC16_check_sum(tx_buff,frame_length);  //一帧数据校验CRC16
+    memset(tx_buff, 0, frame_length); //存储数据的数组清零
 
-	if (seq == 0xff) seq=0;
-  else seq++;
-	
-	/*****数据上传*****/
-	__HAL_UART_CLEAR_FLAG(&huart6,UART_FLAG_TC);
-	HAL_UART_Transmit(&huart6, tx_buff,frame_length , 100);
-	while (__HAL_UART_GET_FLAG(&huart6,UART_FLAG_TC) == RESET); //等待之前的字符发送完成
+    /*****帧头打包*****/
+    tx_buff[0] = sof;//数据帧起始字节
+    memcpy(&tx_buff[1], (uint8_t *)&len, sizeof(len)); //数据帧中data的长度
+    tx_buff[3] = seq;//包序号
+    append_CRC8_check_sum(tx_buff, frameheader_len); //帧头校验CRC8
+
+    /*****命令码打包*****/
+    memcpy(&tx_buff[frameheader_len], (uint8_t *)&cmd_id, cmd_len);
+
+    /*****数据打包*****/
+    memcpy(&tx_buff[frameheader_len + cmd_len], p_data, len);
+    append_CRC16_check_sum(tx_buff, frame_length); //一帧数据校验CRC16
+
+    if (seq == 0xff) seq = 0;
+    else seq++;
+
+    /*****数据上传*****/
+    __HAL_UART_CLEAR_FLAG(&huart6, UART_FLAG_TC);
+    HAL_UART_Transmit(&huart6, tx_buff, frame_length, 100);
+    while (__HAL_UART_GET_FLAG(&huart6, UART_FLAG_TC) == RESET); //等待之前的字符发送完成
 }
 
-static void get_UI_id(uint16_t *sender_ID,uint16_t *receiver_ID)
+static void get_UI_id(uint16_t *sender_ID, uint16_t *receiver_ID)
 {
-	switch(get_robot_id())
-	{
-		case UI_Data_RobotID_RHero:
-		{
-			*sender_ID=UI_Data_RobotID_RHero;
-			*receiver_ID=UI_Data_CilentID_RHero;
-			break;
-		}
-		case UI_Data_RobotID_REngineer:
-		{
-			*sender_ID=UI_Data_RobotID_REngineer;
-			*receiver_ID=UI_Data_CilentID_REngineer;
-			break;
-		}
-		case UI_Data_RobotID_RStandard1:
-		{
-			*sender_ID=UI_Data_RobotID_RStandard1;
-			*receiver_ID=UI_Data_CilentID_RStandard1;
-			break;
-		}
-		case UI_Data_RobotID_RStandard2:
-		{
-			*sender_ID=UI_Data_RobotID_RStandard2;
-			*receiver_ID=UI_Data_CilentID_RStandard2;
-			break;
-		}
-		case UI_Data_RobotID_RStandard3:
-		{
-			*sender_ID=UI_Data_RobotID_RStandard3;
-			*receiver_ID=UI_Data_CilentID_RStandard3;
-			break;
-		}
-		case UI_Data_RobotID_RAerial:
-		{
-			*sender_ID=UI_Data_RobotID_RAerial;
-			*receiver_ID=UI_Data_CilentID_RAerial;
-			break;
-		}
-		case UI_Data_RobotID_BHero:
-		{
-			*sender_ID=UI_Data_RobotID_BHero;
-			*receiver_ID=UI_Data_CilentID_BHero;
-			break;
-		}
-		case UI_Data_RobotID_BEngineer:
-		{
-			*sender_ID=UI_Data_RobotID_BEngineer;
-			*receiver_ID=UI_Data_CilentID_BEngineer;
-			break;
-		}
-		case UI_Data_RobotID_BStandard1:
-		{
-			*sender_ID=UI_Data_RobotID_BStandard1;
-			*receiver_ID=UI_Data_CilentID_BStandard1;
-			break;
-		}	
-		case UI_Data_RobotID_BStandard2:
-		{
-			*sender_ID=UI_Data_RobotID_BStandard2;
-			*receiver_ID=UI_Data_CilentID_BStandard2;
-			break;
-		}	
-		case UI_Data_RobotID_BStandard3:
-		{
-			*sender_ID=UI_Data_RobotID_BStandard3;
-			*receiver_ID=UI_Data_CilentID_BStandard3;
-			break;
-		}	
-		case UI_Data_RobotID_BAerial:
-		{
-			*sender_ID=UI_Data_RobotID_BAerial;
-			*receiver_ID=UI_Data_CilentID_BAerial;
-			break;
-		}	
-	}
+    switch(get_robot_id())
+    {
+    case UI_Data_RobotID_RHero:
+    {
+        *sender_ID = UI_Data_RobotID_RHero;
+        *receiver_ID = UI_Data_CilentID_RHero;
+        break;
+    }
+    case UI_Data_RobotID_REngineer:
+    {
+        *sender_ID = UI_Data_RobotID_REngineer;
+        *receiver_ID = UI_Data_CilentID_REngineer;
+        break;
+    }
+    case UI_Data_RobotID_RStandard1:
+    {
+        *sender_ID = UI_Data_RobotID_RStandard1;
+        *receiver_ID = UI_Data_CilentID_RStandard1;
+        break;
+    }
+    case UI_Data_RobotID_RStandard2:
+    {
+        *sender_ID = UI_Data_RobotID_RStandard2;
+        *receiver_ID = UI_Data_CilentID_RStandard2;
+        break;
+    }
+    case UI_Data_RobotID_RStandard3:
+    {
+        *sender_ID = UI_Data_RobotID_RStandard3;
+        *receiver_ID = UI_Data_CilentID_RStandard3;
+        break;
+    }
+    case UI_Data_RobotID_RAerial:
+    {
+        *sender_ID = UI_Data_RobotID_RAerial;
+        *receiver_ID = UI_Data_CilentID_RAerial;
+        break;
+    }
+    case UI_Data_RobotID_BHero:
+    {
+        *sender_ID = UI_Data_RobotID_BHero;
+        *receiver_ID = UI_Data_CilentID_BHero;
+        break;
+    }
+    case UI_Data_RobotID_BEngineer:
+    {
+        *sender_ID = UI_Data_RobotID_BEngineer;
+        *receiver_ID = UI_Data_CilentID_BEngineer;
+        break;
+    }
+    case UI_Data_RobotID_BStandard1:
+    {
+        *sender_ID = UI_Data_RobotID_BStandard1;
+        *receiver_ID = UI_Data_CilentID_BStandard1;
+        break;
+    }
+    case UI_Data_RobotID_BStandard2:
+    {
+        *sender_ID = UI_Data_RobotID_BStandard2;
+        *receiver_ID = UI_Data_CilentID_BStandard2;
+        break;
+    }
+    case UI_Data_RobotID_BStandard3:
+    {
+        *sender_ID = UI_Data_RobotID_BStandard3;
+        *receiver_ID = UI_Data_CilentID_BStandard3;
+        break;
+    }
+    case UI_Data_RobotID_BAerial:
+    {
+        *sender_ID = UI_Data_RobotID_BAerial;
+        *receiver_ID = UI_Data_CilentID_BAerial;
+        break;
+    }
+    }
 }
 
-uint16_t Sender_ID,Receiver_ID;
+uint16_t Sender_ID, Receiver_ID;
 /************************************************绘制直线*************************************************
 **参数：
         imagename[3]   图片名称，用于标识更改
-        Graph_Operate   图片操作，见头文件 UI_Graph_Line
+        Graph_Operate   图片操作，见头文件
         Graph_Layer    图层0-9
         Graph_Color    图形颜色
         Graph_Width    图形线宽
         Start_x、Start_y    开始坐标
         End_x、End_y   结束坐标
 **********************************************************************************************************/
-void UI_draw_Line(char imagename[3],uint32_t Graph_Operate,uint32_t Graph_Layer,uint32_t Graph_Color,uint32_t Graph_Width,uint32_t Start_x,uint32_t Start_y,uint32_t End_x,uint32_t End_y)
-{
-	ext_student_interactive_header_data_graphic.data_cmd_id=0x0101;//绘制七个图形（内容ID，查询裁判系统手册）
-	get_UI_id(&Sender_ID,&Receiver_ID);
-	ext_student_interactive_header_data_graphic.sender_ID=Sender_ID;//发送者ID，机器人对应ID
-	ext_student_interactive_header_data_graphic.receiver_ID=Receiver_ID;//接收者ID，操作手客户端ID
-	//自定义图像数据
-	
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[0] = imagename[0];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[1] = imagename[1];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[2] = imagename[2];//图形名
-	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.operate_tpye=Graph_Operate;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_tpye=UI_Graph_Line;//图形类型，0为直线，其他的查看用户手册
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.layer=Graph_Layer;//图层数
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.color=Graph_Color;//颜色
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.width=Graph_Width;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_x=Start_x;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_y=Start_y;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_x=End_x;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_y=End_y;
-	
-	
-	referee_data_pack_handle(0xA5,0x0301, (uint8_t *)&ext_student_interactive_header_data_graphic, sizeof(ext_student_interactive_header_data_graphic));	
-}
 
-/************************************************绘制矩形*************************************************
-**参数：
-        imagename[3]   图片名称，用于标识更改
-        Graph_Operate   图片操作，见头文件
-        Graph_Layer    图层0-9
-        Graph_Color    图形颜色
-        Graph_Width    图形线宽
-        Start_x、Start_y    开始坐标
-        End_x、End_y   结束坐标（对顶角坐标）
-**********************************************************************************************************/
-void UI_draw_Rectangle(char imagename[3],uint32_t Graph_Operate,uint32_t Graph_Layer,uint32_t Graph_Color,uint32_t Graph_Width,uint32_t Start_x,uint32_t Start_y,uint32_t End_x,uint32_t End_y)
+void UI_Draw_Line(graphic_data_struct_t *Graph,        //UI图形数据结构体指针
+                  char                   GraphName[3], //图形名 作为客户端的索引
+                  uint8_t                GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
+                  uint8_t                Layer,        //UI图形图层 [0,9]
+                  uint8_t                Color,        //UI图形颜色 对应UI_Color_XXX的9种颜色
+                  uint16_t               Width,        //线宽
+                  uint16_t               StartX,       //起始坐标X
+                  uint16_t               StartY,       //起始坐标Y
+                  uint16_t               EndX,         //截止坐标X
+                  uint16_t               EndY)         //截止坐标Y
 {
-	ext_student_interactive_header_data_graphic.data_cmd_id=0x0101;//绘制七个图形（内容ID，查询裁判系统手册）
-	get_UI_id(&Sender_ID,&Receiver_ID);
-	ext_student_interactive_header_data_graphic.sender_ID=Sender_ID;//发送者ID，机器人对应ID
-	ext_student_interactive_header_data_graphic.receiver_ID=Receiver_ID;//接收者ID，操作手客户端ID
-	//自定义图像数据
-	
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[0] = imagename[0];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[1] = imagename[1];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[2] = imagename[2];//图形名
-	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.operate_tpye=Graph_Operate;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_tpye=UI_Graph_Rectangle;//图形类型，0为直线，其他的查看用户手册
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.layer=Graph_Layer;//图层数
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.color=Graph_Color;//颜色
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.width=Graph_Width;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_x=Start_x;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_y=Start_y;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_x=End_x;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_y=End_y;
-	
-	
-	referee_data_pack_handle(0xA5,0x0301, (uint8_t *)&ext_student_interactive_header_data_graphic, sizeof(ext_student_interactive_header_data_graphic));	
-}
-/************************************************绘制整圆*************************************************
-**参数：
-        imagename[3]   图片名称，用于标识更改
-        Graph_Operate   图片操作，见头文件
-        Graph_Layer    图层0-9
-        Graph_Color    图形颜色
-        Graph_Width    图形线宽
-        Start_x、Start_y    圆心坐标
-        Graph_Radius  图形半径
-**********************************************************************************************************/
-void UI_draw_Circle(char imagename[3],uint32_t Graph_Operate,uint32_t Graph_Layer,uint32_t Graph_Color,uint32_t Graph_Width,uint32_t Start_x,uint32_t Start_y,uint32_t Graph_Radius)
-{
-	ext_student_interactive_header_data_graphic.data_cmd_id=0x0101;//绘制七个图形（内容ID，查询裁判系统手册）
-	get_UI_id(&Sender_ID,&Receiver_ID);
-	ext_student_interactive_header_data_graphic.sender_ID=Sender_ID;//发送者ID，机器人对应ID
-	ext_student_interactive_header_data_graphic.receiver_ID=Receiver_ID;//接收者ID，操作手客户端ID
-	//自定义图像数据
-	
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[0] = imagename[0];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[1] = imagename[1];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[2] = imagename[2];//图形名
-	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.operate_tpye=Graph_Operate;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_tpye=UI_Graph_Circle;//图形类型，0为直线，其他的查看用户手册
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.layer=Graph_Layer;//图层数
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.color=Graph_Color;//颜色
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.width=Graph_Width;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_x=Start_x;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_y=Start_y;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.radius=Graph_Radius;
-	
-	
-	referee_data_pack_handle(0xA5,0x0301, (uint8_t *)&ext_student_interactive_header_data_graphic, sizeof(ext_student_interactive_header_data_graphic));	
-}
-/************************************************绘制圆弧*************************************************
-**参数：
-        imagename[3]   图片名称，用于标识更改
-        Graph_Operate   图片操作，见头文件
-        Graph_Layer    图层0-9
-        Graph_Color    图形颜色
-        Graph_Width    图形线宽
-        Graph_StartAngle,Graph_EndAngle    开始，终止角度
-        Start_y,Start_y    圆心坐标
-        x_Length,y_Length   x,y方向上轴长，参考椭圆
-**********************************************************************************************************/
-void UI_draw_Arc(char imagename[3],uint32_t Graph_Operate,uint32_t Graph_Layer,uint32_t Graph_Color,uint32_t Graph_StartAngle,uint32_t Graph_EndAngle,uint32_t Graph_Width,uint32_t Start_x,uint32_t Start_y,uint32_t x_Length,uint32_t y_Length)
-{
-	ext_student_interactive_header_data_graphic.data_cmd_id=0x0101;//绘制七个图形（内容ID，查询裁判系统手册）
-	get_UI_id(&Sender_ID,&Receiver_ID);
-	ext_student_interactive_header_data_graphic.sender_ID=Sender_ID;//发送者ID，机器人对应ID
-	ext_student_interactive_header_data_graphic.receiver_ID=Receiver_ID;//接收者ID，操作手客户端ID
-	//自定义图像数据
-	
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[0] = imagename[0];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[1] = imagename[1];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[2] = imagename[2];//图形名
-	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.operate_tpye=Graph_Operate;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_tpye=UI_Graph_Arc;//图形类型，0为直线，其他的查看用户手册
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.layer=Graph_Layer;//图层数
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.color=Graph_Color;//颜色
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.width=Graph_Width;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_angle=Graph_StartAngle;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_angle=Graph_EndAngle;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_x=Start_x;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_y=Start_y;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_x=x_Length;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_y=y_Length;
-	
-	
-	referee_data_pack_handle(0xA5,0x0301, (uint8_t *)&ext_student_interactive_header_data_graphic, sizeof(ext_student_interactive_header_data_graphic));	
-}  
-/************************************************绘制浮点型数据*************************************************
-**参数：
-        imagename[3]   图片名称，用于标识更改
-        Graph_Operate   图片操作，见头文件
-        Graph_Layer    图层0-9
-        Graph_Color    图形颜色
-        Graph_Width    图形线宽
-        Graph_Size     字号
-        Graph_Digit    小数位数
-        Start_x、Start_y    开始坐标
-        Graph_Float   要显示的变量
-**********************************************************************************************************/
-void UI_draw_Float(char imagename[3],uint32_t Graph_Operate,uint32_t Graph_Layer,uint32_t Graph_Color,uint32_t Graph_Size,uint32_t Graph_Digit,uint32_t Graph_Width,uint32_t Start_x,uint32_t Start_y,float Graph_Float)
-{
-	ext_student_interactive_header_data_graphic.data_cmd_id=0x0101;//绘制一个图形（内容ID，查询裁判系统手册）
-	get_UI_id(&Sender_ID,&Receiver_ID);
-	ext_student_interactive_header_data_graphic.sender_ID=Sender_ID;//发送者ID，机器人对应ID
-	ext_student_interactive_header_data_graphic.receiver_ID=Receiver_ID;//接收者ID，操作手客户端ID
-	//自定义图像数据
-	
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[0] = imagename[0];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[1] = imagename[1];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[2] = imagename[2];//图形名
-	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.operate_tpye=Graph_Operate;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_tpye=UI_Graph_Float;//图形类型，0为直线，其他的查看用户手册
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.layer=Graph_Layer;//图层数
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.color=Graph_Color;//颜色
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.width=Graph_Width;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_angle=Graph_Size;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_angle=Graph_Digit;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_x=Start_x;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_y=Start_y;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.radius=(int32_t)(Graph_Float*1000);
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_x=(int32_t)(Graph_Float*1000)>>10;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_y=(int32_t)(Graph_Float*1000)>>21;
-	
-	
-	referee_data_pack_handle(0xA5,0x0301, (uint8_t *)&ext_student_interactive_header_data_graphic, sizeof(ext_student_interactive_header_data_graphic));	
-}  
-/************************************************绘制整型数据*************************************************
-**参数：
-        imagename[3]   图片名称，用于标识更改
-        Graph_Operate   图片操作，见头文件
-        Graph_Layer    图层0-9
-        Graph_Color    图形颜色
-        Graph_Width    图形线宽
-        Graph_Size     字号
-        Start_x、Start_y    开始坐标
-        Graph_Int   要显示的变量
-**********************************************************************************************************/
-void UI_draw_Int(char imagename[3],uint32_t Graph_Operate,uint32_t Graph_Layer,uint32_t Graph_Color,uint32_t Graph_Size,uint32_t Graph_Width,uint32_t Start_x,uint32_t Start_y,int32_t Graph_Int)
-{
-	ext_student_interactive_header_data_graphic.data_cmd_id=0x0101;//绘制一个图形（内容ID，查询裁判系统手册）
-	get_UI_id(&Sender_ID,&Receiver_ID);
-	ext_student_interactive_header_data_graphic.sender_ID=Sender_ID;//发送者ID，机器人对应ID
-	ext_student_interactive_header_data_graphic.receiver_ID=Receiver_ID;//接收者ID，操作手客户端ID
-	//自定义图像数据
-	
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[0] = imagename[0];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[1] = imagename[1];
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_name[2] = imagename[2];//图形名
-	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.operate_tpye=Graph_Operate;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.graphic_tpye=UI_Graph_Int;//图形类型，0为直线，其他的查看用户手册
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.layer=Graph_Layer;//图层数
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.color=Graph_Color;//颜色
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.width=Graph_Width;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_angle=Graph_Size;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_x=Start_x;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.start_y=Start_y;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.radius=Graph_Int;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_x=Graph_Int>>10;
-	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_single.grapic_data_struct.end_y=Graph_Int>>21;
-	
-	
-	referee_data_pack_handle(0xA5,0x0301, (uint8_t *)&ext_student_interactive_header_data_graphic, sizeof(ext_student_interactive_header_data_graphic));	
-}  
+    Graph->graphic_name[0] = GraphName[0];
+    Graph->graphic_name[1] = GraphName[1];
+    Graph->graphic_name[2] = GraphName[2];
+    Graph->operate_tpye    = GraphOperate;
+    Graph->graphic_tpye    = UI_Graph_Line;
+    Graph->layer           = Layer;
+    Graph->color           = Color;
+    Graph->width           = Width;
+    Graph->start_x         = StartX;
+    Graph->start_y         = StartY;
+    Graph->end_x           = EndX;
+    Graph->end_y           = EndY;
 
 
-/************************************************绘制字符型数据*************************************************
-**参数：
-        imagename[3]   图片名称，用于标识更改
-        Graph_Operate   图片操作，见头文件
-        Graph_Layer    图层0-9
-        Graph_Color    图形颜色
-        Graph_Width    图形线宽
-        Graph_Size     字号
-        Graph_Digit    字符个数
-        Start_x、Start_x    开始坐标
-        *Char_Data          待发送字符串开始地址
-**********************************************************************************************************/
-void UI_character_draw_data(char imagename[3],uint32_t Graph_Operate,uint32_t Graph_Layer,uint32_t Graph_Color,uint32_t Graph_Size,uint32_t Graph_Digit,uint32_t Graph_Width,uint32_t Start_x,uint32_t Start_y,char *Char_Data)
+}
+
+void UI_Draw_Rectangle(graphic_data_struct_t *Graph,        //UI图形数据结构体指针
+                       char                   GraphName[3], //图形名 作为客户端的索引
+                       uint8_t                GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
+                       uint8_t                Layer,        //UI图形图层 [0,9]
+                       uint8_t                Color,        //UI图形颜色 对应UI_Color_XXX的9种颜色
+                       uint16_t               Width,        //线宽
+                       uint16_t               StartX,       //起始坐标X
+                       uint16_t               StartY,       //起始坐标Y
+                       uint16_t               EndX,         //截止坐标X
+                       uint16_t               EndY)         //截止坐标Y
 {
-	uint8_t i;
-	ext_student_interactive_header_data_character.data_cmd_id=0x0110;//绘制字符（内容ID，查询裁判系统手册）
-	get_UI_id(&Sender_ID,&Receiver_ID);
-	ext_student_interactive_header_data_character.sender_ID=Sender_ID;//发送者ID，机器人对应ID，此处为蓝方英雄
-	ext_student_interactive_header_data_character.receiver_ID=Receiver_ID;//接收者ID，操作手客户端ID，此处为蓝方英雄操作手客户端
-	//自定义图像数据
+    Graph->graphic_name[0] = GraphName[0];
+    Graph->graphic_name[1] = GraphName[1];
+    Graph->graphic_name[2] = GraphName[2];
+    Graph->operate_tpye    = GraphOperate;
+    Graph->graphic_tpye    = UI_Graph_Rectangle;
+    Graph->layer           = Layer;
+    Graph->color           = Color;
+    Graph->width           = Width;
+    Graph->start_x         = StartX;
+    Graph->start_y         = StartY;
+    Graph->end_x           = EndX;
+    Graph->end_y           = EndY;
+}
+
+void UI_Draw_Circle(graphic_data_struct_t *Graph,        //UI图形数据结构体指针
+                    char                   GraphName[3], //图形名 作为客户端的索引
+                    uint8_t                GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
+                    uint8_t                Layer,        //UI图形图层 [0,9]
+                    uint8_t                Color,        //UI图形颜色 对应UI_Color_XXX的9种颜色
+                    uint16_t               Width,        //线宽
+                    uint16_t               CenterX,      //圆心坐标X
+                    uint16_t               CenterY,      //圆心坐标Y
+                    uint16_t               Radius)       //半径
+{
+    Graph->graphic_name[0] = GraphName[0];
+    Graph->graphic_name[1] = GraphName[1];
+    Graph->graphic_name[2] = GraphName[2];
+    Graph->operate_tpye    = GraphOperate;
+    Graph->graphic_tpye    = UI_Graph_Circle;
+    Graph->layer           = Layer;
+    Graph->color           = Color;
+    Graph->width           = Width;
+    Graph->start_x         = CenterX;
+    Graph->start_y         = CenterY;
+    Graph->radius          = Radius;
+
+}
+
+void UI_Draw_Ellipse(graphic_data_struct_t *Graph,        //UI图形数据结构体指针
+                     char                   GraphName[3], //图形名 作为客户端的索引
+                     uint8_t                GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
+                     uint8_t                Layer,        //UI图形图层 [0,9]
+                     uint8_t                Color,        //UI图形颜色 对应UI_Color_XXX的9种颜色
+                     uint16_t               Width,        //线宽
+                     uint16_t               CenterX,      //圆心坐标X
+                     uint16_t               CenterY,      //圆心坐标Y
+                     uint16_t               XHalfAxis,    //X半轴长
+                     uint16_t               YHalfAxis)    //Y半轴长
+{
+    Graph->graphic_name[0] = GraphName[0];
+    Graph->graphic_name[1] = GraphName[1];
+    Graph->graphic_name[2] = GraphName[2];
+    Graph->operate_tpye    = GraphOperate;
+    Graph->graphic_tpye    = UI_Graph_Ellipse;
+    Graph->layer           = Layer;
+    Graph->color           = Color;
+    Graph->width           = Width;
+    Graph->start_x         = CenterX;
+    Graph->start_y         = CenterY;
+    Graph->end_x           = XHalfAxis;
+    Graph->end_y           = YHalfAxis;
+}
+
+void UI_Draw_Arc(graphic_data_struct_t *Graph,        //UI图形数据结构体指针
+                 char                   GraphName[3], //图形名 作为客户端的索引
+                 uint8_t                GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
+                 uint8_t                Layer,        //UI图形图层 [0,9]
+                 uint8_t                Color,        //UI图形颜色 对应UI_Color_XXX的9种颜色
+                 uint16_t               StartAngle,   //起始角度 [0,360]
+                 uint16_t               EndAngle,     //截止角度 [0,360]
+                 uint16_t               Width,        //线宽
+                 uint16_t               CenterX,      //圆心坐标X
+                 uint16_t               CenterY,      //圆心坐标Y
+                 uint16_t               XHalfAxis,    //X半轴长
+                 uint16_t               YHalfAxis)    //Y半轴长
+{
+    Graph->graphic_name[0] = GraphName[0];
+    Graph->graphic_name[1] = GraphName[1];
+    Graph->graphic_name[2] = GraphName[2];
+    Graph->operate_tpye    = GraphOperate;
+    Graph->graphic_tpye    = UI_Graph_Arc;
+    Graph->layer           = Layer;
+    Graph->color           = Color;
+    Graph->start_angle     = StartAngle;
+    Graph->end_angle       = EndAngle;
+    Graph->width           = Width;
+    Graph->start_x         = CenterX;
+    Graph->start_y         = CenterY;
+    Graph->end_x           = XHalfAxis;
+    Graph->end_y           = YHalfAxis;
+}
+
+void UI_Draw_Float(graphic_data_struct_t *Graph,        //UI图形数据结构体指针
+                   char                   GraphName[3], //图形名 作为客户端的索引
+                   uint8_t                GraphOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
+                   uint8_t                Layer,        //UI图形图层 [0,9]
+                   uint8_t                Color,        //UI图形颜色 对应UI_Color_XXX的9种颜色
+                   uint16_t               NumberSize,   //字体大小
+                   uint16_t               Significant,  //有效位数
+                   uint16_t               Width,        //线宽
+                   uint16_t               StartX,       //起始坐标X
+                   uint16_t               StartY,       //起始坐标Y
+                   float                  FloatData)    //数字内容
+{
+    Graph->graphic_name[0] = GraphName[0];
+    Graph->graphic_name[1] = GraphName[1];
+    Graph->graphic_name[2] = GraphName[2];
+    Graph->operate_tpye    = GraphOperate;
+    Graph->graphic_tpye    = UI_Graph_Float;
+    Graph->layer           = Layer;
+    Graph->color           = Color;
+    Graph->start_angle     = NumberSize;
+    Graph->end_angle       = Significant;
+    Graph->width           = Width;
+    Graph->start_x         = StartX;
+    Graph->start_y         = StartY;
+    int32_t IntData = FloatData * 1000;
+    Graph->radius          = (IntData & 0x000003ff) >>  0;
+    Graph->end_x           = (IntData & 0x001ffc00) >> 10;
+    Graph->end_y           = (IntData & 0xffe00000) >> 21;
+
+}
+
+
+
+
+void UI_Draw_String(string_data_struct_t *String,        //UI图形数据结构体指针
+                    char                  StringName[3], //图形名 作为客户端的索引
+                    uint8_t               StringOperate, //UI图形操作 对应UI_Graph_XXX的4种操作
+                    uint8_t               Layer,         //UI图形图层 [0,9]
+                    uint8_t               Color,         //UI图形颜色 对应UI_Color_XXX的9种颜色
+                    uint16_t              CharSize,      //字体大小
+                    uint16_t              StringLength,  //字符串长度
+                    uint16_t              Width,         //线宽
+                    uint16_t              StartX,        //起始坐标X
+                    uint16_t              StartY,        //起始坐标Y
+                    char                 *StringData)    //字符串内容
+{
+    String->string_name[0] = StringName[0];
+    String->string_name[1] = StringName[1];
+    String->string_name[2] = StringName[2];
+    String->operate_tpye   = StringOperate;
+    String->graphic_tpye   = UI_Graph_String;
+    String->layer          = Layer;
+    String->color          = Color;
+    String->start_angle    = CharSize;
+    String->end_angle      = StringLength;
+    String->width          = Width;
+    String->start_x        = StartX;
+    String->start_y        = StartY;
+    for(int i = 0; i < StringLength; i ++) String->stringdata[i] = *StringData ++;
+}
+
+
+
+
+
+
+void UI_PushUp_Graphs(uint8_t Counter /* 1,2,5,7 */, void *Graphs /* 与Counter相一致的UI_Graphx结构体头指针 */, uint8_t RobotID)
+{
+    UI_Graph1_t *Graph = (UI_Graph1_t *)Graphs; //假设只发一个基本图形
+
+    /* 填充 frame_header */
+    Graph->Referee_Transmit_Header.SOF  = HEADER_SOF;
+    if(Counter == 1) Graph->Referee_Transmit_Header.data_length = 6 + 1 * 15;
+    else if(Counter == 2) Graph->Referee_Transmit_Header.data_length = 6 + 2 * 15;
+    else if(Counter == 5) Graph->Referee_Transmit_Header.data_length = 6 + 5 * 15;
+    else if(Counter == 7) Graph->Referee_Transmit_Header.data_length = 6 + 7 * 15;
+    Graph->Referee_Transmit_Header.seq  = Graph->Referee_Transmit_Header.seq + 1;
+    Graph->Referee_Transmit_Header.CRC8 = CRC08_Calculate((uint8_t *)(&Graph->Referee_Transmit_Header), 4);
+
+    /* 填充 cmd_id */
+    Graph->CMD_ID = STUDENT_INTERACTIVE_DATA_CMD_ID;
+
+    /* 填充 student_interactive_header */
+    if(Counter == 1) Graph->Interactive_Header.data_cmd_id = UI_DataID_Draw1;
+    else if(Counter == 2) Graph->Interactive_Header.data_cmd_id = UI_DataID_Draw2;
+    else if(Counter == 5) Graph->Interactive_Header.data_cmd_id = UI_DataID_Draw5;
+    else if(Counter == 7) Graph->Interactive_Header.data_cmd_id = UI_DataID_Draw7;
+    Graph->Interactive_Header.sender_ID   = RobotID ;      //当前机器人ID
+    Graph->Interactive_Header.receiver_ID = RobotID + 256; //对应操作手ID
+
+    /* 填充 frame_tail 即CRC16 */
+    if(Counter == 1)
+    {
+        UI_Graph1_t *Graph1 = (UI_Graph1_t *)Graphs;
+        Graph1->CRC16 = CRC16_Calculate((uint8_t *)Graph1, sizeof(UI_Graph1_t) - 2);
+    }
+    else if(Counter == 2)
+    {
+        UI_Graph2_t *Graph2 = (UI_Graph2_t *)Graphs;
+        Graph2->CRC16 = CRC16_Calculate((uint8_t *)Graph2, sizeof(UI_Graph2_t) - 2);
+    }
+    else if(Counter == 5)
+    {
+        UI_Graph5_t *Graph5 = (UI_Graph5_t *)Graphs;
+        Graph5->CRC16 = CRC16_Calculate((uint8_t *)Graph5, sizeof(UI_Graph5_t) - 2);
+    }
+    else if(Counter == 7)
+    {
+        UI_Graph7_t *Graph7 = (UI_Graph7_t *)Graphs;
+        Graph7->CRC16 = CRC16_Calculate((uint8_t *)Graph7, sizeof(UI_Graph7_t) - 2);
+    }
+
+    /* 使用串口PushUp到裁判系统 */
+    if(Counter == 1) HAL_UART_Transmit(&huart6, (uint8_t *)Graph, sizeof(UI_Graph1_t), 0xff);
+    else if(Counter == 2) HAL_UART_Transmit(&huart6, (uint8_t *)Graph, sizeof(UI_Graph2_t), 0xff);
+    else if(Counter == 5) HAL_UART_Transmit(&huart6, (uint8_t *)Graph, sizeof(UI_Graph5_t), 0xff);
+    else if(Counter == 7) HAL_UART_Transmit(&huart6, (uint8_t *)Graph, sizeof(UI_Graph7_t), 0xff);
+}
+
+void UI_PushUp_String(UI_String_t *String, uint8_t RobotID)
+{
+    /* 填充 frame_header */
+    String->Referee_Transmit_Header.SOF  = HEADER_SOF;
+    String->Referee_Transmit_Header.data_length = 6 + 45;
+    String->Referee_Transmit_Header.seq  = String->Referee_Transmit_Header.seq + 1;
+    String->Referee_Transmit_Header.CRC8 = CRC08_Calculate((uint8_t *)(&String->Referee_Transmit_Header), 4);
+
+    /* 填充 cmd_id */
+    String->CMD_ID = STUDENT_INTERACTIVE_DATA_CMD_ID;
+
+    /* 填充 student_interactive_header */
+    String->Interactive_Header.data_cmd_id = UI_DataID_DrawChar;
+    String->Interactive_Header.sender_ID   = RobotID ;      //当前机器人ID
+    String->Interactive_Header.receiver_ID = RobotID + 256; //对应操作手ID
+
+    /* 填充 frame_tail 即CRC16 */
+    String->CRC16 = CRC16_Calculate((uint8_t *)String, sizeof(UI_String_t) - 2);
+
+    /* 使用串口PushUp到裁判系统 */
+    HAL_UART_Transmit(&huart6, (uint8_t *)String, sizeof(UI_String_t), 0xff);
+}
+
+void UI_PushUp_Delete(UI_Delete_t *Delete, uint8_t RobotID)
+{
+    /* 填充 frame_header */
+    Delete->Referee_Transmit_Header.SOF  = HEADER_SOF;
+    Delete->Referee_Transmit_Header.data_length = 6 + 2;
+    Delete->Referee_Transmit_Header.seq  = Delete->Referee_Transmit_Header.seq + 1;
+    Delete->Referee_Transmit_Header.CRC8 = CRC08_Calculate((uint8_t *)(&Delete->Referee_Transmit_Header), 4);
+
+    /* 填充 cmd_id */
+    Delete->CMD_ID = STUDENT_INTERACTIVE_DATA_CMD_ID;
+
+    /* 填充 student_interactive_header */
+    Delete->Interactive_Header.data_cmd_id = UI_DataID_Delete;
+    Delete->Interactive_Header.sender_ID   = RobotID ;      //当前机器人ID
+    Delete->Interactive_Header.receiver_ID = RobotID + 256; //对应操作手ID
+
+    /* 填充 frame_tail 即CRC16 */
+    Delete->CRC16 = CRC16_Calculate((uint8_t *)Delete, sizeof(UI_Delete_t) - 2);
+
+    /* 使用串口PushUp到裁判系统 */
+    HAL_UART_Transmit(&huart6, (uint8_t *)Delete, sizeof(UI_Delete_t), 0xff);
+}
+uint16_t UI_PushUp_Counter = 0, UI_Init_Counter = 0;
+
+int Referee_UI_Init_Flag = 0;
+void Referee_UI_Init(void)
+{
 	
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.graphic_name[0] = imagename[0];
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.graphic_name[1] = imagename[1];
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.graphic_name[2] = imagename[2];//图形名
-	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.operate_tpye=Graph_Operate;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.graphic_tpye=UI_Graph_Char;//图形类型，0为直线，其他的查看用户手册
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.layer=Graph_Layer;//图层数
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.color=Graph_Color;//颜色
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.start_angle=Graph_Size;
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.end_angle=Graph_Digit;
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.width=Graph_Width;
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.start_x=Start_x;
-	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.start_y=Start_y;
-	
-	for(i=0;i<Graph_Digit;i++)
-	{	
-		ext_student_interactive_header_data_character.ext_client_custom_character.data[i]=*Char_Data;
-		Char_Data++;
+	UI_Init_Counter++; //计时用
+	//绘制不变的线
+	if(UI_Init_Counter % 110 == 0)//定时执行
+    {
+		switch(Referee_UI_Init_Flag)//初始化UI任务列表
+		{
+			//静态UI预绘制1
+			case 0:
+				//中央标尺绘制1
+				UI_Draw_Line(&UI_Graph7.Graphic[0], "001", UI_Graph_Add, 0, UI_Color_Green, 1,	840,	y01,		920,	y01); //第一行左横线
+				UI_Draw_Line(&UI_Graph7.Graphic[1], "002", UI_Graph_Add, 0, UI_Color_Green, 1,  950,	y01,		970,	y01); //第一行十字横
+				UI_Draw_Line(&UI_Graph7.Graphic[2], "003", UI_Graph_Add, 0, UI_Color_Green, 1, 	1000,	y01,		1080,	y01); //第一行右横线
+				UI_Draw_Line(&UI_Graph7.Graphic[3], "004", UI_Graph_Add, 0, UI_Color_Green, 1,  960,	y01 - 10,	960,	y01 + 10); //第一行十字竖
+				UI_Draw_Line(&UI_Graph7.Graphic[4], "005", UI_Graph_Add, 0, UI_Color_Green, 1,  870,	y02,		930,	y02); //第二行左横线
+				UI_Draw_Line(&UI_Graph7.Graphic[5], "006", UI_Graph_Add, 0, UI_Color_Green, 5,  959,	y02,		960,	y02); //第二行中心点
+				UI_Draw_Line(&UI_Graph7.Graphic[6], "007", UI_Graph_Add, 0, UI_Color_Green, 1,  990,	y02,		1050,	y02); //第二行右横线
+				UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
+				Referee_UI_Init_Flag++;
+				break;
+			//静态UI预绘制2
+			case 1:
+				//中央标尺绘制2
+				UI_Draw_Line(&UI_Graph7.Graphic[0], "008",	UI_Graph_Add,	0, UI_Color_Green, 1,  900,	y03,		940,	y03); //第三行左横线
+				UI_Draw_Line(&UI_Graph7.Graphic[1], "009",	UI_Graph_Add,	0, UI_Color_Green, 5,  959,	y03,		960,	y03); //第三行中心点
+				UI_Draw_Line(&UI_Graph7.Graphic[2], "010",	UI_Graph_Add,	0, UI_Color_Green, 1,  980,	y03,		1020,	y03); //第三行右横线
+				UI_Draw_Line(&UI_Graph7.Graphic[3], "011",	UI_Graph_Add,	0, UI_Color_Green, 1,  930,	y04,		950,	y04); //第四行左横线
+				UI_Draw_Line(&UI_Graph7.Graphic[4], "012",	UI_Graph_Add,	0, UI_Color_Green, 5,  959,	y04,		960,	y04); //第四行中心点
+				UI_Draw_Line(&UI_Graph7.Graphic[5], "013",	UI_Graph_Add,	0, UI_Color_Green, 1,  970,	y04,		990,	y04); //第四行右横线
+				UI_Draw_Line(&UI_Graph7.Graphic[6], "014",	UI_Graph_Add,	0, UI_Color_Green, 1,  960,	y04 - 10,	960,	y04 - 30); //第四行下竖线
+				UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
+				Referee_UI_Init_Flag++;
+				break;
+			 //静态UI预绘制3, 动态UI预绘制1
+			case 2:
+				//小陀螺预警线
+				UI_Draw_Line(&UI_Graph7.Graphic[0],	"101",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	630,	30,		780,	100);
+				UI_Draw_Line(&UI_Graph7.Graphic[1],	"102",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	780,	100,	930,	100);
+				UI_Draw_Line(&UI_Graph7.Graphic[2],	"103",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,  990,	100,	1140,	100);
+				UI_Draw_Line(&UI_Graph7.Graphic[3],	"104",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	1140,	100,	1290,	30);
+				UI_Draw_Line(&UI_Graph7.Graphic[4],	"105",	UI_Graph_Add,		1,	UI_Color_Yellow,	5,	959,	100,	960,	100);
+				//模式色环的绘制
+				UI_Draw_Arc	(&UI_Graph7.Graphic[5],	"106",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		180,	660,	15,	15);
+				UI_Draw_Arc	(&UI_Graph7.Graphic[6],	"107",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		180,	590,	15,	15);
+				UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
+				Referee_UI_Init_Flag++;
+				break;
+			//动态UI预绘制2
+			case 3:
+				UI_Draw_String(&UI_String.String, "304", UI_Graph_Add, 2, UI_Color_Pink, 18, 8, 3,  80, 600, "Spin");//陀螺模式指示，粉色为关，绿色为开
+				UI_PushUp_String(&UI_String, get_robot_id());
+				Referee_UI_Init_Flag++;
+				break;
+			//动态UI预绘制3
+			case 4:
+				UI_Draw_String(&UI_String1.String, "305", UI_Graph_Add, 2, UI_Color_Pink, 18, 8, 3,  80, 670, "Prcs");//吊射模式指示，粉色为关，绿色为开
+				UI_PushUp_String(&UI_String1, get_robot_id());
+				Referee_UI_Init_Flag++;
+				break;
+		}
 	}
-	referee_data_pack_handle(0xA5,0x0301, (uint8_t *)&ext_student_interactive_header_data_character, sizeof(ext_student_interactive_header_data_character));
 }
-
-
-float super_cap=1.332f;
-void UI_Init(void)
+void referee_usart_task(void const *argument)
 {
-//	UI_draw_Float("090",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH/3,SCREEN_WIDTH/4,supercap_volt); //超电电压
-	pich_angle = 1.23f;
-	UI_draw_Float("091", UI_Graph_ADD, 1, UI_Color_Yellow, 2, 3, 2,SCREEN_LENGTH*2/3	, SCREEN_WIDTH/4	, pich_angle);//Pitch角度
-	UI_draw_Float("092",UI_Graph_ADD,1,UI_Color_Yellow,28,1,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/2+180,mode_now);//模式显示
-	UI_draw_Float("090",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH/3,SCREEN_WIDTH/4,supercap_volt);
-	UI_draw_Float("091",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3,SCREEN_WIDTH/4,supercap_per);
-	UI_draw_Line("080",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
-	UI_draw_Line("081",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-34,SCREEN_WIDTH/2-170,SCREEN_LENGTH/2+34,SCREEN_WIDTH/2-170);
-	UI_draw_Line("082",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-40,SCREEN_WIDTH/2-140,SCREEN_LENGTH/2+40,SCREEN_WIDTH/2-140);
-	UI_draw_Line("083",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-30,SCREEN_WIDTH/2-110,SCREEN_LENGTH/2+30,SCREEN_WIDTH/2-110);
-	UI_draw_Line("085",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-27,SCREEN_WIDTH/2-80,SCREEN_LENGTH/2+27,SCREEN_WIDTH/2-80);
-	UI_draw_Line("084",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2,SCREEN_WIDTH/2-10,SCREEN_LENGTH/2,SCREEN_WIDTH/2-200);
+    /* 动态UI控制变量 */
+    float    Capacitance_X;
+    /* 裁判系统初始化 */
+	if (Referee_UI_Init_Flag < 5) Referee_UI_Init();
+    /* 解析裁判系统数据 */
+    //vTaskDelay(10);
+    //Referee_UnpackFifoData(&Referee_Unpack_OBJ, &Referee_FIFO);
+    /* UI更新 */
+    UI_PushUp_Counter++; //计时用
+//    if(UI_PushUp_Counter % 101 == 0) //静态UI预绘制 中央标尺1
+//    {
+//        UI_Draw_Line(&UI_Graph7.Graphic[0], "001", UI_Graph_Add, 0, UI_Color_Green, 1,	840,	y01,		920,	y01); //第一行左横线
+//        UI_Draw_Line(&UI_Graph7.Graphic[1], "002", UI_Graph_Add, 0, UI_Color_Green, 1,  950,	y01,		970,	y01); //第一行十字横
+//        UI_Draw_Line(&UI_Graph7.Graphic[2], "003", UI_Graph_Add, 0, UI_Color_Green, 1, 	1000,	y01,		1080,	y01); //第一行右横线
+//        UI_Draw_Line(&UI_Graph7.Graphic[3], "004", UI_Graph_Add, 0, UI_Color_Green, 1,  960,	y01 - 10,	960,	y01 + 10); //第一行十字竖
+//        UI_Draw_Line(&UI_Graph7.Graphic[4], "005", UI_Graph_Add, 0, UI_Color_Green, 1,  870,	y02,		930,	y02); //第二行左横线
+//        UI_Draw_Line(&UI_Graph7.Graphic[5], "006", UI_Graph_Add, 0, UI_Color_Green, 5,  959,	y02,		960,	y02); //第二行中心点
+//        UI_Draw_Line(&UI_Graph7.Graphic[6], "007", UI_Graph_Add, 0, UI_Color_Green, 1,  990,	y02,		1050,	y02); //第二行右横线
+//        UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
+//    }
+//    if(UI_PushUp_Counter % 111 == 0) //静态UI预绘制 中央标尺2
+//    {
+//        UI_Draw_Line(&UI_Graph7.Graphic[0], "008",	UI_Graph_Add,	0, UI_Color_Green, 1,  900,	y03,		940,	y03); //第三行左横线
+//        UI_Draw_Line(&UI_Graph7.Graphic[1], "009",	UI_Graph_Add,	0, UI_Color_Green, 5,  959,	y03,		960,	y03); //第三行中心点
+//        UI_Draw_Line(&UI_Graph7.Graphic[2], "010",	UI_Graph_Add,	0, UI_Color_Green, 1,  980,	y03,		1020,	y03); //第三行右横线
+//        UI_Draw_Line(&UI_Graph7.Graphic[3], "011",	UI_Graph_Add,	0, UI_Color_Green, 1,  930,	y04,		950,	y04); //第四行左横线
+//        UI_Draw_Line(&UI_Graph7.Graphic[4], "012",	UI_Graph_Add,	0, UI_Color_Green, 5,  959,	y04,		960,	y04); //第四行中心点
+//        UI_Draw_Line(&UI_Graph7.Graphic[5], "013",	UI_Graph_Add,	0, UI_Color_Green, 1,  970,	y04,		990,	y04); //第四行右横线
+//        UI_Draw_Line(&UI_Graph7.Graphic[6], "014",	UI_Graph_Add,	0, UI_Color_Green, 1,  960,	y04 - 10,	960,	y04 - 30); //第四行下竖线
+//        UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
+//    }
+//    if(UI_PushUp_Counter % 121 == 0) //静态UI预绘制 小陀螺预警线
+//    {
+//        UI_Draw_Line(&UI_Graph7.Graphic[0],	"101",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	630,	30,		780,	100);
+//        UI_Draw_Line(&UI_Graph7.Graphic[1],	"102",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	780,	100,	930,	100);
+//        UI_Draw_Line(&UI_Graph7.Graphic[2],	"103",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,  990,	100,	1140,	100);
+//        UI_Draw_Line(&UI_Graph7.Graphic[3],	"104",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	1140,	100,	1290,	30);
+//        UI_Draw_Line(&UI_Graph7.Graphic[4],	"105",	UI_Graph_Add,		1,	UI_Color_Yellow,	5,	959,	100,	960,	100);
+//        UI_Draw_Arc	(&UI_Graph7.Graphic[5],	"106",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		180,	590,	15,	15);
+//        UI_Draw_Arc	(&UI_Graph7.Graphic[6],	"107",	UI_Graph_Add,	2,	UI_Color_Green,		0,	360,	5,		180,	690,	15,	15);
+//        UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
+//    }
+    if(UI_PushUp_Counter % 131 == 0) //动态UI预绘制 图形
+    {
+        UI_Draw_Float(&UI_Graph2.Graphic[0],	"201",	UI_Graph_Add,	2,	UI_Color_Main,		22,	3,		3,		1355,	632,	1.000f);   //Pith轴角度
+        UI_Draw_Float(&UI_Graph2.Graphic[1],	"202",	UI_Graph_Add,	2,	UI_Color_Yellow,	20,	1829,	330,	1870,	832,	334.00f);     //电容容量
+        //	UI_Draw_Arc(&UI_Graph2.Graphic[1],"204",UI_Graph_Change,2,UI_Color_Pink,0,360,2,10,10,5,5);
+        UI_PushUp_Graphs(2, &UI_Graph2, get_robot_id());
+    }
+//    if(UI_PushUp_Counter % 141 == 0) //动态UI预绘制 字符串1
+//    {
+//        UI_Draw_String(&UI_String.String, "304", UI_Graph_Add, 2, UI_Color_Main, 18, 8, 3,  38, 600, "Spin");//摩擦轮是否开启
+//        UI_PushUp_String(&UI_String, get_robot_id());
+//    }
+//    if(UI_PushUp_Counter % 151 == 0) //动态UI预绘制 字符串1
+//    {
+//        UI_Draw_String(&UI_String1.String, "305", UI_Graph_Add, 2, UI_Color_Green, 18, 8, 3,  38, 700, "Prcs");//吊射模式指示
+//        UI_PushUp_String(&UI_String1, get_robot_id());
+////		UI_PushUp_String(&UI_String1, get_robot_id());
+//    }
+    //		if(UI_PushUp_Counter % 21 == 0) //动态UI更新 字符串1
+    //		{
+    //			if(UI_fric_is_on == 1)
+    //			{
+    //				if(autoaim_mode==0x02&&autoaim_armor==0x10&&if_predict==0)
+    //				{
+    //					UI_Draw_String(&UI_String.String, "203", UI_Graph_Change, 2, UI_Color_Main,  22, 8+4+9+8, 3,  100, 700, "Fric  ON\nNor\nArm Auto\nPre  NO");
+    //				}
+    //				else if(autoaim_mode==0x02&&autoaim_armor==0x20&&if_predict==0)
+    //				{
+    //					UI_Draw_String(&UI_String.String, "203", UI_Graph_Change, 2, UI_Color_Main,  22, 8+4+9+8, 3,  100, 700, "Fric  ON\nNor\nArm  Big\nPre  NO");
+    //				}
+    //				else if(autoaim_mode==0x02&&autoaim_armor==0x30&&if_predict==0)
+    //				{
+    //					UI_Draw_String(&UI_String.String, "203", UI_Graph_Change, 2, UI_Color_Main,  22, 8+4+9+8, 3,  100, 700, "Fric  ON\nNor\nArm Smal\nPre  NO");
+    //				}
+    //				else if(autoaim_mode==0x02&&autoaim_armor==0x10&&if_predict==1)
+    //				{
+    //					UI_Draw_String(&UI_String.String, "203", UI_Graph_Change, 2, UI_Color_Main,  22, 8+4+9+8, 3,  100, 700, "Fric  ON\nNor\nArm Auto\nPre YES");
+    //				}
+    //				else if(autoaim_mode==0x02&&autoaim_armor==0x20&&if_predict==1)
+    //				{
+    //					UI_Draw_String(&UI_String.String, "203", UI_Graph_Change, 2, UI_Color_Main,  22, 8+4+9+8, 3,  100, 700, "Fric  ON\nNor\nArm  Big\nPre YES");
+    //				}
+    //				else if(autoaim_mode==0x02&&autoaim_armor==0x30&&if_predict==1)
+    //				{
+    //					UI_Draw_String(&UI_String.String, "203", UI_Graph_Change, 2, UI_Color_Main,  22, 8+4+9+8, 3,  100, 700, "Fric  ON\nNor\nArm Smal\nPre YES");
+    //				}
+    //
+    //				else if(autoaim_mode==0x03)
+    //				{
+    //					UI_Draw_String(&UI_String.String, "203", UI_Graph_Change, 2, UI_Color_Main,  22, 8+4+9+8, 3,  100, 700, "Fric  ON\nXFu\n        \n       ");
+    //				}
+    //				else if(autoaim_mode==0x04)
+    //				{
+    //					UI_Draw_String(&UI_String.String, "203", UI_Graph_Change, 2, UI_Color_Main,  22, 8+4+9+8, 3,  100, 700, "Fric  ON\nDFu\n        \n       ");
+    //				}
+    //			}
+    //			//if(UI_fric_is_on == 0) UI_Draw_String(&UI_String.String, "203", UI_Graph_Change, 2, UI_Color_Black, 22, 8+4+9+8, 3,  100, 700, "Fric OFF\n   \n        \n       ");
+    //			UI_PushUp_String(&UI_String, get_robot_id());
+    //		}
+    //if(UI_PushUp_Counter % 351 == 0)
+    //{UI_Draw_String(&UI_String1.String, "305", UI_Graph_Add, 2, UI_Color_Green, 22, 12, 3,  10, 700, "vision_mode");//摩擦轮是否开启
+    //		//UI_Draw_String(&UI_String1.String, "305", UI_Graph_Add, 2,  UI_Color_Yellow,  22, 11, 3,10,500,"vision_mode");
+    //
+    //UI_PushUp_String(&UI_String1, get_robot_id());}
+    if(UI_PushUp_Counter % 50 == 0)  //动态UI更新 图形
+    {
+        /* Pitch轴当前角度 */
+        UI_Draw_Float(&UI_Graph2.Graphic[0], "201", UI_Graph_Change, 2, UI_Color_Main, 22, 3, 4, 1000, 632, UI_PushUp_Counter);
+
+        /* 超级电容容量 */
+        UI_Capacitance = Max(UI_Capacitance, 30);
+        Capacitance_X  = 1870.0f - 4.1f * UI_Capacitance;
+        if(50 < UI_Capacitance && UI_Capacitance <= 100) UI_Draw_Line(&UI_Graph2.Graphic[1], "202", UI_Graph_Change, 2, UI_Color_Green, 20, Capacitance_X, 334, 1870, 334);
+        if(35 < UI_Capacitance && UI_Capacitance <=  50) UI_Draw_Line(&UI_Graph2.Graphic[1], "202", UI_Graph_Change, 2, UI_Color_Yellow, 20, Capacitance_X, 334, 1870, 334);
+        if(0  < UI_Capacitance && UI_Capacitance <=  35) UI_Draw_Line(&UI_Graph2.Graphic[1], "202", UI_Graph_Change, 2, UI_Color_Orange, 20, Capacitance_X, 334, 1870, 334);
+
+        UI_PushUp_Graphs(2, &UI_Graph2, get_robot_id());
+    }
 }
-
-void UI_Display(int MS_Cnt)
-{
-	
-	//UI_draw_Float("092",UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/4,shoot_data_t.bullet_speed);
-	//参考线
-
-		//            name,  Operate,       Layer, Color,     Size, Digit, Width, Start_x,     Start_y,            Float
-	pich_angle = 1.23f;
-	UI_draw_Float("090", UI_Graph_Change, 1, UI_Color_Yellow, 20, 3, 2,SCREEN_LENGTH/3		, SCREEN_WIDTH/4	, supercap_volt);
-	UI_draw_Float("091", UI_Graph_Change, 1, UI_Color_Yellow, 2, 3, 2,SCREEN_LENGTH*2/3	, SCREEN_WIDTH/4	, pich_angle);
-	UI_draw_Float("092", UI_Graph_Change, 1, UI_Color_Yellow, 28, 1, 2,SCREEN_LENGTH*2/3+100, SCREEN_WIDTH/2+180, mode_now);
-	UI_draw_Float("092", UI_Graph_ADD,1,UI_Color_Yellow,20,3,2,SCREEN_LENGTH*2/3+100,SCREEN_WIDTH/4,shoot_data_t.bullet_speed);
-	
-	UI_draw_Line("080",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
-	UI_draw_Line("081",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-34,SCREEN_WIDTH/2-170,SCREEN_LENGTH/2+34,SCREEN_WIDTH/2-170);
-	UI_draw_Line("082",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-40,SCREEN_WIDTH/2-140,SCREEN_LENGTH/2+40,SCREEN_WIDTH/2-140);
-	UI_draw_Line("083",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-30,SCREEN_WIDTH/2-110,SCREEN_LENGTH/2+30,SCREEN_WIDTH/2-110);
-	UI_draw_Line("085",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-27,SCREEN_WIDTH/2-80,SCREEN_LENGTH/2+27,SCREEN_WIDTH/2-80);
-	UI_draw_Line("084",UI_Graph_ADD,1,UI_Color_Yellow,1,SCREEN_LENGTH/2,SCREEN_WIDTH/2-10,SCREEN_LENGTH/2,SCREEN_WIDTH/2-200);
-
-	UI_draw_Line("080",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
-	UI_draw_Line("080",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-50,SCREEN_WIDTH/2-200,SCREEN_LENGTH/2+50,SCREEN_WIDTH/2-200);
-	UI_draw_Line("081",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-34,SCREEN_WIDTH/2-170,SCREEN_LENGTH/2+34,SCREEN_WIDTH/2-170);
-	UI_draw_Line("082",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-40,SCREEN_WIDTH/2-140,SCREEN_LENGTH/2+40,SCREEN_WIDTH/2-140);
-	UI_draw_Line("083",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-30,SCREEN_WIDTH/2-110,SCREEN_LENGTH/2+30,SCREEN_WIDTH/2-110);
-	UI_draw_Line("085",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2-27,SCREEN_WIDTH/2-80,SCREEN_LENGTH/2+27,SCREEN_WIDTH/2-80);
-	UI_draw_Line("084",UI_Graph_Change,1,UI_Color_Yellow,1,SCREEN_LENGTH/2,SCREEN_WIDTH/2-10,SCREEN_LENGTH/2,SCREEN_WIDTH/2-200);
-
-}
-
-//void UI_graphic_init(uint16_t sender_ID,uint16_t receiver_ID)
-//{
-//	ext_student_interactive_header_data_graphic.data_cmd_id=0x0104;//绘制七个图形（内容ID，查询裁判系统手册）
-////	get_UI_id(&sender_ID,&receiver_ID);
-
-//		ext_student_interactive_header_data_graphic.sender_ID=sender_ID;//发送者ID，机器人对应ID，此处为蓝方英雄
-//		ext_student_interactive_header_data_graphic.receiver_ID=receiver_ID;//接收者ID，操作手客户端ID，此处为蓝方英雄操作手客户端
-//	//自定义图像数据
-//	
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].graphic_name[0] = 97;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].graphic_name[1] = 97;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].graphic_name[2] = 0;//图形名
-//	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].operate_tpye=1;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].graphic_tpye=0;//图形类型，0为直线，其他的查看用户手册
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].layer=1;//图层数
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].color=1;//颜色
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].start_angle=0;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].end_angle=0;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].width=1;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].start_x=SCREEN_LENGTH/2;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].start_y=SCREEN_WIDTH/2;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].end_x=SCREEN_LENGTH/2;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].end_y=SCREEN_WIDTH/2-300;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[0].radius=0;
-//	
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].graphic_name[0] = 10;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].graphic_name[1] = 10;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].graphic_name[2] = 10;//图形名
-//	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].operate_tpye=1;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].graphic_tpye=5;//图形类型，0为直线，其他的查看用户手册
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].layer=1;//图层数
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].color=1;//颜色
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].start_angle=20;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].end_angle=3;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].width=2;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].start_x=SCREEN_LENGTH/3;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].start_y=SCREEN_WIDTH/4;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].radius=(int32_t)(supercap_volt*1000);
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].end_x=(int32_t)(supercap_volt*1000)>>10;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].end_y=(int32_t)(supercap_volt*1000)>>21;
-
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].graphic_name[0] = 12;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].graphic_name[1] = 13;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].graphic_name[2] = 14;//图形名
-//	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].operate_tpye=1;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].graphic_tpye=6;//图形类型，0为直线，其他的查看用户手册
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].layer=1;//图层数
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].color=1;//颜色
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].start_angle=20;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].end_angle=0;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].width=2;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].start_x=SCREEN_LENGTH*2/3;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].start_y=SCREEN_WIDTH/4;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].radius=(int32_t)(supercap_per);
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].end_x=(int32_t)(supercap_per)>>10;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].end_y=(int32_t)(supercap_per)>>21;
-
-//	referee_data_pack_handle(0xA5,0x0301, (uint8_t *)&ext_student_interactive_header_data_graphic, sizeof(ext_student_interactive_header_data_graphic));	
-
-
-//}
-
-//void UI_graphic_draw_data(uint16_t sender_ID,uint16_t receiver_ID)
-//{
-//	ext_student_interactive_header_data_graphic.data_cmd_id=0x0104;//绘制七个图形（内容ID，查询裁判系统手册）
-////	get_UI_id(&sender_ID,&receiver_ID);
-
-//		ext_student_interactive_header_data_graphic.sender_ID=sender_ID;//发送者ID，机器人对应ID，此处为蓝方英雄
-//		ext_student_interactive_header_data_graphic.receiver_ID=receiver_ID;//接收者ID，操作手客户端ID，此处为蓝方英雄操作手客户端
-//	//自定义图像数据
-//		
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].graphic_name[0] = 10;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].graphic_name[1] = 10;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].graphic_name[2] = 10;//图形名
-//	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].operate_tpye=2;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].graphic_tpye=5;//图形类型，0为直线，其他的查看用户手册
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].layer=1;//图层数
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].color=1;//颜色
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].start_angle=20;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].end_angle=3;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].width=2;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].start_x=SCREEN_LENGTH/3;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].start_y=SCREEN_WIDTH/4;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].radius=(int32_t)(supercap_volt*1000);
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].end_x=(int32_t)(supercap_volt*1000)>>10;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[1].end_y=(int32_t)(supercap_volt*1000)>>21;
-
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].graphic_name[0] = 12;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].graphic_name[1] = 13;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].graphic_name[2] = 14;//图形名
-//	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].operate_tpye=2;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].graphic_tpye=6;//图形类型，0为直线，其他的查看用户手册
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].layer=1;//图层数
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].color=1;//颜色
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].start_angle=20;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].end_angle=0;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].width=2;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].start_x=SCREEN_LENGTH*2/3;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].start_y=SCREEN_WIDTH/4;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].radius=(int32_t)(supercap_per);
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].end_x=(int32_t)(supercap_per)>>10;
-//	ext_student_interactive_header_data_graphic.ext_client_custom_graphic_seven.grapic_data_struct[2].end_y=(int32_t)(supercap_per)>>21;
-
-//	referee_data_pack_handle(0xA5,0x0301, (uint8_t *)&ext_student_interactive_header_data_graphic, sizeof(ext_student_interactive_header_data_graphic));	
-//}
-
-//void UI_character_draw_data(uint16_t sender_ID,uint16_t receiver_ID)
-//{
-//	ext_student_interactive_header_data_character.data_cmd_id=0x0110;//绘制字符（内容ID，查询裁判系统手册）
-
-//		ext_student_interactive_header_data_character.sender_ID=sender_ID;//发送者ID，机器人对应ID，此处为蓝方英雄
-//		ext_student_interactive_header_data_character.receiver_ID=receiver_ID;//接收者ID，操作手客户端ID，此处为蓝方英雄操作手客户端
-//	//自定义图像数据
-//	
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.graphic_name[0] = 97;
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.graphic_name[1] = 97;
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.graphic_name[2] = 0;//图形名
-//	//上面三个字节代表的是图形名，用于图形索引，可自行定义
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.operate_tpye=1;//图形操作，0：空操作；1：增加；2：修改；3：删除；
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.graphic_tpye=0;//图形类型，0为直线，其他的查看用户手册
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.layer=1;//图层数
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.color=1;//颜色
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.start_angle=0;
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.end_angle=0;
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.width=1;
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.start_x=SCREEN_LENGTH/2;
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.start_y=SCREEN_WIDTH/2;
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.end_x=SCREEN_LENGTH/2;
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.end_y=SCREEN_WIDTH/2-300;
-//	ext_student_interactive_header_data_character.ext_client_custom_character.grapic_data_struct.radius=0;
-//		
-//	referee_data_pack_handle(0xA5,0x0301, (uint8_t *)&ext_student_interactive_header_data_character, sizeof(ext_student_interactive_header_data_character));
-//}
-
 

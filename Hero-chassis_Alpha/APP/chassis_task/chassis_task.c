@@ -50,9 +50,9 @@ void CHASSIS_TASK()//TIM3定时器中断控制战车（已经过宏定义）
 	{
 		//UartTX_To_BetaBoard_Yaw_Control(Yaw_Control_Current_Mode, gimbal_y.given_current);//yaw轴旋转任务
 	}	
-	if(MS_Count%10==0)
+	if(MS_Count%3==0)
 	{
-		send_gimbal_data_2();
+		referee_usart_task();
 	}	
 
 	if (MS_Count%10==0)
@@ -71,9 +71,9 @@ void CHASSIS_TASK()//TIM3定时器中断控制战车（已经过宏定义）
 	{
 		Get_Encoder_Position(4);
 	} 	
-	if (MS_Count%201==0)
-		UI_Display(MS_Count);
-	if (MS_Count % 10 == 0)
+//	if (MS_Count%201==0)
+//		UI_Display();
+	if (MS_Count % 100 == 0)
 		supercap();
 	if(MS_Count>=1000)			//清除计数标志    1s
 	{
