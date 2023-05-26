@@ -209,9 +209,9 @@ void Gimbal_Task(int S_Cnt, int MS_Cnt)
     //Pitch角度限制，防止云台角度过阈破坏机械结构
 	if (Gimbal_Precision_Mode == 0)
 	{
-		if(gimbal_p.IMU_actual_angle <= -20.f)
+		if(gimbal_p.IMU_actual_angle <= -22.f)
 		{
-			gimbal_p.target_angle = -20.f;
+			gimbal_p.target_angle = -22.f;
 			gimbal_p.target_speed = 0;
 		}
 		if(gimbal_p.IMU_actual_angle >= 29)
@@ -222,7 +222,7 @@ void Gimbal_Task(int S_Cnt, int MS_Cnt)
 	}
 	else if (Gimbal_Precision_Mode)
 	{
-		if(gimbal_p.IMU_actual_angle <= -20.f || gimbal_p.IMU_actual_angle >= 29)
+		if(gimbal_p.IMU_actual_angle <= -22.f || gimbal_p.IMU_actual_angle >= 29)
 			Gimbal_Precision_Mode = 0;
 		//初次切换标志
 		if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1) Gimbal_Precision_Activated_Flag = 1;

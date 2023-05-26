@@ -12,10 +12,12 @@ shoot_task_t rc_shoot;
 float TriggerSpeed[5] 	= {3.0f,			0.1f,			0.1f,				8000,			500};  //拨弹轮速度环
 float TriggerAngle[5] 	= {0.4f,			0.0f,			0.00015f,		4000,			0.0f};  //拨弹轮角度环
 
-float FricLeftSpeed[5] 	= {18.0f,			0.1f,			0.0f,				15000.0f,			4000.0f};  //左摩擦轮速度环
-float FricRightSpeed[5] = {18.0f,			0.1f,			0.0f,				15000.0f,			4000.0f};  //右摩擦轮速度环
-
+//float FricLeftSpeed[5]	= {18.0f,			0.05f,			0.0f,				15000.0f,			4000.0f};  //适用训练弹丸的左摩擦轮速度环
+//float FricRightSpeed[5]	= {18.0f,			0.05f,			0.0f,				15000.0f,			4000.0f};  //适用训练弹丸的右摩擦轮速度环
+float FricLeftSpeed[5]	= {25.5f,			0.2f,			0.0f,				15000.0f,			4000.0f};  //适用比赛的左摩擦轮速度环
+float FricRightSpeed[5] = {25.5f,			0.2f,			0.0f,				15000.0f,			4000.0f};  //适用比赛的右摩擦轮速度环
 //摩擦轮PID计算
+int LR_Error;
 static void fric_pid(void);
 static int16_t speed_counter=0;
 extern int Shoot_Flag_For_Buzzer;
@@ -58,13 +60,16 @@ void shoot_init(void)
 
 static void fric_pid(void)
 {
+	LR_Error = rc_shoot.left_fric.actual_speed + rc_shoot.right_fric.actual_speed;
 	PID_Calc(&rc_shoot.left_fric.speed_pid,rc_shoot.left_fric.target_speed,rc_shoot.left_fric.actual_speed);
-	
 	rc_shoot.left_fric.set_currunt=rc_shoot.left_fric.speed_pid.out;
+//	if (abs(rc_shoot.left_fric.target_speed-rc_shoot.left_fric.actual_speed)>500)
+//	rc_shoot.left_fric.set_currunt = -15000;
 	
 	PID_Calc(&rc_shoot.right_fric.speed_pid,rc_shoot.right_fric.target_speed,rc_shoot.right_fric.actual_speed);
-	
 	rc_shoot.right_fric.set_currunt=rc_shoot.right_fric.speed_pid.out;
+//	if (abs(rc_shoot.right_fric.target_speed-rc_shoot.right_fric.actual_speed)>500)
+//	rc_shoot.right_fric.set_currunt = 15000;
 }
 
 void Trigger_Motor_Callback(trigger_t *motor,uint16_t angle, int16_t speed)

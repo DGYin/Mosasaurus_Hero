@@ -35,7 +35,7 @@
 #define CHASSIS_NORMAL           3    //正常模式                                  左中位
 #define CHASSIS_SPIN             2    //小陀螺模式                                    左低位
 
-#define GIMBAL_HEAD_ANGLE  65 
+#define GIMBAL_HEAD_ANGLE  147 
 
 #define POWER_LIMIT         80.0f
 #define WARNING_POWER       40.0f   

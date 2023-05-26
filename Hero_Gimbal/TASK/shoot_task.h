@@ -5,7 +5,8 @@
 
 #define SHOOT_NUM 1
 
-#define SHOOT_FRIC_HIGH_SPEED 5900
+#define SHOOT_FRIC_HIGH_SPEED 7000	//适用比赛弹丸的16m/s
+//#define SHOOT_FRIC_HIGH_SPEED 5900 //适用训练弹丸的16m/s
 #define SHOOT_FRIC_LOW_SPEED 1600
 #define SHOOT_FRIC_MIDDLE_SPEED 1600
 

@@ -82,10 +82,10 @@ static void trigger_pid(void)//²¦µ¯ÂÖpid¸³Öµ¼ÆËã
 {
 //	if (abs(trigger.Target_Angle - trigger.total_angle) < 10000.f )
 //		trigger.angle_pid.max_out = 1400;
-	 if (abs(trigger.Target_Angle - trigger.total_angle) < 30000.f )
+	 if (abs(trigger.Target_Angle - trigger.total_angle) < 60000.f )
 		trigger.angle_pid.max_out = 300;
 	else 
-		trigger.angle_pid.max_out = 1400;
+		trigger.angle_pid.max_out = 1500;
 	apid_vpid_realize(&trigger.angle_pid,trigger.Target_Angle,trigger.total_angle);
 	
 	trigger.Target_Speed = trigger.angle_pid.out;

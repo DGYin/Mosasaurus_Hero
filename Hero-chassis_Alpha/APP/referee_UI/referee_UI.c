@@ -463,36 +463,38 @@ uint16_t UI_PushUp_Counter = 0, UI_Init_Counter = 0;
 int Referee_UI_Init_Flag = 0;
 void Referee_UI_Init(void)
 {
-	
 	UI_Init_Counter++; //计时用
+	if (UI_Init_Counter % 3600 == 0) //定时重启
+		Referee_UI_Init_Flag = 0;
+	
 	//绘制不变的线
-	if(UI_Init_Counter % 110 == 0)//定时执行
+	if(UI_Init_Counter % 120 == 0)//定时执行
     {
 		switch(Referee_UI_Init_Flag)//初始化UI任务列表
 		{
 			//静态UI预绘制1
 			case 0:
 				//中央标尺绘制1
-				UI_Draw_Line(&UI_Graph7.Graphic[0], "001", UI_Graph_Add, 0, UI_Color_Green, 1,	840,	y01,		920,	y01); //第一行左横线
-				UI_Draw_Line(&UI_Graph7.Graphic[1], "002", UI_Graph_Add, 0, UI_Color_Green, 1,  950,	y01,		970,	y01); //第一行十字横
-				UI_Draw_Line(&UI_Graph7.Graphic[2], "003", UI_Graph_Add, 0, UI_Color_Green, 1, 	1000,	y01,		1080,	y01); //第一行右横线
-				UI_Draw_Line(&UI_Graph7.Graphic[3], "004", UI_Graph_Add, 0, UI_Color_Green, 1,  960,	y01 - 10,	960,	y01 + 10); //第一行十字竖
-				UI_Draw_Line(&UI_Graph7.Graphic[4], "005", UI_Graph_Add, 0, UI_Color_Green, 1,  870,	y02,		930,	y02); //第二行左横线
-				UI_Draw_Line(&UI_Graph7.Graphic[5], "006", UI_Graph_Add, 0, UI_Color_Green, 5,  959,	y02,		960,	y02); //第二行中心点
-				UI_Draw_Line(&UI_Graph7.Graphic[6], "007", UI_Graph_Add, 0, UI_Color_Green, 1,  990,	y02,		1050,	y02); //第二行右横线
+				UI_Draw_Line(&UI_Graph7.Graphic[0], "001", UI_Graph_Add, 0, UI_Color_Green, 1,	0,	0,		0,	0); //第一行左横线
+				UI_Draw_Line(&UI_Graph7.Graphic[1], "002", UI_Graph_Add, 0, UI_Color_Green, 1,  0,	0,		0,	0); //第一行十字横
+				UI_Draw_Line(&UI_Graph7.Graphic[2], "003", UI_Graph_Add, 0, UI_Color_Green, 1, 	0,	0,		0,	0); //第一行右横线
+				UI_Draw_Line(&UI_Graph7.Graphic[3], "004", UI_Graph_Add, 0, UI_Color_Green, 1,  0,	0,		0,	0); //第一行十字竖
+				UI_Draw_Line(&UI_Graph7.Graphic[4], "005", UI_Graph_Add, 0, UI_Color_Green, 1,  0,	0,		0,	0); //第二行左横线
+				UI_Draw_Line(&UI_Graph7.Graphic[5], "006", UI_Graph_Add, 0, UI_Color_Green, 5,  0,	0,		0,	0); //第二行中心点
+				UI_Draw_Line(&UI_Graph7.Graphic[6], "007", UI_Graph_Add, 0, UI_Color_Green, 1,  0,	0,		0,	0); //第二行右横线
 				UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
 				Referee_UI_Init_Flag++;
 				break;
 			//静态UI预绘制2
 			case 1:
 				//中央标尺绘制2
-				UI_Draw_Line(&UI_Graph7.Graphic[0], "008",	UI_Graph_Add,	0, UI_Color_Green, 1,  900,	y03,		940,	y03); //第三行左横线
-				UI_Draw_Line(&UI_Graph7.Graphic[1], "009",	UI_Graph_Add,	0, UI_Color_Green, 5,  959,	y03,		960,	y03); //第三行中心点
-				UI_Draw_Line(&UI_Graph7.Graphic[2], "010",	UI_Graph_Add,	0, UI_Color_Green, 1,  980,	y03,		1020,	y03); //第三行右横线
-				UI_Draw_Line(&UI_Graph7.Graphic[3], "011",	UI_Graph_Add,	0, UI_Color_Green, 1,  930,	y04,		950,	y04); //第四行左横线
-				UI_Draw_Line(&UI_Graph7.Graphic[4], "012",	UI_Graph_Add,	0, UI_Color_Green, 5,  959,	y04,		960,	y04); //第四行中心点
-				UI_Draw_Line(&UI_Graph7.Graphic[5], "013",	UI_Graph_Add,	0, UI_Color_Green, 1,  970,	y04,		990,	y04); //第四行右横线
-				UI_Draw_Line(&UI_Graph7.Graphic[6], "014",	UI_Graph_Add,	0, UI_Color_Green, 1,  960,	y04 - 10,	960,	y04 - 30); //第四行下竖线
+				UI_Draw_Line(&UI_Graph7.Graphic[0], "008",	UI_Graph_Add,	0,	UI_Color_Yellow, 1,0		,0		,0		,0); //第三行左横线
+				UI_Draw_Line(&UI_Graph7.Graphic[1], "009",	UI_Graph_Add,	0,	UI_Color_Yellow, 5,0		,0		,0		,0); //第三行中心点
+				UI_Draw_Line(&UI_Graph7.Graphic[2], "010",	UI_Graph_Add,	0,	UI_Color_Yellow, 1,0		,0		,0		,0); //第三行右横线
+				UI_Draw_Line(&UI_Graph7.Graphic[3], "011",	UI_Graph_Add,	0,	UI_Color_Yellow, 1,0		,0		,0		,0); //第四行左横线
+				UI_Draw_Line(&UI_Graph7.Graphic[4], "012",	UI_Graph_Add,	0,	UI_Color_Yellow, 1,0		,0		,0		,0); //第四行中心点
+				UI_Draw_Line(&UI_Graph7.Graphic[5], "013",	UI_Graph_Add,	0,	UI_Color_Yellow, 2,SXC-10	,309	,SXC+10	,309); //第四行右横线
+				UI_Draw_Line(&UI_Graph7.Graphic[6], "014",	UI_Graph_Add,	0,	UI_Color_Yellow, 1,SXC		,250	,SXC	,500); //中心竖线
 				UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
 				Referee_UI_Init_Flag++;
 				break;
@@ -558,17 +560,16 @@ void referee_usart_task(void const *argument)
 //        UI_Draw_Line(&UI_Graph7.Graphic[6], "014",	UI_Graph_Add,	0, UI_Color_Green, 1,  960,	y04 - 10,	960,	y04 - 30); //第四行下竖线
 //        UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
 //    }
-//    if(UI_PushUp_Counter % 121 == 0) //静态UI预绘制 小陀螺预警线
-//    {
-//        UI_Draw_Line(&UI_Graph7.Graphic[0],	"101",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	630,	30,		780,	100);
-//        UI_Draw_Line(&UI_Graph7.Graphic[1],	"102",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	780,	100,	930,	100);
-//        UI_Draw_Line(&UI_Graph7.Graphic[2],	"103",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,  990,	100,	1140,	100);
-//        UI_Draw_Line(&UI_Graph7.Graphic[3],	"104",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	1140,	100,	1290,	30);
-//        UI_Draw_Line(&UI_Graph7.Graphic[4],	"105",	UI_Graph_Add,		1,	UI_Color_Yellow,	5,	959,	100,	960,	100);
-//        UI_Draw_Arc	(&UI_Graph7.Graphic[5],	"106",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		180,	590,	15,	15);
-//        UI_Draw_Arc	(&UI_Graph7.Graphic[6],	"107",	UI_Graph_Add,	2,	UI_Color_Green,		0,	360,	5,		180,	690,	15,	15);
-//        UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
-//    }
+    if(UI_PushUp_Counter % 121 == 0) //静态UI 模式色环
+    {
+		if (chassis_control_order.Precision_Mode == 0)
+				UI_Draw_Arc	(&UI_Graph7.Graphic[5],	"106",	UI_Graph_Change,	2,	UI_Color_Pink,		0,	360,	5,		180,	660,	15,	15);//吊射模式色环
+		else 	UI_Draw_Arc	(&UI_Graph7.Graphic[5],	"106",	UI_Graph_Change,	2,	UI_Color_Green,		0,	360,	10,		180,	660,	15,	15);//吊射模式色环
+		if (chassis_control_order.chassis_mode == CHASSIS_SPIN)
+				UI_Draw_Arc	(&UI_Graph7.Graphic[6],	"107",	UI_Graph_Change,	2,	UI_Color_Green,		0,	360,	10,		180,	590,	15,	15);//陀螺模式色环
+        else 	UI_Draw_Arc	(&UI_Graph7.Graphic[6],	"107",	UI_Graph_Change,	2,	UI_Color_Pink,		0,	360,	5,		180,	590,	15,	15);//陀螺模式色环
+		UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
+    }
     if(UI_PushUp_Counter % 131 == 0) //动态UI预绘制 图形
     {
         UI_Draw_Float(&UI_Graph2.Graphic[0],	"201",	UI_Graph_Add,	2,	UI_Color_Main,		22,	3,		3,		1355,	632,	1.000f);   //Pith轴角度
@@ -576,17 +577,21 @@ void referee_usart_task(void const *argument)
         //	UI_Draw_Arc(&UI_Graph2.Graphic[1],"204",UI_Graph_Change,2,UI_Color_Pink,0,360,2,10,10,5,5);
         UI_PushUp_Graphs(2, &UI_Graph2, get_robot_id());
     }
-//    if(UI_PushUp_Counter % 141 == 0) //动态UI预绘制 字符串1
-//    {
-//        UI_Draw_String(&UI_String.String, "304", UI_Graph_Add, 2, UI_Color_Main, 18, 8, 3,  38, 600, "Spin");//摩擦轮是否开启
-//        UI_PushUp_String(&UI_String, get_robot_id());
-//    }
-//    if(UI_PushUp_Counter % 151 == 0) //动态UI预绘制 字符串1
-//    {
-//        UI_Draw_String(&UI_String1.String, "305", UI_Graph_Add, 2, UI_Color_Green, 18, 8, 3,  38, 700, "Prcs");//吊射模式指示
-//        UI_PushUp_String(&UI_String1, get_robot_id());
-////		UI_PushUp_String(&UI_String1, get_robot_id());
-//    }
+	
+    if(UI_PushUp_Counter % 141 == 0) //动态UI绘制 小陀螺模式
+    {
+		if (chassis_control_order.chassis_mode == CHASSIS_SPIN)
+			UI_Draw_String(&UI_String.String, "304", UI_Graph_Change, 2, UI_Color_Green, 18, 8, 4,  80, 600, "Spin");//陀螺模式指示，粉色为关，绿色为开
+        else UI_Draw_String(&UI_String.String, "304", UI_Graph_Change, 2, UI_Color_Pink, 18, 8, 2,  80, 600, "Spin");//陀螺模式指示，粉色为关，绿色为开
+		UI_PushUp_String(&UI_String, get_robot_id());
+    }
+    if(UI_PushUp_Counter % 151 == 0) //动态UI绘制 吊射模式
+    {
+		if (chassis_control_order.Precision_Mode == 1)
+			UI_Draw_String(&UI_String1.String, "305", UI_Graph_Change, 2, UI_Color_Green, 18, 8, 4,  80, 670, "Prcs");//吊射模式指示，粉色为关，绿色为开
+		else UI_Draw_String(&UI_String1.String, "305", UI_Graph_Change, 2, UI_Color_Pink, 18, 8, 2,  80, 670, "Prcs");//吊射模式指示，粉色为关，绿色为开
+        UI_PushUp_String(&UI_String1, get_robot_id());
+    }
     //		if(UI_PushUp_Counter % 21 == 0) //动态UI更新 字符串1
     //		{
     //			if(UI_fric_is_on == 1)
@@ -636,7 +641,14 @@ void referee_usart_task(void const *argument)
     if(UI_PushUp_Counter % 50 == 0)  //动态UI更新 图形
     {
         /* Pitch轴当前角度 */
-        UI_Draw_Float(&UI_Graph2.Graphic[0], "201", UI_Graph_Change, 2, UI_Color_Main, 22, 3, 4, 1000, 632, UI_PushUp_Counter);
+		extern float pich_angle;
+		int IntIze_Pitch_Angle;
+		IntIze_Pitch_Angle = pich_angle*100;
+		if (IntIze_Pitch_Angle>-1900 && IntIze_Pitch_Angle<2800) //未触发角度保护
+			UI_Draw_Float(&UI_Graph2.Graphic[0], "201", UI_Graph_Change, 2, UI_Color_Green, 22, 3, 3, 1000, 632, pich_angle);
+		else if (IntIze_Pitch_Angle>-1950 && IntIze_Pitch_Angle<2850)
+			UI_Draw_Float(&UI_Graph2.Graphic[0], "201", UI_Graph_Change, 2, UI_Color_Yellow, 22, 3, 4, 1000, 632, pich_angle);
+		else UI_Draw_Float(&UI_Graph2.Graphic[0], "201", UI_Graph_Change, 2, UI_Color_Purple, 22, 5, 5, 1000, 632, pich_angle);
 
         /* 超级电容容量 */
         UI_Capacitance = Max(UI_Capacitance, 30);

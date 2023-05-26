@@ -68,7 +68,8 @@
 #define SCREEN_WIDTH 1080
 #define SCREEN_LENGTH 1920
 
-
+#define SXC	967 //图传视角X方向在屏幕的中心位置
+#define SYC	0	//图传视角y方向在屏幕的中心位置
 extern int16_t vision_mode;
 void UI_Display(void);
 void referee_usart_task();

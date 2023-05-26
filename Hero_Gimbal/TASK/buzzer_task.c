@@ -30,6 +30,7 @@ void Shoot_Beep(int S_Cnt, int MS_Cnt, int Shoot_Flag)
 	if (Total_MS - Shoot_Beep_Start_MS == 400)
 		buzzer_off();
 }
+
 void Zero_Force_Beep(int S_Cnt, int MS_Cnt)
 {
 	int psc = 3;
