@@ -272,48 +272,46 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)//CAN接收函数
 				chassis_control_order.chassis_mode		=	(uint8_t)gdata[0];
 				chassis_control_order.Precision_Mode 	= 	(uint8_t)gdata[1];
 				chassis_control_order.last_chassis_mode=chassis_control_order.chassis_mode;
-			break;		
+				break;		
 			case GIMBAL_CONTROL_ID: //遥控值接收
 				chassis_control_order.vx_set=(int16_t)((gdata[0]<<8)|gdata[1]); 
 				chassis_control_order.vy_set=(int16_t)((gdata[2]<<8)|gdata[3]); 
 				chassis_control_order.wz_set=(int16_t)((gdata[4]<<8)|gdata[5]);	
-			break;	
-			case TRIGGER_CONTROL_ID: //是否发射
-				if(gdata[0]==1) 
-				{
-					UartTX_trigger(); //向Beta板发送发射指令
-					shoot_flag=1;
-					shoot_angle_clc();
-					gdata[0]=0;
-				}
-			break;		
+				break;	
+			case Chassis_Shoot_Task_Rx_ID: //是否发射
+				extern int Shoot_Num, Fric_State;
+				Fric_State = gdata[1];
+				Shoot_Num = gdata[2];
+				break;		
 			case YAW_ID:
 				yaw_can_rx.lastangle = yaw_can_rx.angle;
 				yaw_can_rx.angle = (int16_t)((gdata[0]<<8)|gdata[1]);
 				yaw_can_rx.speed = (int16_t)((gdata[2]<<8)|gdata[3]);
 				Yaw_Angle_Process();
-			break;
+				break;
 			case UI_ID:  //UI接收
 				pich_angle=(int16_t)((gdata[0]<<8)|gdata[1]);
 				pich_angle=(float)pich_angle/100.0f;
 				mode_now=(int16_t)((gdata[2]<<8)|gdata[3]);
 				mode_now=(float)mode_now;
+				extern int Pitch_Tempreture;
+				Pitch_Tempreture = (int16_t)((gdata[4]<<8)|gdata[5]);
 				// 1 随动 2 f 3 小陀螺
 //				if(mode_now==1) {M_DAta[0]='A';M_DAta[1]='A';}
 //				if(mode_now==2) {M_DAta[0]='F';M_DAta[1]='F';}
 //				if(mode_now==3) {M_DAta[0]='T';M_DAta[1]='T';}
-			break;
+				break;
 			//编码器数据接收
 			case Briter_Encoder1_ID:
 				Encoder_Data_Process(rxdata, &Briter_Encoder1,&Chassis_MotorA);              
-			break;			
+				break;			
 			case Briter_Encoder3_ID:
 				Encoder_Data_Process(rxdata, &Briter_Encoder3,&Chassis_MotorC);              
-			break;     
+				break;     
 			//Yaw换向Flag
 			case CAN_Yaw_Invert_Flag_Trans_ID:
 				gimbal_y.Invert_Flag = rxdata[0];
-			break;
+				break;
 		}
 	}
 }

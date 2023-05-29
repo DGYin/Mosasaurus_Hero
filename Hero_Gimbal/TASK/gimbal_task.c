@@ -42,14 +42,14 @@ GIMBAL_t gimbal_y, gimbal_p;
 GIMBAL_MODE_t gimbal_set_mode;
 
 //以下数组中每一位分别对应	   KP、		KI、	KD、  MAX_OUT、 MAX_IOUT、deadband
-float YawGyroPid[6] 		= {1.0f,	0.0f,	0.0f, 500.0f,   0.0f,   0.0f};  //imu角度环
-float YawEncondePid[5] 		= {30.0f,	50.0f,	0.0f, 500.0f,   0.0f};  	//编码器角度环
+float YawGyroPid[6] 		= {1.0f,	0.2f,	0.1f, 500.0f,   0.0f,   0.0f};	//Yaw imu角度环
+float YawEncondePid[6] 		= {25.0f,	1.0f,	0.1f, 500.0f,   100.0f,	0.005};	//Yaw 编码器角度环
 
 float YawGyroPIDSpeed[5]    = {3000.0f,	70.0f,	0.0f, 15000.0f,	7500.0f};	//imu速度环
 float YawEncondePidSpeed[5] = {170.0f,	0.2f,	0.0f, 15000.0f,	7500.0f};   //编码器速度环
 float YawSpeedPid[5] 		= {2100.0f,	300.0f,	0.0f, 13000.0f,	7000.0f};     //速度环int test_set_speed = 10;
 
-float PitchGyroPid[6] 		  = {20.f,		120.0f,			0.0f,		300.0f,			0.0f,	0.03f};  	//imu角度环
+float PitchGyroPid[6] 		  = {20.f,		50.0f,			0.0f,		240.0f,			0.0f,	0.07f};  	//imu角度环
 float PitchEncondePid[6] 	  = {0.1f,		0.0f,			0.0f,		10.0f,		0.0f,		0.0f}; //编码器角度环
 float PitchEncondePidSpeed[6] = {0.0f,	0.0f,		0.0f,	0.0f,	0.0f, 	0.0f}; //编码器速度环
 //float PitchSpeedPid[6] 	  = {0.2f,		0.03f,			0.8f,		12.0f,	8.0f, 0.0f};    //
@@ -195,6 +195,12 @@ void Pitch_Encoder_PID(GIMBAL_t *gimbal_);
 --*/
 void Gimbal_Task(int S_Cnt, int MS_Cnt)
 {
+	extern int Gimbal_Precision_Mode, Last_Gimbal_Precision_Mode;
+	//初次切换标志
+	if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1) Gimbal_Precision_Activated_Flag = 1;
+	if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)Gimbal_Precision_Inactivated_Flag = 1;
+	Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
+	
 	if (MS_Cnt==51) Get_Pitch_Motor_Error_Status();//读取温度
 //	for (int i=0; i<11000; i++)
 //		i=i;
@@ -220,6 +226,7 @@ void Gimbal_Task(int S_Cnt, int MS_Cnt)
 			gimbal_p.target_speed = 0;
 		}
 	}
+
 	else if (Gimbal_Precision_Mode)
 	{
 		if(gimbal_p.IMU_actual_angle <= -22.f || gimbal_p.IMU_actual_angle >= 29)
@@ -392,13 +399,13 @@ static void GIMBAL_Set_Contorl(void)
         gimbal_y.target_angle = gimbal_y.add_angle;
         gimbal_p.target_angle = gimbal_p.add_angle;
     }
-    if(gimbal_set_mode != GIMBAL_RELATIVE_ANGLE)
-    {
-        if(gimbal_y.target_angle > 180)
-            gimbal_y.target_angle -= 360;
-        if(gimbal_y.target_angle < -180)
-            gimbal_y.target_angle += 360;
-    }//360度制的角度
+//    if(gimbal_set_mode != GIMBAL_RELATIVE_ANGLE)
+//    {
+//        if(gimbal_y.target_angle > 180)
+//            gimbal_y.target_angle -= 360;
+//        if(gimbal_y.target_angle < -180)
+//            gimbal_y.target_angle += 360;
+//    }//360度制的角度
 
 }
 /*
@@ -533,8 +540,13 @@ static void Yaw_Gyro_PID(GIMBAL_t *gimbal_)
 }
 
 //使用电机编码器数据为目标角度的PID
+int TP1, TP2;
 static void Yaw_Encoder_PID(GIMBAL_t *gimbal_)
 {
+	
+	while (Yaw_Target_Angle - gimbal_->CAN_Total_Angle<-360.f)	Yaw_Target_Angle = Yaw_Target_Angle + 360.f;
+	while (Yaw_Target_Angle - gimbal_->CAN_Total_Angle>360.f)	Yaw_Target_Angle = Yaw_Target_Angle - 360.f;
+	TP1 = Yaw_Target_Angle; TP2 = gimbal_->CAN_Total_Angle;
     PID_Calc(&gimbal_->gimbal_enconde_pid, Yaw_Target_Angle, gimbal_->CAN_Total_Angle);   //pitch的第三个参数为gimbal_->CAN_actual_angle
 	gimbal_->target_speed = gimbal_->gimbal_enconde_pid.out;
     PID_Calc(&gimbal_->gimbal_enconde_pid_speed, gimbal_->target_speed, gimbal_->CAN_actual_speed);

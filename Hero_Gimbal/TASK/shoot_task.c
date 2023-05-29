@@ -14,10 +14,14 @@ float TriggerAngle[5] 	= {0.4f,			0.0f,			0.00015f,		4000,			0.0f};  //²¦µ¯ÂÖ½Ç¶
 
 //float FricLeftSpeed[5]	= {18.0f,			0.05f,			0.0f,				15000.0f,			4000.0f};  //ÊÊÓÃÑµÁ·µ¯ÍèµÄ×óÄ¦²ÁÂÖËÙ¶È»·
 //float FricRightSpeed[5]	= {18.0f,			0.05f,			0.0f,				15000.0f,			4000.0f};  //ÊÊÓÃÑµÁ·µ¯ÍèµÄÓÒÄ¦²ÁÂÖËÙ¶È»·
-float FricLeftSpeed[5]	= {25.5f,			0.2f,			0.0f,				15000.0f,			4000.0f};  //ÊÊÓÃ±ÈÈüµÄ×óÄ¦²ÁÂÖËÙ¶È»·
-float FricRightSpeed[5] = {25.5f,			0.2f,			0.0f,				15000.0f,			4000.0f};  //ÊÊÓÃ±ÈÈüµÄÓÒÄ¦²ÁÂÖËÙ¶È»·
+//float FricLeftSpeed[5]	= {25.5f,			0.2f,			0.0f,				15000.0f,			4000.0f};  //¡¾ĞÂÄ¦²ÁÂÖ£¬Ğ§¹ûÓÅ¡¿ÊÊÓÃ±ÈÈüµÄ×óÄ¦²ÁÂÖËÙ¶È»·
+//float FricRightSpeed[5] = {25.5f,			0.2f,			0.0f,				15000.0f,			4000.0f};  //¡¾ĞÂÄ¦²ÁÂÖ£¬Ğ§¹ûÓÅ¡¿ÊÊÓÃ±ÈÈüµÄÓÒÄ¦²ÁÂÖËÙ¶È»·
+float FricLeftSpeed[5]	= {15.5f,			0.2f,			0.0f,				15000.0f,			4000.0f};  //ÊÊÓÃ±ÈÈüµÄ×óÄ¦²ÁÂÖËÙ¶È»·
+float FricRightSpeed[5] = {15.5f,			0.2f,			0.0f,				15000.0f,			4000.0f};  //ÊÊÓÃ±ÈÈüµÄÓÒÄ¦²ÁÂÖËÙ¶È»·
+
 //Ä¦²ÁÂÖPID¼ÆËã
 int LR_Error;
+
 static void fric_pid(void);
 static int16_t speed_counter=0;
 extern int Shoot_Flag_For_Buzzer;

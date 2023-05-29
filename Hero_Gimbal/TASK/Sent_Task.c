@@ -54,7 +54,7 @@ uint8_t CAN_Tx_Mode(uint8_t mode, int Precision_Mode)
     return temp;
 }
 
-uint8_t canTX_UI(int pitch, int mode)
+uint8_t canTX_UI(int pitch, int mode, int Pitch_Temp)
 {
     CAN_TxHeaderTypeDef canFrame;
     uint8_t data[8] = {0};
@@ -69,8 +69,8 @@ uint8_t canTX_UI(int pitch, int mode)
     data[1] = pitch & 0xff;
     data[2] = mode >> 8;
     data[3] = mode & 0xff;
-    data[4] = 0;
-    data[5] = 0;
+    data[4] = Pitch_Temp >> 8;
+    data[5] = Pitch_Temp & 0xff;
     data[6] = 0;
     data[7] = 0;
     HAL_CAN_AddTxMessage(&hcan2, &canFrame, data, &temp);
@@ -195,14 +195,16 @@ uint8_t canTX_trigger(uint8_t trigger)
     uint32_t temp = 0;
 
     canFrame.IDE = CAN_ID_STD;
-    canFrame.StdId = 0x012;
+    canFrame.StdId = Chassis_Shoot_Task_Tx_ID;
     canFrame.RTR = CAN_RTR_DATA;
     canFrame.DLC = 8;
     canFrame.TransmitGlobalTime = DISABLE;
-
+	
+	extern int Fric_Switch_Flag;
+	extern int Shoot_Num;
     data[0] = trigger;
-    data[1] = 0;
-    data[2] = 0;
+    data[1] = Fric_Switch_Flag;
+    data[2] = Shoot_Num;
     data[3] = 0;
     data[4] = 0;
     data[5] = 0;

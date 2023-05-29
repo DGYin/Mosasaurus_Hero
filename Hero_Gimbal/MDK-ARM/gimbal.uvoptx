@@ -167,8 +167,40 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
+          <LineNumber>549</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134249140</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\549</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>547</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134249086</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\547</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
           <LineNumber>7214</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
+          <EnabledFlag>0</EnabledFlag>
           <Address>134235852</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
@@ -179,6 +211,22 @@
           <Filename>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\gimbal\../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c\7214</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>550</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -436,6 +484,16 @@
           <count>50</count>
           <WinNumber>1</WinNumber>
           <ItemText>LK_Pitch_Motor_Receive_Data</ItemText>
+        </Ww>
+        <Ww>
+          <count>51</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>SHOOT_FRIC_HIGH_SPEED,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>52</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>TP2,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

@@ -28,7 +28,7 @@
 #define MODE_RECEIVE_ID           	  0X009
 #define UI_ID                     	  0x010
 #define CAN_RefereeData_ID        	  0x011
-#define TRIGGER_CONTROL_ID       	  0x012
+#define Chassis_Shoot_Task_Rx_ID       	  0x012
 #define Chassis_Motor_Speed_ID	  	  0x013
 #define CAN_Yaw_Raw_Angle		  	  0x014
 #define CAN_Yaw_Invert_Flag_Trans_ID  0x015

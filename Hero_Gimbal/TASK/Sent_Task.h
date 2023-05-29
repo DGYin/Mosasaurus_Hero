@@ -3,6 +3,8 @@
 
 #include "stm32f4xx.h"
 
+#define Chassis_Shoot_Task_Tx_ID 0x012;
+
 uint8_t canTX_chassis(int16_t x,int16_t y,int8_t z,int8_t deviation);
 uint8_t canTX_fric(int16_t left,int16_t right);
 uint8_t canTX_trigger(uint8_t trigger);
@@ -13,6 +15,6 @@ uint8_t CAN_Tx_Mode(uint8_t mode, int Precision_Mode);
 void canTX_Invert_Flag(uint8_t Bool_Invert_Flag);
 
 void canTX_LK_Pitch_Motor(void);
-uint8_t canTX_UI(int pitch,int mode);
+uint8_t canTX_UI(int pitch, int mode, int Pitch_Temp);
 
 #endif

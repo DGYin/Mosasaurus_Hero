@@ -365,6 +365,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>chassis_control_order.chassis_mode</ItemText>
         </Ww>
+        <Ww>
+          <count>39</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Fric_State</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>

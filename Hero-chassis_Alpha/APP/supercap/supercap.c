@@ -2,7 +2,7 @@
 #include "referee.h"
 int Capacitor_State = 0; 	//电容剩余能量状态。0为低，1为高
 
-int supercap_volt = 24; 		//超级电容电压
+int supercap_volt = 150; 		//超级电容电压
 int Power_Mode = 0, Last_Power_Mode = 0;
 float supercap_per = 0; 	//超级电容电量百分比
 uint8_t rec_super = 0;
@@ -24,12 +24,12 @@ void supercap(void)
 	//UART_TX_Power_Max = 60; //调试用
 	UartTX_Super_Capacitor(UART_TX_Power_Max, UART_TX_Power);
 	//控制Beta板的加速度
-	supercap_volt = 240;
-	if (supercap_volt>20)
+	//supercap_volt = 240;
+	if (supercap_volt>200)
 		Power_Mode = High_Voltage_Mode;
-	if (supercap_volt<=15)
+	if (supercap_volt<=150)
 		Power_Mode = Low_Voltage_Mode;
-	if (Last_Power_Mode==Low_Voltage_Mode && supercap_volt<18) Power_Mode = Low_Voltage_Mode;
+	if (Last_Power_Mode==Low_Voltage_Mode && supercap_volt<180) Power_Mode = Low_Voltage_Mode;
 	canTX_To_Beta_Power_Limit(Power_Mode);
 	Last_Power_Mode = Power_Mode;
 }

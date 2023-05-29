@@ -13,12 +13,16 @@ static int deadline_judge(uint8_t a);
 float rc_cali(int max,int min, int RC_actual, int RC_max, int RC_mid, int RC_min,int deadline);
 int F_flag=0;//判断F是否开启
 int frie_first_flag=0;//判断第一次发单
+int Fric_Switch_Flag = 0;
+int Shoot_Num = 0;
 int MOUSE_pre_left_cnt=0;	
 //计时变量
 int Gimbal_Reverse_Bottom_Delay_Cnt = 0;
 int Chassis_Reverse_Bottom_Delay_Cnt = 0;
 int Gimbal_Precision_Mode_Delay_Cnt = 0;
 int Chassis_TurnAround_Delay_Cnt = 0;
+int Fric_Switch_Delay_Cnt = 0;
+
 KEY_CONTROL KEY_MODE=KEY_OFF;
 extern int Sent_dataC;
 //修改外部模式变量
@@ -40,34 +44,34 @@ void remote_control_data(void)
 {
 //	if(!(KEY_board||MOUSE_x||MOUSE_y||MOUSE_z)==0)
 //		return;
-	if(switch_is_down(SW_R)&&vision_switch_flag==0) //视觉模式选择
-	{
-		if(vision_mode==VISION_OFF)
-		{
-			vision_mode=VISION_ON;
-//			gimbal_set_mode=GIMBAL_RELATIVE_ANGLE;
-			gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
-			vision_sent.yaw.target_angle=gimbal_y.CAN_actual_angle;
-			vision_sent.pitch.target_angle=gimbal_p.IMU_actual_angle;
-		    gimbal_y.target_angle=gimbal_y.CAN_actual_angle;
-			gimbal_p.target_angle=gimbal_p.IMU_actual_angle;
-		}
-			
-		else 
-		{
-			gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
-		    gimbal_y.target_angle=gimbal_y.IMU_actual_angle;
-			vision_mode=VISION_OFF;
-		}
-		vision_switch_flag=1;
-	}
-	else if(switch_is_up(SW_R) || switch_is_mid(SW_R)) vision_switch_flag=0;
+//	if(switch_is_down(SW_R)&&vision_switch_flag==0) //视觉模式选择
+//	{
+//		if(vision_mode==VISION_OFF)
+//		{
+//			vision_mode=VISION_ON;
+////			gimbal_set_mode=GIMBAL_RELATIVE_ANGLE;
+//			gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
+//			vision_sent.yaw.target_angle=gimbal_y.CAN_actual_angle;
+//			vision_sent.pitch.target_angle=gimbal_p.IMU_actual_angle;
+//		    gimbal_y.target_angle=gimbal_y.CAN_actual_angle;
+//			gimbal_p.target_angle=gimbal_p.IMU_actual_angle;
+//		}
+//			
+//		else 
+//		{
+//			gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
+//		    gimbal_y.target_angle=gimbal_y.IMU_actual_angle;
+//			vision_mode=VISION_OFF;
+//		}
+//		vision_switch_flag=1;
+//	}
+//	else if(switch_is_up(SW_R) || switch_is_mid(SW_R)) vision_switch_flag=0;
 	
-	if(switch_is_up(SW_R)&&frie_first_flag==0)
+	if(switch_is_up(SW_R)&&frie_first_flag == 0)
 	{
+		frie_first_flag=1;
 		rc_shoot.left_fric.target_speed = -SHOOT_FRIC_HIGH_SPEED;
 		rc_shoot.right_fric.target_speed = SHOOT_FRIC_HIGH_SPEED;
-		frie_first_flag=1;
 	}
 
 	if(switch_is_up(SW_L) && gimbal_set_mode!=GIMBAL_RELATIVE_ANGLE) //小陀螺模式
@@ -108,19 +112,13 @@ void remote_control_data(void)
 	//遥控器打前哨站
 	if((MOUSE_pre_left==1 || shoot_vision_flag==1 ) && rc_shoot.trigger.last_shoot_flag==0) 
     {			
-			if(frie_first_flag==0)
-			{
-				frie_first_flag=1;
-					rc_shoot.left_fric.target_speed = -SHOOT_FRIC_HIGH_SPEED;
-					rc_shoot.right_fric.target_speed = SHOOT_FRIC_HIGH_SPEED;
-			}
-			else
-			{
-				rc_shoot.trigger.target_angle=SHOOT_NUM;
-				rc_shoot.trigger.last_shoot_flag=1;
-				shoot_true=0;
-			}
+		if (Fric_Switch_Flag)
+		{
+			rc_shoot.trigger.target_angle=SHOOT_NUM;
+			rc_shoot.trigger.last_shoot_flag=1;
+			shoot_true=0;
 		}
+	}
 	
 	if(switch_is_mid(SW_R))
 	{
@@ -188,21 +186,29 @@ void key_control_data(void)
 		gimbal_y.target_angle=gimbal_y.CAN_Total_Angle;
 	}
 
+	//摩擦轮开关
+	if (MOUSE_pre_right)
+	{
+		if (Fric_Switch_Delay_Cnt==0)
+		{
+			if (Fric_Switch_Flag == 0) Fric_Switch_Flag=1;
+			else if (Fric_Switch_Flag == 1) Fric_Switch_Flag=0;
+			rc_shoot.left_fric.target_speed = -SHOOT_FRIC_HIGH_SPEED*Fric_Switch_Flag;
+		    rc_shoot.right_fric.target_speed = SHOOT_FRIC_HIGH_SPEED*Fric_Switch_Flag;
+			Fric_Switch_Delay_Cnt = 100;
+		}
+	}
 	//发射及发射延迟
 	if((MOUSE_pre_left==1 || shoot_vision_flag==1 ) && rc_shoot.trigger.last_shoot_flag==0) 
     {			
-		if(frie_first_flag==0)
-		{
-			frie_first_flag=1;
-		    rc_shoot.left_fric.target_speed = -SHOOT_FRIC_HIGH_SPEED;
-		    rc_shoot.right_fric.target_speed = SHOOT_FRIC_HIGH_SPEED;
-		}
-		else
+		if (Fric_Switch_Flag)
 		{
 			rc_shoot.trigger.target_angle=SHOOT_NUM;
 			rc_shoot.trigger.last_shoot_flag=1;
 			shoot_true=0;
+			Shoot_Num++;
 		}
+		else rc_shoot.trigger.target_angle=0;
 	}
 	if(MOUSE_pre_left==0) 
 	{
@@ -274,19 +280,19 @@ void key_control_data(void)
 			//模式切换
 			if (Gimbal_Precision_Mode==1) Gimbal_Precision_Mode = 0;
 			else Gimbal_Precision_Mode = 1;
-			//初次切换标志
-			if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1) Gimbal_Precision_Activated_Flag = 1;
-			if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)Gimbal_Precision_Inactivated_Flag = 1;
+			
 			//计时重置
 			Gimbal_Precision_Mode_Delay_Cnt = 100;
 		}
-		Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
+		
 	}
+
 	//计时用
 	if (Gimbal_Precision_Mode_Delay_Cnt > 0)  Gimbal_Precision_Mode_Delay_Cnt--;
 	if (Gimbal_Reverse_Bottom_Delay_Cnt > 0)  Gimbal_Reverse_Bottom_Delay_Cnt--; 
 	if (Chassis_Reverse_Bottom_Delay_Cnt > 0) Chassis_Reverse_Bottom_Delay_Cnt--;
 	if (Chassis_TurnAround_Delay_Cnt>0)		  Chassis_TurnAround_Delay_Cnt--;
+	if (Fric_Switch_Delay_Cnt>0)			  Fric_Switch_Delay_Cnt--;
 }
 /**
 	* @brief       幅度判断函数

@@ -391,7 +391,7 @@ void Cap_Volt_Loop(void)
 {
 	float Scale1=1, Scale2=1;
 	extern int supercap_volt;
-	supercap_volt = 240;
+	//supercap_volt = 240;
 	if (supercap_volt<180)
 		Scale2 = (supercap_volt-130)/50.f;
 	if (Scale2<0) Scale2 = 0;

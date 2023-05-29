@@ -9,6 +9,7 @@
 #include "can_receive.h"
 #include "sent_task.h"
 #include "buzzer_task.h"
+#include "lk_pitch_turn.h"
 int MS_Count = 0;
 int IMU_cnt = 0, start_flag = 0, S_Count = 0;
 //0.1ms
@@ -62,11 +63,11 @@ void TIM3_CNT_TASK()
     if(MS_Count % 70 == 0)
     {
         if(gimbal_set_mode == GIMBAL_ABSOLUTE_ANGLE) //A
-            canTX_UI(gimbal_p.IMU_actual_angle * 100, 1);
+            canTX_UI(gimbal_p.IMU_actual_angle * 100, 1, LK_Pitch_Motor.Tempreture);
         else  if(gimbal_set_mode == GIMBAL_RELATIVE_ANGLE) //F
-            canTX_UI(gimbal_p.IMU_actual_angle * 100, 2);
+            canTX_UI(gimbal_p.IMU_actual_angle * 100, 2,  LK_Pitch_Motor.Tempreture);
         else  if(gimbal_set_mode == GIMBAL_TOP_ANGLE) //T
-            canTX_UI(gimbal_p.IMU_actual_angle * 100, 3);
+            canTX_UI(gimbal_p.IMU_actual_angle * 100, 3,  LK_Pitch_Motor.Tempreture);
     }
 	//计时部分
     if(MS_Count >= 1000)
