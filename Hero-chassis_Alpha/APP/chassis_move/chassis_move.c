@@ -26,7 +26,7 @@
 #include "chassis_move.h"
 #include "kinematics.h"
 #include "bsp_can.h"
-
+#include "supercap.h"
 /*define-----------------------------------------------------------------------*/
 
 
@@ -194,13 +194,12 @@ void chassis_move(void)//底盘移动过程
 {
 
     chassis_move_mode(); //对应模式的底盘状态赋值
+	
     get_chassis_power_and_buffer_and_max(&power, &buffer, &max_power);
 	
-	extern int Capacitor_State;
-	Cap_Volt_Loop();
-	//if (Capacitor_State==0)
-		//Power_Loop(power, max_power);
-	//Buffer_Loop();
+	if (Supercap_Connection_Status == Supercap_Connected)
+		Cap_Volt_Loop();
+	else Buffer_Loop();
 		//power_limitation_jugement(); //功率判断与限制
     vpid_chassis_realize_F();
     can_send_chassis_current();	//输出底盘电流值
@@ -296,17 +295,8 @@ float Gimbal_Chassis_Relative_Angle;
 float Get_Gimbal_Chassis_Relative_Angle(void);
 static void chassis_move_mode(void)
 {
-	//来自云台的控制信号
-//	if (gimbal_y.Invert_Flag) 
-//	{
-		vx = (float)chassis_control_order.vx_set;
-		vy = (float)chassis_control_order.vy_set;
-//	}
-//	else 
-//	{
-//		vx = (float)-chassis_control_order.vx_set;
-//		vy = (float)-chassis_control_order.vy_set;
-//    }
+	vx = (float)chassis_control_order.vx_set;
+	vy = (float)chassis_control_order.vy_set;
     wz = (float)chassis_control_order.wz_set/10.0f;
 	Gimbal_Chassis_Relative_Angle = Get_Gimbal_Chassis_Relative_Angle();//Gimbal_Chassis_Relative_Angle以云台为0度，CW为0~180°，CCW为0~-180°。
     //	chassis_control_order.chassis_mode=CHASSIS_REMOTE_CLOSE;
@@ -317,19 +307,17 @@ static void chassis_move_mode(void)
 			vx = 0;
 			vy = 0;
 			wz = 0;
-		break;
+			break;
 		//云台随动模式时
 		case CHASSIS_NORMAL:
-//			chassis_spin(&vx, &vy);
 			wz = wz -1.0f * chassis_follow(); //为了使底盘回到云台角度而产生的旋转
-		break;
+			break;
 		//旋转模式时
 		case CHASSIS_SPIN:
-//			chassis_spin(&vx, &vy);
 			if (vx==0 && vy==0)
 				wz = 3.0f;
-			else wz = 1.5f;
-		break;
+			else wz = 1.0f;
+			break;
 	}
     chassis_speed_control(vx, vy, wz, Gimbal_Chassis_Relative_Angle);
 

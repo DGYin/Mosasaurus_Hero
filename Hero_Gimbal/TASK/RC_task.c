@@ -154,13 +154,13 @@ void key_control_data(void)
 	else
 	{
 		if(KEY_board & KEY_PRESSED_OFFSET_W)
-			rc_sent.x_speed=100;
+			rc_sent.x_speed=130;
 		if(KEY_board & KEY_PRESSED_OFFSET_S)
-			rc_sent.x_speed=-100;
+			rc_sent.x_speed=-130;
 		if(KEY_board & KEY_PRESSED_OFFSET_A)
-			rc_sent.y_speed=-100;
+			rc_sent.y_speed=-130;
 		if(KEY_board & KEY_PRESSED_OFFSET_D)
-			rc_sent.y_speed=100;
+			rc_sent.y_speed=130;
 		rc_sent.yaw.target_angle=limits_change(KEY_YAW_ANGLE_MAXX_ON,KEY_YAW_ANGLE_MINN_ON,MOUSE_x,KEY_MAXX,KEY_MINN);
 		rc_sent.pitch.target_angle=limits_change(KEY_PITCH_ANGLE_MAXX_ON,KEY_PITCH_ANGLE_MINN_ON,MOUSE_y,KEY_MAXX,KEY_MINN);
 	}

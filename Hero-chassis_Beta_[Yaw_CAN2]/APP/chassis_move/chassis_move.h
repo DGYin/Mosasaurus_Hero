@@ -39,8 +39,8 @@
 
 /*Target_Velocity_Smoothen函数相关的宏定义*/
 #define Low_Voltage_Mode 		0
-#define Medium_Voltage_Mode		1
 #define High_Voltage_Mode 		2
+#define Supercap_Disconnected_Mode		1
 
 #define Smoothen_Off 0 //不进行曲线平缓
 #define Uniform_Acceleration 1 //匀加速模式，用于平滑速度曲线

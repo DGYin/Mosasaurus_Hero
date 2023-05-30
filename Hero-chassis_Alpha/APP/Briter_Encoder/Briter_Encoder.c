@@ -160,6 +160,19 @@ void Init_Encoder_Struct(void)
 	
 }
 
+void Briter_Encoder_Task(int S_Cnt, int MS_Cnt)
+{
+	int Global_Time;
+	Global_Time = S_Cnt*1000 + MS_Cnt;
+	if (Global_Time % 10 == 0)
+		Get_Encoder_Position(1);
+	if (Global_Time % 10 == 1)
+		Get_Encoder_Position(2);
+	if (Global_Time % 10 == 2)
+		Get_Encoder_Position(3);
+	if (Global_Time % 10 == 3)
+		Get_Encoder_Position(4);
+}
 void Get_Encoder_Position(int ID) //如果ID为0，则查询四个编码器的数据。否则查询对应ID的编码器数据。结果存储在数据体中。
 {
 	Send_Data_Initialize();

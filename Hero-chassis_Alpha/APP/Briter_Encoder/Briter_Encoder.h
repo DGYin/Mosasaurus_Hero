@@ -35,4 +35,6 @@ void Init_Encoder_Struct(void);
 void Get_Encoder_Position(int ID);
 int All_Initial_Position_Recorded(void);
 
+void Briter_Encoder_Task(int S_Cnt, int MS_Cnt);
+
 #endif

@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <string.h>
 #include "dma.h"
@@ -9,6 +8,11 @@
 #include "bsp_uart.h"
 #include "chassis_move.h"
 
+
+/***********************************************************
+*@Brief	仅供bsp_uart.c文件中使用的变量
+***********************************************************/
+uint8_t KeepAlive_SentData[4];
 //union Receive_data{int get_data[2];char char_data[8];}receive_data;
 uint8_t receive_data[40];
 uint8_t UART1_Sent_Data[10];
@@ -20,8 +24,6 @@ union Send_Data
     char char_data[8];
 } Send_Data;
 uint8_t start_receive_flag = 0;
-
-
 
 static int i = 0;
 float a, b = 0;
@@ -58,11 +60,11 @@ void USART1_IRQHandler(void)
 				{
 					case Briter_Encoder2_TypeCode:
 						Encoder_Data_Process(Temp, &Briter_Encoder2,&Chassis_MotorB);
-					break;
+						break;
 
 					case Briter_Encoder4_TypeCode:
 						Encoder_Data_Process(Temp, &Briter_Encoder4,&Chassis_MotorD);
-					break;
+						break;
 					case Yaw_Data_Trans_Typecode:
 						float Angle, Speed;
 						Angle = (uint16_t) ((Temp[0]<<8)|(Temp[1]));
@@ -70,7 +72,7 @@ void USART1_IRQHandler(void)
 						temp_1 = Angle;
 						Speed = (uint16_t) ((Temp[2]<<8)|(Temp[3]));
 						record_yaw_callback(Angle, Speed);
-					break;
+						break;
 					case Super_Cap_RX_Typecode:
 						extern int supercap_volt; //超级电容电压
 						extern float supercap_per; //超级电容电量百分比
@@ -78,8 +80,17 @@ void USART1_IRQHandler(void)
 						Capacitor_State   = Temp[0];
 						supercap_per  = Temp[1];
 						supercap_volt = Temp[2];
-					
-					break;
+						break;
+					case SuperCap_Status_RX_Typecode:
+						if (KeepAlive_SentData[0] = Temp[0])
+							if (KeepAlive_SentData[1] = Temp[1])
+								if (KeepAlive_SentData[2] = Temp[2])
+									if (KeepAlive_SentData[3] = Temp[3])
+									{
+										extern int Keep_Alive_Time_Cnt;
+										Keep_Alive_Time_Cnt = 0;
+									}
+						break;
             	}
 				//超电数据处理
 
@@ -139,6 +150,46 @@ void UartTX_Super_Capacitor(int Power_Limitation, fp32 Power)
     uint8_t status;
     status = HAL_UART_Transmit(&huart1, Buffer, 11, 0xff);
 }
+
+/***********************************************************
+*@fuction	:Uart_TX_Supercap
+*@brief		:
+*@param		:Typecode		发送数据包类型
+*@param		:Sent_Data[8]	发送的数据，共8字节
+*@return	:void
+*@author	:DGYin
+*@date		:2023-05-29
+***********************************************************/
+void Uart_TX_Supercap(int Typecode, uint8_t Sent_Data[8])
+{
+	uint8_t Data[11];
+	//写入起始帧、结束帧
+	Data[0] = '*';
+	Data[10] = ';';
+	//写入发送数据包类型
+	Data[1] = Typecode;
+	//写入数据包
+	for (int i=2; i<=9; i++)
+	Data[i] = Sent_Data[i];
+	//数据发送，并用Status监视发送成功与否
+	uint8_t status;
+    status = HAL_UART_Transmit(&huart1, Data, 11, 0xff);
+}
+
+
+void UART_TX_Supercap_Connection_Check(int Global_Time)
+{
+	uint8_t Sent_Data[8];
+	int Keep_Alive_Typecode = SuperCap_KeepAlive_TX_Typecode;
+	Sent_Data[0] = (uint8_t)(Global_Time>>24);
+	Sent_Data[1] = (uint8_t)((Global_Time>>16)&0xff);
+	Sent_Data[2] = (uint8_t)((Global_Time>>8)&0xff);
+	Sent_Data[3] = (uint8_t)(Global_Time&0xff);
+	for (int i=0; i<=3; i++)
+		KeepAlive_SentData[i] = Sent_Data[i];
+	Uart_TX_Supercap(Keep_Alive_Typecode, Sent_Data);
+}
+
 
 void DMA_Send(void)
 {

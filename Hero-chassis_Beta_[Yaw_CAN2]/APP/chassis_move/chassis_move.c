@@ -450,11 +450,11 @@ int Target_Velocity_Smoothen(int Target_Speed, int Current_Speed, int Smoothen_M
 						Parameter_C = 0.03;
 					else Parameter_C = 0.17 ;
 				}
-				if (Power_Mode == Medium_Voltage_Mode)
+				if (Power_Mode == Supercap_Disconnected_Mode)
 				{
 					if (abs(Target_Speed - Current_Speed) < 500)
-						Parameter_C = 0.03;
-					else Parameter_C = 0.14 ;
+						Parameter_C = 0.05;
+					else Parameter_C = 0.25 ;
 				}
 				if (Power_Mode == Low_Voltage_Mode)
 				{

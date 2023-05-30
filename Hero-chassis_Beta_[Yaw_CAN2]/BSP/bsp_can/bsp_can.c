@@ -293,7 +293,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)//CAN½ÓÊÕº¯Êý
 				break;	
 			case CAN_Beta_Power_Limit_ID:
 				extern int Power_Mode;
-				Power_Mode = gdata[0];
+				Power_Mode = rxdata[0];
 				break;
 
         }

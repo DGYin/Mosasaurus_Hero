@@ -686,7 +686,11 @@ void referee_usart_task(void const *argument)
         //        if(50 < UI_Capacitance && UI_Capacitance <= 100) UI_Draw_Line(&UI_Graph2.Graphic[1], "202", UI_Graph_Change, 2, UI_Color_Green, 20, Capacitance_X, 334, 1870, 334);
         //        if(35 < UI_Capacitance && UI_Capacitance <=  50) UI_Draw_Line(&UI_Graph2.Graphic[1], "202", UI_Graph_Change, 2, UI_Color_Yellow, 20, Capacitance_X, 334, 1870, 334);
         //        if(0  < UI_Capacitance && UI_Capacitance <=  35) UI_Draw_Line(&UI_Graph2.Graphic[1], "202", UI_Graph_Change, 2, UI_Color_Orange, 20, Capacitance_X, 334, 1870, 334);
-        UI_Draw_Float(&UI_Graph2.Graphic[1], "205", UI_Graph_Change, 1, UI_Color_White, 18, 0, 3, 1700, 692, supercap_volt);
+        extern int Supercap_Connection_Status;
+		if (Supercap_Connection_Status)
+			UI_Draw_Float(&UI_Graph2.Graphic[1], "205", UI_Graph_Change, 1, UI_Color_White, 18, 0, 3, 1700, 692, supercap_volt);
+		else UI_Draw_Float(&UI_Graph2.Graphic[1], "205", UI_Graph_Change, 1, UI_Color_Purple, 22, 2, 5, 1700, 692, 0.00);
+		
         UI_PushUp_Graphs(2, &UI_Graph2, get_robot_id());
     }
 }

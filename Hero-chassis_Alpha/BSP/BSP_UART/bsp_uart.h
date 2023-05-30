@@ -19,7 +19,9 @@
 #define Trigger_TypeCode 				11
 #define Super_Cap_RX_Typecode 			12
 #define SuperCap_Power_TX_Typecode		13
-
+#define SuperCap_KeepAlive_TX_Typecode	14
+#define SuperCap_Status_RX_Typecode		15
+#define SuperCap_ErrorCode_RX_Typecode	41
 
 #define Yaw_Control_Current_Mode	   1
 #define Yaw_Control_Target_Angle_Mode  2
