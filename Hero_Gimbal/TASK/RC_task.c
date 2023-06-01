@@ -7,6 +7,7 @@
 #include "bsp_uart.h"
 #include "shoot_task.h"
 #include "can_receive.h"
+#include "chassis_task.h"
 
 int vision_switch_flag=0;//视觉开关的标识符，用来实现拨一下开关视觉，再播一下开关视觉的功能 
 static int deadline_judge(uint8_t a);
@@ -17,11 +18,12 @@ int Fric_Switch_Flag = 0;
 int Shoot_Num = 0;
 int MOUSE_pre_left_cnt=0;	
 //计时变量
-int Gimbal_Reverse_Bottom_Delay_Cnt = 0;
-int Chassis_Reverse_Bottom_Delay_Cnt = 0;
-int Gimbal_Precision_Mode_Delay_Cnt = 0;
-int Chassis_TurnAround_Delay_Cnt = 0;
-int Fric_Switch_Delay_Cnt = 0;
+int Chassis_Spin_Delay_Cnt					= 0;
+int Gimbal_Reverse_Bottom_Delay_Cnt			= 0;
+int Chassis_Reverse_Bottom_Delay_Cnt		= 0;
+int Gimbal_Precision_Mode_Delay_Cnt			= 0;
+int Chassis_TurnAround_Delay_Cnt			= 0;
+int Fric_Switch_Delay_Cnt					= 0;
 
 KEY_CONTROL KEY_MODE=KEY_OFF;
 extern int Sent_dataC;
@@ -166,24 +168,53 @@ void key_control_data(void)
 	}
 	if(F_flag==1 && gimbal_set_mode != GIMBAL_TOP_ANGLE ) gimbal_set_mode=GIMBAL_RELATIVE_ANGLE;
 	else if(F_flag==0 && gimbal_set_mode != GIMBAL_TOP_ANGLE) gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
-	//Q键陀螺切换
+	//Ctrl+R键底盘随动开关
+	if(KEY_board & KEY_PRESSED_OFFSET_R)
+	{
+		if (KEY_board & KEY_PRESSED_OFFSET_CTRL)
+		{
+			if (Chassis_Spin_Delay_Cnt == 0)
+			{
+				Chassis_Spin_Delay_Cnt = 100;
+				if (Chassis_Follow_Switch == Chassis_Follow_ON) Chassis_Follow_Switch = Chassis_Follow_OFF;
+				else Chassis_Follow_Switch = Chassis_Follow_ON;
+			}
+		}
+	}
+	//R键小陀螺模式开关
+	if(KEY_board & KEY_PRESSED_OFFSET_R)
+	{
+		if (Chassis_Spin_Delay_Cnt == 0)
+		{
+			Chassis_Spin_Delay_Cnt = 100;
+			gimbal_set_mode = GIMBAL_TOP_ANGLE;
+			if (Chassis_Mode !=  CHASSIS_SPIN)
+			{
+				Chassis_Follow_Switch = Chassis_Follow_OFF;
+				Chassis_Mode = CHASSIS_SPIN;
+			}
+			else if (Chassis_Mode ==  CHASSIS_SPIN)
+			{
+				Chassis_Follow_Switch = Chassis_Follow_ON;
+				Chassis_Mode = CHASSIS_NORMAL;
+			}
+		}
+	}
+	//Q键阿克曼底盘模式，底盘左转
+	rc_sent.r_speed = 0;
 	if(KEY_board & KEY_PRESSED_OFFSET_Q)
 	{
-		if(gimbal_set_mode==GIMBAL_RELATIVE_ANGLE  || F_flag==1)
-		{
-			F_flag=0;
-		 gimbal_y.target_angle=gimbal_y.IMU_actual_angle;
-		}
-		gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
-
+		if (rc_sent.x_speed >= 0)
+			rc_sent.r_speed = -1.0;
+		else rc_sent.r_speed = 1.0;
 	}
+	//E键阿克曼底盘模式，底盘右转
 	if(KEY_board & KEY_PRESSED_OFFSET_E)
-		gimbal_set_mode = GIMBAL_TOP_ANGLE;
-	if(KEY_board & KEY_PRESSED_OFFSET_F)
 	{
-		gimbal_set_mode=GIMBAL_RELATIVE_ANGLE;
-		F_flag=1;
-		gimbal_y.target_angle=gimbal_y.CAN_Total_Angle;
+		if (rc_sent.x_speed >= 0)
+			rc_sent.r_speed = 1.0;
+		else 
+			rc_sent.r_speed = -1.0;
 	}
 
 	//摩擦轮开关
@@ -212,38 +243,11 @@ void key_control_data(void)
 	}
 	if(MOUSE_pre_left==0) 
 	{
-//		if(rc_shoot.trigger.last_shoot_flag==1)
-//		{
-//			if(shoot_flag==1) shoot_true=1;
-//		}
 		MOUSE_pre_left_cnt++;
 		if(MOUSE_pre_left_cnt>=100)
 			{rc_shoot.trigger.last_shoot_flag=0;MOUSE_pre_left_cnt=0;}
-//		if(shoot_true==1)
-//		{
-//			rc_shoot.trigger.target_angle=SHOOT_NUM;
-//	  	rc_shoot.trigger.last_shoot_flag=1;
-//			shoot_true=0;
-//		}
 	}
-
-//   	if(MOUSE_pre_right==1) 
-//    {			
-//        vision_mode=VISION_ON;
-//		gimbal_set_mode=GIMBAL_RELATIVE_ANGLE;
-//		gimbal_y.target_angle=gimbal_y.CAN_Total_Angle;
-//	    vision_pitch=gimbal_y.IMU_actual_angle;
-//	}
-//	else 
-//	{
-//		//gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
-////		gimbal_y.target_angle=gimbal_y.IMU_actual_angle;
-//	    vision_mode=VISION_OFF;
-//	}
-//	rc_sent.yaw.target_angle=limits_change(KEY_YAW_ANGLE_MAXX_ON,KEY_YAW_ANGLE_MINN_ON,MOUSE_x,KEY_MAXX,KEY_MINN);
-//    if(deadline_judge(MOUSE_y)==0)
-//	rc_sent.pitch.target_angle=-limits_change(KEY_PITCH_ANGLE_MAXX_ON,KEY_PITCH_ANGLE_MINN_ON,MOUSE_y,KEY_MAXX,KEY_MINN);
-//	    
+    
 	//一键掉头
 	if(KEY_PRESSED_OFFSET_C&KEY_board)
 	{
@@ -286,13 +290,25 @@ void key_control_data(void)
 		}
 		
 	}
+	extern int Relay_Set_State;
+	if (KEY_board&KEY_PRESSED_OFFSET_CTRL)
+	{
+		if (KEY_board&KEY_PRESSED_OFFSET_G)	//Ctrl+G	电池供电模式
+			Relay_Set_State = 2;
+	}
+	if (KEY_board&KEY_PRESSED_OFFSET_SHIFT)
+	{
+		if (KEY_board&KEY_PRESSED_OFFSET_G)	//Shift+G	电容供电模式
+			Relay_Set_State = 1;
+	}	
 
 	//计时用
-	if (Gimbal_Precision_Mode_Delay_Cnt > 0)  Gimbal_Precision_Mode_Delay_Cnt--;
-	if (Gimbal_Reverse_Bottom_Delay_Cnt > 0)  Gimbal_Reverse_Bottom_Delay_Cnt--; 
-	if (Chassis_Reverse_Bottom_Delay_Cnt > 0) Chassis_Reverse_Bottom_Delay_Cnt--;
-	if (Chassis_TurnAround_Delay_Cnt>0)		  Chassis_TurnAround_Delay_Cnt--;
-	if (Fric_Switch_Delay_Cnt>0)			  Fric_Switch_Delay_Cnt--;
+	if (Chassis_Spin_Delay_Cnt > 0)				Chassis_Spin_Delay_Cnt--;
+	if (Gimbal_Precision_Mode_Delay_Cnt > 0)	Gimbal_Precision_Mode_Delay_Cnt--;
+	if (Gimbal_Reverse_Bottom_Delay_Cnt > 0)	Gimbal_Reverse_Bottom_Delay_Cnt--; 
+	if (Chassis_Reverse_Bottom_Delay_Cnt > 0)	Chassis_Reverse_Bottom_Delay_Cnt--;
+	if (Chassis_TurnAround_Delay_Cnt>0)			Chassis_TurnAround_Delay_Cnt--;
+	if (Fric_Switch_Delay_Cnt>0)				Fric_Switch_Delay_Cnt--;
 }
 /**
 	* @brief       幅度判断函数

@@ -31,9 +31,12 @@
 #define Chassis_Type AGV_Chassis
 
 //也可由云台直接传输指令
-#define CHASSIS_REMOTE_CLOSE   	 1    //关闭遥控器                                左高位
-#define CHASSIS_NORMAL           3    //正常模式                                  左中位
-#define CHASSIS_SPIN             2    //小陀螺模式                                    左低位
+#define CHASSIS_REMOTE_CLOSE		1	//关闭遥控器                                左高位
+#define CHASSIS_NORMAL				3	//正常模式                                  左中位
+#define CHASSIS_SPIN				2	//小陀螺模式                                    左低位
+
+#define Chassis_Follow_ON		1
+#define Chassis_Follow_OFF		0
 
 #define GIMBAL_HEAD_ANGLE  -30
 
@@ -139,6 +142,8 @@ extern CHASSIS_CONTROL_ORDER_t chassis_control_order;
 extern POWER_PID_t p_pid;
 extern BUFFER_PID_t b_pid;
 extern int shoot_flag;
+extern int Chassis_Follow_Switch;
+
 float Square(float Input);
 void vpid_chassis_realize_F(void);
 void chassis_move(void);

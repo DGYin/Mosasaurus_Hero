@@ -201,10 +201,10 @@ void Gimbal_Task(int S_Cnt, int MS_Cnt)
 	if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)Gimbal_Precision_Inactivated_Flag = 1;
 	Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
 	
-	if (MS_Cnt==51) Get_Pitch_Motor_Error_Status();//读取温度
-//	for (int i=0; i<11000; i++)
-//		i=i;
+	if (MS_Cnt==51) Get_Pitch_Motor_Error_Status();//每秒读取一次Pitch电机温度
+	//读取Pitch编码器角度
 	Get_Pitch_Motor_SingleRound_Angle();
+	//for循环保证瓴控电机不会丢帧
 	for (int i=0; i<11000; i++)
 	i=i;
     Pitch_Motor_Model = MOTOR_LKTECH;//选择Pitch电机型号
@@ -215,21 +215,21 @@ void Gimbal_Task(int S_Cnt, int MS_Cnt)
     //Pitch角度限制，防止云台角度过阈破坏机械结构
 	if (Gimbal_Precision_Mode == 0)
 	{
-		if(gimbal_p.IMU_actual_angle <= -22.f)
+		if(gimbal_p.IMU_actual_angle <= -33.f)
 		{
-			gimbal_p.target_angle = -22.f;
+			gimbal_p.target_angle = -33.f;
 			gimbal_p.target_speed = 0;
 		}
-		if(gimbal_p.IMU_actual_angle >= 29)
+		if(gimbal_p.IMU_actual_angle >= 22)
 		{
-			gimbal_p.target_angle = 29;
+			gimbal_p.target_angle = 22;
 			gimbal_p.target_speed = 0;
 		}
 	}
 
 	else if (Gimbal_Precision_Mode)
 	{
-		if(gimbal_p.IMU_actual_angle <= -22.f || gimbal_p.IMU_actual_angle >= 29)
+		if(gimbal_p.IMU_actual_angle <= -33.f || gimbal_p.IMU_actual_angle >= 22)
 			Gimbal_Precision_Mode = 0;
 		//初次切换标志
 		if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1) Gimbal_Precision_Activated_Flag = 1;
@@ -274,7 +274,7 @@ void Gimbal_Task(int S_Cnt, int MS_Cnt)
 */
 void Gimbal_Init(void)
 {
-
+	
     YawPitch_PIDinit(); //PID初始化
     gimbal_set_mode = GIMBAL_ABSOLUTE_ANGLE;
     gimbal_y.IMU_actual_angle = 0.0f;
@@ -485,38 +485,20 @@ static void GIMBAL_PID(void)
 	//吊射模式未开启，使用IMU数据控制
 	if (Gimbal_Precision_Mode==0) 
 	{
-		//大陀螺时使用
-		if(gimbal_y.gimbal_motor_mode == GIMBAL_MOTOR_GYRO)
-		{
-			//优劣弧处理
-			while(Yaw_Target_Angle - Yaw_IMU_Angle > 180) Yaw_Target_Angle -= 360;
-			while(Yaw_Target_Angle - Yaw_IMU_Angle < -180) Yaw_Target_Angle += 360;
-			Yaw_Gyro_PID(&gimbal_y);
-		}
-		//普通模式使用
-		if(gimbal_y.gimbal_motor_mode == GIMBAL_MOTOR_ENCONDE)
-		{
-			//优劣弧处理
-			while(Yaw_Target_Angle - Yaw_IMU_Angle > 180) Yaw_Target_Angle -= 360;
-			while(Yaw_Target_Angle - Yaw_IMU_Angle < -180) Yaw_Target_Angle += 360;
-			Yaw_Gyro_PID(&gimbal_y);
-		}
-		
+		/**************************/
+		/**** Yaw电机PID计算  ****/
+		/**************************/
+		//优劣弧处理
+		while(Yaw_Target_Angle - Yaw_IMU_Angle > 180) Yaw_Target_Angle -= 360;
+		while(Yaw_Target_Angle - Yaw_IMU_Angle < -180) Yaw_Target_Angle += 360;
+		Yaw_Gyro_PID(&gimbal_y);
 		/**************************/
 		/**** Pitch电机PID计算 ****/
 		/**************************/
-		if(gimbal_p.gimbal_motor_mode == GIMBAL_MOTOR_RAW)
-		{
-			gimbal_motor_raw_pid(&gimbal_p);
-			//Send_Pitch_Motor_Shutdown_Instruction();
-		}
-
-		if(gimbal_p.gimbal_motor_mode == GIMBAL_MOTOR_GYRO)
-		{
-			Pitch_Gyro_PID(&gimbal_p);
-		}
+		Pitch_Gyro_PID(&gimbal_p);
 	}
 	else
+	//吊射模式开启，使用编码器模式
 	{
 		Pitch_Encoder_PID(&gimbal_p);
 		Yaw_Encoder_PID(&gimbal_y);

@@ -31,6 +31,12 @@
 
 
 /*variate----------------------------------------------------------------------*/
+
+/***********************************************************
+*@Brief	供外部调用的变量
+***********************************************************/
+int Chassis_Follow_Switch = Chassis_Follow_ON;
+
 float total_current_limit, total_current, power;
 uint16_t buffer, max_power;
 BUFFER_PID_t b_pid;
@@ -310,7 +316,8 @@ static void chassis_move_mode(void)
 			break;
 		//云台随动模式时
 		case CHASSIS_NORMAL:
-			wz = wz -1.0f * chassis_follow(); //为了使底盘回到云台角度而产生的旋转
+			if (Chassis_Follow_Switch == Chassis_Follow_ON)		wz = wz -1.0f * chassis_follow(); //为了使底盘回到云台角度而产生的旋转
+			if (Chassis_Follow_Switch == Chassis_Follow_OFF)	Gimbal_Chassis_Relative_Angle = 0;
 			break;
 		//旋转模式时
 		case CHASSIS_SPIN:
@@ -319,6 +326,7 @@ static void chassis_move_mode(void)
 			else wz = 1.0f;
 			break;
 	}
+	
     chassis_speed_control(vx, vy, wz, Gimbal_Chassis_Relative_Angle);
 
 }

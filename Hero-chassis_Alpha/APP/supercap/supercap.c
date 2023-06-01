@@ -245,7 +245,8 @@ void PowerMode_Judgement(void)
 			Power_Mode = High_Voltage_Mode;
 		if (supercap_volt <= 150)
 			Power_Mode = Low_Voltage_Mode;
-		if (Last_Power_Mode == Low_Voltage_Mode && supercap_volt < 180) Power_Mode = Low_Voltage_Mode;
+		if (Last_Power_Mode == Low_Voltage_Mode && supercap_volt < 180) Power_Mode = Low_Voltage_Mode; 
+		else Power_Mode = High_Voltage_Mode;
 		
 	}
 	else 

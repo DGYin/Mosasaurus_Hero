@@ -33,6 +33,7 @@
 #define CAN_Yaw_Raw_Angle		  	  0x014
 #define CAN_Yaw_Invert_Flag_Trans_ID  0x015
 #define CAN_Beta_Power_Limit_ID		  0x016
+#define Relay_Mode_Set_ID			  0x017
 
 #define Briter_Encoder1_ID 0x0A
 #define Briter_Encoder2_ID 0x0B

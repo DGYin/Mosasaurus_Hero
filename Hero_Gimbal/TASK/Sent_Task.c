@@ -4,7 +4,8 @@
 #include "bsp_can.h"
 #include "lk_pitch_turn.h"
 
-#define CAN_Invert_Flag_Trans_ID  0x015
+
+int Relay_Set_State = 1; //1为电容供电，2为电池直连
 
 uint8_t canTX_chassis(int16_t x, int16_t y, int8_t z, int8_t deviation)
 {
@@ -30,7 +31,7 @@ uint8_t canTX_chassis(int16_t x, int16_t y, int8_t z, int8_t deviation)
     return temp;
 }
 
-uint8_t CAN_Tx_Mode(uint8_t mode, int Precision_Mode)
+uint8_t CAN_Tx_Mode(uint8_t Chassis_Mode, int Precision_Mode, int Chassis_Follow_Mode)
 {
     CAN_TxHeaderTypeDef canFrame;
     uint8_t data[8] = {0};
@@ -41,9 +42,9 @@ uint8_t CAN_Tx_Mode(uint8_t mode, int Precision_Mode)
     canFrame.RTR = CAN_RTR_DATA;
     canFrame.DLC = 8;
     canFrame.TransmitGlobalTime = DISABLE;
-    data[0] = mode;
+    data[0] = Chassis_Mode;
     data[1] = Precision_Mode;
-    data[2] = 0;
+    data[2] = Chassis_Follow_Mode;
     data[3] = 0;
     data[4] = 0;
     data[5] = 0;
@@ -228,6 +229,29 @@ void canTX_Invert_Flag(uint8_t Bool_Invert_Flag)
     canFrame.TransmitGlobalTime = DISABLE;
 
     data[0] = Bool_Invert_Flag;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 0;
+    data[4] = 0;
+    data[5] = 0;
+    data[6] = 0;
+    data[7] = 0;
+    HAL_CAN_AddTxMessage(&hcan2, &canFrame, data, &temp);
+}
+
+void canTX_Relay_Set_Mode(void)
+{
+    CAN_TxHeaderTypeDef canFrame;
+    uint8_t data[8] = {0};
+    uint32_t temp = 0;
+
+    canFrame.IDE = CAN_ID_STD;
+    canFrame.StdId = Relay_Mode_Set_ID;
+    canFrame.RTR = CAN_RTR_DATA;
+    canFrame.DLC = 8;
+    canFrame.TransmitGlobalTime = DISABLE;
+
+    data[0] = Relay_Set_State;
     data[1] = 0;
     data[2] = 0;
     data[3] = 0;

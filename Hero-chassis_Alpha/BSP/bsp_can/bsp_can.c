@@ -27,7 +27,7 @@
 
 
 #include "bsp_can.h"
-
+#include "relay_task.h"
 
 /*define-----------------------------------------------------------------------*/
 
@@ -268,9 +268,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)//CAN接收函数
 		
 		switch(CAN_RxHeaderStruct.StdId)
 		{
+
 			case MODE_RECEIVE_ID:
-				chassis_control_order.chassis_mode		=	(uint8_t)gdata[0];
-				chassis_control_order.Precision_Mode 	= 	(uint8_t)gdata[1];
+				chassis_control_order.chassis_mode		=	(uint8_t)rxdata[0];
+				chassis_control_order.Precision_Mode 	= 	(uint8_t)rxdata[1];
+				Chassis_Follow_Switch					= 	(uint8_t)rxdata[2];		
 				chassis_control_order.last_chassis_mode=chassis_control_order.chassis_mode;
 				break;		
 			case GIMBAL_CONTROL_ID: //遥控值接收
@@ -308,9 +310,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)//CAN接收函数
 			case Briter_Encoder3_ID:
 				Encoder_Data_Process(rxdata, &Briter_Encoder3,&Chassis_MotorC);              
 				break;     
-			//Yaw换向Flag
+			//Yaw换向Flag，已弃用
 			case CAN_Yaw_Invert_Flag_Trans_ID:
 				gimbal_y.Invert_Flag = rxdata[0];
+				break;
+			//接收继电器控制模式
+			case Relay_Mode_Set_ID:
+				Relay_Set_State = rxdata[0];
 				break;
 		}
 	}

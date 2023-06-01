@@ -7,6 +7,7 @@
 #include "referee.h"
 #include "bsp_referee.h"
 #include "supercap.h"
+#include "relay_task.h"
 
 extern int time2;
 #define Max(a,b) ((a) > (b) ? (a) : (b))
@@ -468,7 +469,7 @@ int Referee_UI_Init_Flag = 0;
 void Referee_UI_Init(void)
 {
     UI_Init_Counter++; //计时用
-    if (UI_Init_Counter % 1700 == 0) //定时重启
+    if (UI_Init_Counter % 1800 == 0) //定时重启
         Referee_UI_Init_Flag = 0;
 
     //绘制不变的线
@@ -509,60 +510,65 @@ void Referee_UI_Init(void)
             UI_Draw_Line(&UI_Graph7.Graphic[1],	"102",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	780,	100,	930,	100);
             UI_Draw_Line(&UI_Graph7.Graphic[2],	"103",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,  990,	100,	1140,	100);
             UI_Draw_Line(&UI_Graph7.Graphic[3],	"104",	UI_Graph_Add,		1,	UI_Color_Yellow,	2,	1140,	100,	1290,	30);
-            UI_Draw_Line(&UI_Graph7.Graphic[4],	"105",	UI_Graph_Add,		1,	UI_Color_Yellow,	5,	959,	100,	960,	100);
+            //UI_Draw_Line(&UI_Graph7.Graphic[4],	"105",	UI_Graph_Add,		1,	UI_Color_Yellow,	5,	959,	100,	960,	100);
             //模式色环的绘制
-            UI_Draw_Arc	(&UI_Graph7.Graphic[5],	"106",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		180,	660,	15,	15);//吊射模式色环
-            UI_Draw_Arc	(&UI_Graph7.Graphic[6],	"107",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		180,	590,	15,	15);//陀螺模式色环
+			UI_Draw_Arc	(&UI_Graph7.Graphic[4],	"109",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		Left_Ring_List_X,	520,	15,	15);//跟随模式色环
+            UI_Draw_Arc	(&UI_Graph7.Graphic[5],	"106",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		Left_Ring_List_X,	660,	15,	15);//吊射模式色环
+            UI_Draw_Arc	(&UI_Graph7.Graphic[6],	"107",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		Left_Ring_List_X,	590,	15,	15);//陀螺模式色环
             UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
             Referee_UI_Init_Flag++;
             break;
         case 3:
-			UI_Draw_Float(&UI_Graph5.Graphic[4], "205", UI_Graph_Add, 1, UI_Color_White, 18, 0, 3, 1700, 692, supercap_volt);
-            UI_Draw_Float(&UI_Graph5.Graphic[3], "201", UI_Graph_Add, 2, UI_Color_White, 18, 3, 3, 1000, 632, 0.00f);
-            UI_Draw_Float(&UI_Graph5.Graphic[2], "204", UI_Graph_Add, 1, UI_Color_White, 18, 0, 3, 1700, 572, Pitch_Tempreture);
-            UI_Draw_Arc	(&UI_Graph5.Graphic[1],	"108",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		180,	730,	15,	15);//摩擦轮色环
+			UI_Draw_Float(&UI_Graph5.Graphic[4], "205", UI_Graph_Add, 1, UI_Color_White, 18, 0, 3, Right_Num_List_X, 692, supercap_volt);
+            UI_Draw_Float(&UI_Graph5.Graphic[3], "201", UI_Graph_Add, 2, UI_Color_White, 18, 3, 3, Right_Num_List_X, 632, 0.00f);
+            UI_Draw_Float(&UI_Graph5.Graphic[2], "204", UI_Graph_Add, 1, UI_Color_White, 18, 0, 3, Right_Num_List_X, 572, Pitch_Tempreture);
+            UI_Draw_Arc	(&UI_Graph5.Graphic[1],	"108",	UI_Graph_Add,	2,	UI_Color_Pink,		0,	360,	5,		Left_Ring_List_X,	730,	15,	15);//摩擦轮色环
             UI_Draw_Float(&UI_Graph5.Graphic[0], "203", UI_Graph_Add, 1, UI_Color_White, 18, 0, 3, 1500, 632, Shoot_Num);
             UI_PushUp_Graphs(5, &UI_Graph5, get_robot_id());
             Referee_UI_Init_Flag++;
             break;
         case 4:
-            UI_Draw_String(&UI_String1.String, "305", UI_Graph_Add, 2, UI_Color_Pink, 18, 8, 3,  80, 670, "Prcs");//吊射模式指示，粉色为关，绿色为开
+            UI_Draw_String(&UI_String1.String, "305", UI_Graph_Add, 2, UI_Color_Pink, 18, 8, 3,  Left_Title_List_X, 670, "Prcs");//吊射模式指示，粉色为关，绿色为开
             UI_PushUp_String(&UI_String1, get_robot_id());
             Referee_UI_Init_Flag++;
             break;
         case 5:
-            UI_Draw_String(&UI_String1.String, "306", UI_Graph_Add, 2, UI_Color_Pink, 18, 8, 3,  80, 740, "Fric");//摩擦轮状态指示，粉色为关，绿色为开
+            UI_Draw_String(&UI_String1.String, "306", UI_Graph_Add, 2, UI_Color_Pink, 18, 8, 3,  Left_Title_List_X, 740, "Fric");//摩擦轮状态指示，粉色为关，绿色为开
             UI_PushUp_String(&UI_String1, get_robot_id());
             Referee_UI_Init_Flag++;
             break;
         case 6:
-            UI_Draw_String(&UI_String1.String, "307", UI_Graph_Add, 2, UI_Color_White, 18, 8, 3,  1600, 572, "PMCD:");//Pitch电机温度指示
+            UI_Draw_String(&UI_String1.String, "307", UI_Graph_Add, 2, UI_Color_White, 18, 8, 3,  Right_Title_List_X, 572, "PMCD:");//Pitch电机温度指示
             UI_PushUp_String(&UI_String1, get_robot_id());
             Referee_UI_Init_Flag++;
             break;
         case 7:
-            UI_Draw_String(&UI_String1.String, "308", UI_Graph_Add, 2, UI_Color_White, 18, 8, 3,  1600, 632, "LCC:");//左键次数指示
+            UI_Draw_String(&UI_String1.String, "308", UI_Graph_Add, 2, UI_Color_White, 18, 8, 3,  Right_Title_List_X, 632, "LCC:");//左键次数指示
             UI_PushUp_String(&UI_String1, get_robot_id());
             Referee_UI_Init_Flag++;
             break;
         case 8:
-            UI_Draw_String(&UI_String.String, "304", UI_Graph_Add, 2, UI_Color_Pink, 18, 8, 3,  80, 600, "Spin");//陀螺模式指示，粉色为关，绿色为开
+            UI_Draw_String(&UI_String.String, "304", UI_Graph_Add, 2, UI_Color_Pink, 18, 8, 3,  Left_Title_List_X, 600, "Spin");//陀螺模式指示，粉色为关，绿色为开
             UI_PushUp_String(&UI_String, get_robot_id());
             Referee_UI_Init_Flag++;
             break;
         case 9:
-            UI_Draw_String(&UI_String1.String, "309", UI_Graph_Add, 2, UI_Color_White, 18, 8, 3,  1600, 692, "SCV:");//左键次数指示
+            UI_Draw_String(&UI_String1.String, "309", UI_Graph_Add, 2, UI_Color_White, 18, 8, 3,  Right_Title_List_X, 692, "SCV:");//超电电压指示
             UI_PushUp_String(&UI_String1, get_robot_id());
             Referee_UI_Init_Flag++;
             break;
-
+		case 10:
+            UI_Draw_String(&UI_String.String, "310", UI_Graph_Add, 2, UI_Color_Pink, 18, 8, 3,  Left_Title_List_X, 530, "FOLW");//陀螺模式指示，粉色为关，绿色为开
+            UI_PushUp_String(&UI_String, get_robot_id());
+            Referee_UI_Init_Flag++;
+            break;
         }
     }
 }
 void referee_usart_task(void const *argument)
 {
     /* 动态UI控制变量 */
-    float    Capacitance_X;
+    extern int Chassis_Follow_Switch;
     /* 裁判系统初始化 */
     Referee_UI_Init();
     /* 解析裁判系统数据 */
@@ -575,17 +581,20 @@ void referee_usart_task(void const *argument)
     /**************************************************/
     if(UI_PushUp_Counter % 21 == 0) //静态UI 模式色环
     {
-
+		
+		if (Chassis_Follow_Switch == 1)
+			UI_Draw_Arc	(&UI_Graph5.Graphic[0],	"109",	UI_Graph_Change,	2,	UI_Color_Green,		0,	360,	10,		Left_Ring_List_X,	520,	15,	15);//跟随模式色环
+		else	UI_Draw_Arc	(&UI_Graph5.Graphic[0],	"109",	UI_Graph_Change,	2,	UI_Color_Pink,		0,	360,	5,		Left_Ring_List_X,	520,	15,	15);//跟随模式色环
         UI_Draw_Float(&UI_Graph5.Graphic[1], "203", UI_Graph_Change, 1, UI_Color_White, 18, 0, 3, 1700, 632, Shoot_Num);
         if (Fric_State == 1)
-            UI_Draw_Arc	(&UI_Graph5.Graphic[2],	"108",	UI_Graph_Change,	2,	UI_Color_Green,		0,	360,	10,		180,	730,	15,	15);//摩擦轮色环
-        else 	UI_Draw_Arc	(&UI_Graph5.Graphic[2],	"108",	UI_Graph_Change,	2,	UI_Color_Pink,		0,	360,	5,		180,	730,	15,	15);//摩擦轮色环
+            UI_Draw_Arc	(&UI_Graph5.Graphic[2],	"108",	UI_Graph_Change,	2,	UI_Color_Green,		0,	360,	10,		Left_Ring_List_X,	730,	15,	15);//摩擦轮色环
+        else 	UI_Draw_Arc	(&UI_Graph5.Graphic[2],	"108",	UI_Graph_Change,	2,	UI_Color_Pink,		0,	360,	5,		Left_Ring_List_X,	730,	15,	15);//摩擦轮色环
         if (chassis_control_order.Precision_Mode == 0)
-            UI_Draw_Arc	(&UI_Graph5.Graphic[3],	"106",	UI_Graph_Change,	2,	UI_Color_Pink,		0,	360,	5,		180,	660,	15,	15);//吊射模式色环
-        else 	UI_Draw_Arc	(&UI_Graph5.Graphic[3],	"106",	UI_Graph_Change,	2,	UI_Color_Green,		0,	360,	10,		180,	660,	15,	15);//吊射模式色环
+            UI_Draw_Arc	(&UI_Graph5.Graphic[3],	"106",	UI_Graph_Change,	2,	UI_Color_Pink,		0,	360,	5,		Left_Ring_List_X,	660,	15,	15);//吊射模式色环
+        else 	UI_Draw_Arc	(&UI_Graph5.Graphic[3],	"106",	UI_Graph_Change,	2,	UI_Color_Green,		0,	360,	10,		Left_Ring_List_X,	660,	15,	15);//吊射模式色环
         if (chassis_control_order.chassis_mode == CHASSIS_SPIN)
-            UI_Draw_Arc	(&UI_Graph5.Graphic[4],	"107",	UI_Graph_Change,	2,	UI_Color_Green,		0,	360,	10,		180,	590,	15,	15);//陀螺模式色环
-        else 	UI_Draw_Arc	(&UI_Graph5.Graphic[4],	"107",	UI_Graph_Change,	2,	UI_Color_Pink,		0,	360,	5,		180,	590,	15,	15);//陀螺模式色环
+            UI_Draw_Arc	(&UI_Graph5.Graphic[4],	"107",	UI_Graph_Change,	2,	UI_Color_Green,		0,	360,	10,		Left_Ring_List_X,	590,	15,	15);//陀螺模式色环
+        else 	UI_Draw_Arc	(&UI_Graph5.Graphic[4],	"107",	UI_Graph_Change,	2,	UI_Color_Pink,		0,	360,	5,		Left_Ring_List_X,	590,	15,	15);//陀螺模式色环
         UI_PushUp_Graphs(5, &UI_Graph5, get_robot_id());
     }
     if(UI_PushUp_Counter % 131 == 0) //动态UI预绘制 图形
@@ -599,24 +608,39 @@ void referee_usart_task(void const *argument)
     if(UI_PushUp_Counter % 241 == 0) //动态UI绘制 小陀螺模式
     {
         if (chassis_control_order.chassis_mode == CHASSIS_SPIN)
-            UI_Draw_String(&UI_String.String, "304", UI_Graph_Change, 2, UI_Color_Green, 18, 8, 4,  80, 600, "Spin");//陀螺模式指示，粉色为关，绿色为开
-        else UI_Draw_String(&UI_String.String, "304", UI_Graph_Change, 2, UI_Color_Pink, 18, 8, 2,  80, 600, "Spin");//陀螺模式指示，粉色为关，绿色为开
+            UI_Draw_String(&UI_String.String, "304", UI_Graph_Change, 2, UI_Color_Green, 18, 8, 4,  Left_Title_List_X, 600, "Spin");//陀螺模式指示，粉色为关，绿色为开
+        else UI_Draw_String(&UI_String.String, "304", UI_Graph_Change, 2, UI_Color_Pink, 18, 8, 2,  Left_Title_List_X, 600, "Spin");//陀螺模式指示，粉色为关，绿色为开
         UI_PushUp_String(&UI_String, get_robot_id());
     }
     if(UI_PushUp_Counter % 251 == 0) //动态UI绘制 吊射模式
     {
         if (chassis_control_order.Precision_Mode == 1)
-            UI_Draw_String(&UI_String1.String, "305", UI_Graph_Change, 2, UI_Color_Green, 18, 8, 4,  80, 670, "Prcs");//吊射模式指示，粉色为关，绿色为开
-        else UI_Draw_String(&UI_String1.String, "305", UI_Graph_Change, 2, UI_Color_Pink, 18, 8, 2,  80, 670, "Prcs");//吊射模式指示，粉色为关，绿色为开
+            UI_Draw_String(&UI_String1.String, "305", UI_Graph_Change, 2, UI_Color_Green, 18, 8, 4,  Left_Title_List_X, 670, "Prcs");//吊射模式指示，粉色为关，绿色为开
+        else UI_Draw_String(&UI_String1.String, "305", UI_Graph_Change, 2, UI_Color_Pink, 18, 8, 2,  Left_Title_List_X, 670, "Prcs");//吊射模式指示，粉色为关，绿色为开
         UI_PushUp_String(&UI_String1, get_robot_id());
     }
     if(UI_PushUp_Counter % 261 == 0) //动态UI绘制 摩擦轮状态
     {
         if (Fric_State == 1)
-            UI_Draw_String(&UI_String1.String, "306", UI_Graph_Change, 2, UI_Color_Green, 18, 8, 4,  80, 740, "Fric");//摩擦轮指示，粉色为关，绿色为开
-        else UI_Draw_String(&UI_String1.String, "306", UI_Graph_Change, 2, UI_Color_Pink, 18, 8, 2,  80, 740, "Fric");//摩擦轮指示，粉色为关，绿色为开
+            UI_Draw_String(&UI_String1.String, "306", UI_Graph_Change, 2, UI_Color_Green, 18, 8, 4,  Left_Title_List_X, 740, "Fric");//摩擦轮指示，粉色为关，绿色为开
+        else UI_Draw_String(&UI_String1.String, "306", UI_Graph_Change, 2, UI_Color_Pink, 18, 8, 2,  Left_Title_List_X, 740, "Fric");//摩擦轮指示，粉色为关，绿色为开
         UI_PushUp_String(&UI_String1, get_robot_id());
     }
+	if(UI_PushUp_Counter % 271 == 0) //动态UI绘制 继电器状态
+    {
+        if (Relay_Set_State == Direct_Power_Supply)
+		UI_Draw_String(&UI_String1.String, "309", UI_Graph_Change, 2, UI_Color_Pink, 22, 8, 5,  Right_Title_List_X, 692, "DIRC");//摩擦轮指示，粉色为关，绿色为开
+        else UI_Draw_String(&UI_String1.String, "309", UI_Graph_Change, 2, UI_Color_White, 18, 8, 3,  Right_Title_List_X, 692, "SCV:");
+		UI_PushUp_String(&UI_String1, get_robot_id());
+    }
+	if(UI_PushUp_Counter % 281 == 0) 
+	{
+		if (Chassis_Follow_Switch == 0)
+		UI_Draw_String(&UI_String.String, "310", UI_Graph_Change, 2, UI_Color_Pink, 18, 8, 2,  Left_Title_List_X, 530, "FOLW");//跟随模式指示，粉色为关，绿色为开
+		else UI_Draw_String(&UI_String.String, "310", UI_Graph_Change, 2, UI_Color_Green, 18, 8, 4,  Left_Title_List_X, 530, "FOLW");//跟随模式指示，粉色为关，绿色为开
+		UI_PushUp_String(&UI_String, get_robot_id());
+	}
+		
     //	if (UI_PushUp_Counter % 171 == 0) //动态UI绘制 左键点击数量
     //	{
     //		UI_Draw_Float(&UI_Graph1.Graphic[0], "203", UI_Graph_Change, 2, UI_Color_White, 22, 0, 3, 1500, 632, Shoot_Num);
@@ -681,16 +705,15 @@ void referee_usart_task(void const *argument)
         else UI_Draw_Float(&UI_Graph2.Graphic[0], "201", UI_Graph_Change, 2, UI_Color_Purple, 22, 5, 5, 1000, 632, pich_angle);
 
         /* 超级电容容量 */
-        //        UI_Capacitance = Max(UI_Capacitance, 30);
-        //        Capacitance_X  = 1870.0f - 4.1f * UI_Capacitance;
-        //        if(50 < UI_Capacitance && UI_Capacitance <= 100) UI_Draw_Line(&UI_Graph2.Graphic[1], "202", UI_Graph_Change, 2, UI_Color_Green, 20, Capacitance_X, 334, 1870, 334);
-        //        if(35 < UI_Capacitance && UI_Capacitance <=  50) UI_Draw_Line(&UI_Graph2.Graphic[1], "202", UI_Graph_Change, 2, UI_Color_Yellow, 20, Capacitance_X, 334, 1870, 334);
-        //        if(0  < UI_Capacitance && UI_Capacitance <=  35) UI_Draw_Line(&UI_Graph2.Graphic[1], "202", UI_Graph_Change, 2, UI_Color_Orange, 20, Capacitance_X, 334, 1870, 334);
         extern int Supercap_Connection_Status;
-		if (Supercap_Connection_Status)
-			UI_Draw_Float(&UI_Graph2.Graphic[1], "205", UI_Graph_Change, 1, UI_Color_White, 18, 0, 3, 1700, 692, supercap_volt);
-		else UI_Draw_Float(&UI_Graph2.Graphic[1], "205", UI_Graph_Change, 1, UI_Color_Purple, 22, 2, 5, 1700, 692, 0.00);
-		
+		if (Relay_Set_State == Supercap_Power_Supply)
+		{
+			if (Supercap_Connection_Status)
+				UI_Draw_Float(&UI_Graph2.Graphic[1], "205", UI_Graph_Change, 1, UI_Color_White, 18, 0, 3, 1700, 692, supercap_volt);
+			else UI_Draw_Float(&UI_Graph2.Graphic[1], "205", UI_Graph_Change, 1, UI_Color_Purple, 22, 2, 5, 1700, 692, 0.00);
+		}
+		else 
+			UI_Draw_Float(&UI_Graph2.Graphic[1], "205", UI_Graph_Change, 1, UI_Color_White, 18, 0, 0, 1700, 692, supercap_volt); //线宽为0，不显示
         UI_PushUp_Graphs(2, &UI_Graph2, get_robot_id());
     }
 }

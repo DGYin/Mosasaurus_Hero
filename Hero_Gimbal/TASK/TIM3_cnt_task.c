@@ -21,6 +21,7 @@ int IMU_cnt = 0, start_flag = 0, S_Count = 0;
 extern int Gimbal_Precision_Mode;
 void TIM3_CNT_TASK()
 {
+	
 	Buzzer_Task(S_Count,MS_Count);
 	//等待IMU数据稳定
 	if(IMU_cnt > 3)
@@ -30,7 +31,7 @@ void TIM3_CNT_TASK()
     else
     {
         canTX_chassis(0, 0, 0, 0);
-        CAN_Tx_Mode(CHASSIS_REMOTE_CLOSE, Gimbal_Precision_Mode);
+        CAN_Tx_Mode(CHASSIS_REMOTE_CLOSE, Gimbal_Precision_Mode, Chassis_Follow_Switch);
     }
     MS_Count++;
 	//IMU任务
@@ -39,6 +40,7 @@ void TIM3_CNT_TASK()
 	{
 	    if(MS_Count % 7 == 2)
 		{
+			canTX_Relay_Set_Mode();
 			Gimbal_Task(S_Count, MS_Count);		//控制云台
 			shoot_task();		//控制拨弹轮、摩擦轮的运动
 			DMA_Send();			//向上位机发送数据
