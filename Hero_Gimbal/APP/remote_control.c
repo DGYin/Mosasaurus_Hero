@@ -3,11 +3,13 @@
 #include "dma.h"
 #include "usart.h"
 #include "math.h"
+#include "referee.h"
 
 #define RC_huart    huart3
 #define RC_UART		USART3
 #define RC_dma		hdma_usart3_rx
 
+int Transmission_Mode = Transmission_Mode_OFF;
 
 /*******
 ch
@@ -256,15 +258,16 @@ static void sbus_to_rc(volatile const uint8_t *sbus_buf, RC_ctrl_t *rc_ctrl, RC_
 	rc_ctrl->rc.s[0] = ((sbus_buf[5] >> 4) & 0x0003); //×ó²¦¸Ë -+
 	rc_ctrl->rc.s[1] = ((sbus_buf[5] >> 4) & 0x000C) >> 2; //ÓÒ²¦¸Ë -+
 	
-	rc_ctrl->mouse.x = sbus_buf[6] | (sbus_buf[7] << 8); //Êó±êxÖá×ø±ê
-	rc_ctrl->mouse.y = sbus_buf[8] | (sbus_buf[9] << 8); //Êó±êyÖá×ø±ê
-	rc_ctrl->mouse.z = sbus_buf[10] | (sbus_buf[11] << 8);//Êó±êzÖá×ø±ê
-	
-	rc_ctrl->mouse.press_l = sbus_buf[12]; //Êó±ê×ó¼ü°´ÏÂ1
-	rc_ctrl->mouse.press_r = sbus_buf[13]; //Êó±êÓÒ¼ü°´ÏÂ1
-	
-	rc_ctrl->key.v = sbus_buf[14] | (sbus_buf[15] << 8); //¼üÅÌ¼üÖµ
-		
+	if (Transmission_Mode == Transmission_Mode_OFF)
+	{
+		rc_ctrl->mouse.x = sbus_buf[6] | (sbus_buf[7] << 8); //Êó±êxÖá×ø±ê
+		rc_ctrl->mouse.y = sbus_buf[8] | (sbus_buf[9] << 8); //Êó±êyÖá×ø±ê
+		rc_ctrl->mouse.z = sbus_buf[10] | (sbus_buf[11] << 8);//Êó±êzÖá×ø±ê
+		rc_ctrl->mouse.press_l = sbus_buf[12]; //Êó±ê×ó¼ü°´ÏÂ1
+		rc_ctrl->mouse.press_r = sbus_buf[13]; //Êó±êÓÒ¼ü°´ÏÂ1
+		rc_ctrl->key.v = sbus_buf[14] | (sbus_buf[15] << 8); //¼üÅÌ¼üÖµ
+	}	
+
 	rc_ctrl->rc.ch[0] -= 1024;
 	rc_ctrl->rc.ch[1] -= 1024;
 	rc_ctrl->rc.ch[2] -= 1024;

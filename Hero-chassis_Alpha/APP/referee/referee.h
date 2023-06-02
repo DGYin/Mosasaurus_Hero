@@ -563,6 +563,7 @@ void UI_Draw_String(string_data_struct_t *String,        //UI图形数据结构体指针
 void UI_PushUp_Graphs(uint8_t Counter, void *Graphs, uint8_t RobotID);
 void UI_PushUp_String(UI_String_t *String, uint8_t RobotID);
 void UI_PushUp_Delete(UI_Delete_t *Delete, uint8_t RobotID);
+void get_chassis_power_and_buffer_and_max(fp32 *power, uint16_t *buffer,uint16_t *power_max);
 extern void referee_usart_task();
 
 #ifdef __cplusplus

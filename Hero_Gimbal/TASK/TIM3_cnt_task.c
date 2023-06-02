@@ -10,6 +10,8 @@
 #include "sent_task.h"
 #include "buzzer_task.h"
 #include "lk_pitch_turn.h"
+#include "referee.h"
+
 int MS_Count = 0;
 int IMU_cnt = 0, start_flag = 0, S_Count = 0;
 //0.1ms
@@ -46,6 +48,8 @@ void TIM3_CNT_TASK()
 			DMA_Send();			//向上位机发送数据
 			remote_chassis();	//控制底盘的模式和运动
 		}
+		if(MS_Count % 33 == 0)
+			referee_unpack_fifo_data();
 	}
     if(MS_Count % 20 == 0)
     {
@@ -55,11 +59,15 @@ void TIM3_CNT_TASK()
 
     if(MS_Count % 7 == 0)
     {
+		
         //remote_chassis();
         if(KEY_MODE == KEY_OFF)
             remote_control_data();	//发送遥控器数据
         else
+		{
+			
             key_control_data();	//发送键盘数据
+		}
     }
 
     if(MS_Count % 70 == 0)

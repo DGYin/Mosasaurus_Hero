@@ -23,7 +23,7 @@
 
 #define RE_huart  huart6
 #define RE_UART		USART6
-#define RE_dma_rx		hdma_usart6_rx
+#define RE_dma_rx	hdma_usart6_rx
 #define RE_dma_tx   hdma_usart6_tx
 
 
@@ -102,7 +102,7 @@ static void REFEREE_init(uint8_t *rx1_buf, uint8_t *rx2_buf, uint16_t dma_buf_nu
 }
 
 
-//写入stm32f4xx_it.c串口usart1中断
+//写入stm32f4xx_it.c串口usart6中断
 void USART6_IRQHandler(void)
 {
 	static volatile uint8_t res;

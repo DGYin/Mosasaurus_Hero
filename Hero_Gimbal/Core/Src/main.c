@@ -40,6 +40,7 @@
 #include "BMI088driver.h"
 #include "BSP_UART.h"
 #include "blueteeth.h"
+#include "BSP_REFEREE.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -70,7 +71,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-fp32 gyro[3], accel[3], temp;
+fp32 gyro[3], accel[3];
 /* USER CODE END 0 */
 
 /**
@@ -88,8 +89,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-
-	HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -105,28 +105,28 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_CAN2_Init();
   MX_CAN1_Init();
-  
+  MX_CAN2_Init();
   MX_TIM3_Init();
-  MX_TIM4_Init();
-  MX_TIM6_Init();
-  MX_TIM10_Init();
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
+  MX_TIM6_Init();
   MX_I2C3_Init();
   MX_SPI1_Init();
-
+  MX_TIM10_Init();
   
-
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-  Chassis_Mode = CHASSIS_NORMAL;
-  HAL_TIM_Base_Start_IT(&htim3);
-  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
+    Chassis_Mode = CHASSIS_NORMAL;
+    HAL_TIM_Base_Start_IT(&htim3);
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
+	
+	referee_usart_fifo_init();
+	init_referee_struct_data();
+	
     uart_init();
-
     //   led_init();
     Bsp_canInit();
 

@@ -4,6 +4,9 @@
 #include "dma.h"
 #include "usart.h"
 
+#define	Transmission_Mode_OFF	0
+#define Transmission_Mode_ON	1
+
 #define SBUS_RX_BUF_NUM 36u
 #define RC_FRAME_LENGTH 18u
 
@@ -91,6 +94,7 @@ extern const RC_ctrl_t *get_remote_control_point(void);
 extern RC_GET_t rc_sent;
 extern RC_ctrl_t rc_ctrl;
 extern RC_ctrl_t global_ctrl;
+extern int Transmission_Mode;
 void remote_control_init(void);
 void RC_IRQHandler(void);
 

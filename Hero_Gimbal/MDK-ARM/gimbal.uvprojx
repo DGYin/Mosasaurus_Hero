@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../APP;../BSP/BSP_CAN;../BSP/BSP_TIM;../TASK;../Core/Src;../BSP/BSP_IMU;../components/algorithm;../components/devices;../BSP/BSP_SPI;../BSP/BSP_UART;../components/controller</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../APP;../BSP/BSP_CAN;../BSP/BSP_TIM;../TASK;../Core/Src;../BSP/BSP_IMU;../components/algorithm;../components/devices;../BSP/BSP_SPI;../BSP/BSP_UART;../components/controller;../components/fifo;../components/crc8_crc16;../BSP/BSP_Referee</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -590,6 +590,11 @@
               <FileType>1</FileType>
               <FilePath>..\APP\buzzer.c</FilePath>
             </File>
+            <File>
+              <FileName>referee.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\referee.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -624,6 +629,11 @@
               <FileName>BSP_UART.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\BSP_UART\BSP_UART.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_referee.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\BSP_Referee\bsp_referee.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2043,6 +2053,21 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Components</GroupName>
+          <Files>
+            <File>
+              <FileName>fifo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\components\fifo\fifo.c</FilePath>
+            </File>
+            <File>
+              <FileName>crc8_crc16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\components\crc8_crc16\crc8_crc16.c</FilePath>
             </File>
           </Files>
         </Group>
