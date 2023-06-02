@@ -7,6 +7,7 @@
 #include "shoot_task.h"
 #include "bsp_can.h"
 #include "lk_pitch_turn.h"
+#include "gimbal_calibration_task.h"
 
 Motor_HandleTypeDef	yaw_can_rx = {0}, pitch_can_rx = {0}, shoot_can_rx[2] = {0};
 
@@ -53,7 +54,19 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 				for(int i = 0; i < 8; i++)
 					LK_Pitch_Motor_Receive_Data[i] = rxData[i];
 				if (rxData[0] == Get_MultiRound_Angle_ID)
+				{
+					Motor_Alive_Flag++;
 					LK_Pitch_Motor.SingleRound_Angle =(int16_t) rxData[4] | rxData[5]<<8 | rxData[6]<<16 | rxData[7]<<24;
+					if (Gimbal_Calibration_Read_Angle_Flag) 
+					{
+						Gimbal_Encoder_Horizontal_Angle = LK_Pitch_Motor.SingleRound_Angle;
+						Gimbal_Calibration_Read_Angle_Flag = 0;
+					}
+					if (Gimbal_Calibration_Target_Times == Gimbal_Calibration_Times)
+						LK_Pitch_Motor.Calibrated_Angle = LK_Pitch_Motor.SingleRound_Angle - Gimbal_Encoder_Horizontal_Angle;
+					LK_Pitch_Motor.Converted_Calibrated_Angle = (LK_Pitch_Motor.Calibrated_Angle/216000.f)*360.f;
+					if (LK_Pitch_Motor.Converted_Calibrated_Angle > 200.f) LK_Pitch_Motor.Converted_Calibrated_Angle = LK_Pitch_Motor.Converted_Calibrated_Angle - 360.f;
+				}
 					if (LK_Pitch_Motor.SingleRound_Angle - LK_Pitch_Motor.Last_SingleRound_Angle)
 					LK_Pitch_Motor.Last_SingleRound_Angle = LK_Pitch_Motor.SingleRound_Angle;
 				if (rxData[0] == 0x9A)

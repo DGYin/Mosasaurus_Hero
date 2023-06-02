@@ -690,6 +690,11 @@
               <FileType>1</FileType>
               <FilePath>..\TASK\buzzer_task.c</FilePath>
             </File>
+            <File>
+              <FileName>gimbal_calibration_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TASK\gimbal_calibration_task.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

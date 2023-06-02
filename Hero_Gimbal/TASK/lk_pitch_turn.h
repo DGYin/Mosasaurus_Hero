@@ -14,6 +14,8 @@ typedef struct
     uint32_t Send_Status;
 	uint64_t SingleRound_Angle;
 	uint64_t Last_SingleRound_Angle;
+	int Calibrated_Angle;
+	float Converted_Calibrated_Angle;
 	uint64_t Total_Angle;
 } LK_Pitch_Motor_t;
 

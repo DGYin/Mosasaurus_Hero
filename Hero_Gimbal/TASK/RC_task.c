@@ -8,6 +8,7 @@
 #include "shoot_task.h"
 #include "can_receive.h"
 #include "chassis_task.h"
+#include "gimbal_calibration_task.h"
 
 int vision_switch_flag=0;//视觉开关的标识符，用来实现拨一下开关视觉，再播一下开关视觉的功能 
 static int deadline_judge(uint8_t a);
@@ -24,6 +25,7 @@ int Chassis_Reverse_Bottom_Delay_Cnt		= 0;
 int Gimbal_Precision_Mode_Delay_Cnt			= 0;
 int Chassis_TurnAround_Delay_Cnt			= 0;
 int Fric_Switch_Delay_Cnt					= 0;
+int Pitch_Calibration_Delay_Cnt				= 0;
 
 KEY_CONTROL KEY_MODE=KEY_OFF;
 extern int Sent_dataC;
@@ -288,7 +290,16 @@ void key_control_data(void)
 			//计时重置
 			Gimbal_Precision_Mode_Delay_Cnt = 100;
 		}
-		
+	}
+	if(KEY_PRESSED_OFFSET_F&KEY_board)
+	{
+		if (Pitch_Calibration_Delay_Cnt == 0) 
+		{
+			//进行校准
+			Gimbal_Calibration_Target_Times++;
+			//计时重置
+			Pitch_Calibration_Delay_Cnt = 1000;
+		}
 	}
 	extern int Relay_Set_State;
 	if (KEY_board&KEY_PRESSED_OFFSET_CTRL)
@@ -309,6 +320,7 @@ void key_control_data(void)
 	if (Chassis_Reverse_Bottom_Delay_Cnt > 0)	Chassis_Reverse_Bottom_Delay_Cnt--;
 	if (Chassis_TurnAround_Delay_Cnt>0)			Chassis_TurnAround_Delay_Cnt--;
 	if (Fric_Switch_Delay_Cnt>0)				Fric_Switch_Delay_Cnt--;
+	if (Pitch_Calibration_Delay_Cnt>0)			Pitch_Calibration_Delay_Cnt--;
 }
 /**
 	* @brief       幅度判断函数

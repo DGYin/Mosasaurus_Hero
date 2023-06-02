@@ -5,6 +5,7 @@
 #include "gimbal_task.h"
 #include "can_receive.h"
 #include "mode_control.h"
+#include "gimbal_calibration_task.h"
 /*
 	* @ brief       控制底盘
 	* @ param				none
@@ -21,6 +22,11 @@ void remote_chassis(void)
 	rc_sent.y_speed = rc_sent.y_speed*gimbal_y.Valuence_Invert_Flag;
 	if (Gimbal_Precision_Mode == 0)
 	{
+		if (Gimbal_Calibration_Target_Times > Gimbal_Calibration_Times) //校准模式，底盘不能运动
+		{
+			canTX_chassis(rc_sent.x_speed, rc_sent.y_speed, 0, 0);
+			CAN_Tx_Mode(CHASSIS_REMOTE_CLOSE, Gimbal_Precision_Mode, Chassis_Follow_Switch);
+		}
 		if(gimbal_set_mode == GIMBAL_ZERO_FORCE || gimbal_set_mode == GIMBAL_RELATIVE_ANGLE)//无力
 		{
 			canTX_chassis(rc_sent.x_speed, rc_sent.y_speed, 0, 0);

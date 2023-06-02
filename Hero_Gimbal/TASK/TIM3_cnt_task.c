@@ -40,10 +40,11 @@ void TIM3_CNT_TASK()
     INS_task();
 	if (start_flag == 1)
 	{
+		Gimbal_Task(S_Count, MS_Count);		//控制云台
 	    if(MS_Count % 7 == 2)
 		{
 			canTX_Relay_Set_Mode();
-			Gimbal_Task(S_Count, MS_Count);		//控制云台
+			
 			shoot_task();		//控制拨弹轮、摩擦轮的运动
 			DMA_Send();			//向上位机发送数据
 			remote_chassis();	//控制底盘的模式和运动
@@ -73,11 +74,11 @@ void TIM3_CNT_TASK()
     if(MS_Count % 70 == 0)
     {
         if(gimbal_set_mode == GIMBAL_ABSOLUTE_ANGLE) //A
-            canTX_UI(gimbal_p.IMU_actual_angle * 100, 1, LK_Pitch_Motor.Tempreture);
+            canTX_UI(LK_Pitch_Motor.Converted_Calibrated_Angle * 100, 1, LK_Pitch_Motor.Tempreture);
         else  if(gimbal_set_mode == GIMBAL_RELATIVE_ANGLE) //F
-            canTX_UI(gimbal_p.IMU_actual_angle * 100, 2,  LK_Pitch_Motor.Tempreture);
+            canTX_UI(LK_Pitch_Motor.Converted_Calibrated_Angle * 100, 2,  LK_Pitch_Motor.Tempreture);
         else  if(gimbal_set_mode == GIMBAL_TOP_ANGLE) //T
-            canTX_UI(gimbal_p.IMU_actual_angle * 100, 3,  LK_Pitch_Motor.Tempreture);
+            canTX_UI(LK_Pitch_Motor.Converted_Calibrated_Angle * 100, 3,  LK_Pitch_Motor.Tempreture);
     }
 	//计时部分
     if(MS_Count >= 1000)

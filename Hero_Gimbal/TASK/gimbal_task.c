@@ -32,7 +32,7 @@
 #include "can_receive.h"
 #include "RC_task.h"
 #include "lk_pitch_turn.h"
-
+#include "gimbal_calibration_task.h"
 /*define-----------------------------------------------------------------------*/
 #define yaw_angle gimbal_y.add_angle
 #define pitch_angle gimbal_p.add_angle
@@ -195,77 +195,78 @@ void Pitch_Encoder_PID(GIMBAL_t *gimbal_);
 --*/
 void Gimbal_Task(int S_Cnt, int MS_Cnt)
 {
-	extern int Gimbal_Precision_Mode, Last_Gimbal_Precision_Mode;
-	//初次切换标志
-	if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1) Gimbal_Precision_Activated_Flag = 1;
-	if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)Gimbal_Precision_Inactivated_Flag = 1;
-	Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
-	
-	if (MS_Cnt==51) Get_Pitch_Motor_Error_Status();//每秒读取一次Pitch电机温度
+	if (MS_Cnt % 4==0 && Motor_Alive_Flag > -5) Motor_Alive_Flag--;
+	if (Motor_Alive_Flag > 5) Motor_Alive_Flag = 5;
 	//读取Pitch编码器角度
 	Get_Pitch_Motor_SingleRound_Angle();
 	//for循环保证瓴控电机不会丢帧
 	for (int i=0; i<11000; i++)
 	i=i;
-    Pitch_Motor_Model = MOTOR_LKTECH;//选择Pitch电机型号
-    GIMBAL_CALBACK_GET(); //处理电机数据
-    GIMBAL_Set_Mode();//模式选择
-    GIMBAL_Set_Contorl();//模式控制
-    GIMBAL_PID();//PID计算
-    //Pitch角度限制，防止云台角度过阈破坏机械结构
-	if (Gimbal_Precision_Mode == 0)
+	//无需校准时
+	if (Gimbal_Calibration_Target_Times == Gimbal_Calibration_Times && MS_Cnt%7==0)
 	{
-		if(gimbal_p.IMU_actual_angle <= -33.f)
-		{
-			gimbal_p.target_angle = -33.f;
-			gimbal_p.target_speed = 0;
-		}
-		if(gimbal_p.IMU_actual_angle >= 22)
-		{
-			gimbal_p.target_angle = 22;
-			gimbal_p.target_speed = 0;
-		}
-	}
-
-	else if (Gimbal_Precision_Mode)
-	{
-		if(gimbal_p.IMU_actual_angle <= -33.f || gimbal_p.IMU_actual_angle >= 22)
-			Gimbal_Precision_Mode = 0;
+		extern int Gimbal_Precision_Mode, Last_Gimbal_Precision_Mode;
 		//初次切换标志
 		if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1) Gimbal_Precision_Activated_Flag = 1;
 		if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)Gimbal_Precision_Inactivated_Flag = 1;
 		Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
-
-	}
-	//云台电机数据发送
-	if (gimbal_set_mode != GIMBAL_ZERO_FORCE)//非无力模式
-	{
+		
+		if (MS_Cnt==51) Get_Pitch_Motor_Error_Status();//每秒读取一次Pitch电机温度
+		
+		Pitch_Motor_Model = MOTOR_LKTECH;//选择Pitch电机型号
+		GIMBAL_CALBACK_GET(); //处理电机数据
+		GIMBAL_Set_Mode();//模式选择
+		GIMBAL_Set_Contorl();//模式控制
+		GIMBAL_PID();//PID计算
+		//Pitch角度限制，防止云台角度过阈破坏机械结构
 		if (Gimbal_Precision_Mode == 0)
 		{
-			canTX_Yaw_Current(gimbal_y.given_current);
-			Send_Pitch_Motor_Add_Angle(-gimbal_p.gimbal_gyro_pid.out);//电机编码器角度低头是减，抬头是加；与IMU相反
+			if(gimbal_p.IMU_actual_angle <= -33.f)
+			{
+				gimbal_p.target_angle = -33.f;
+				gimbal_p.target_speed = 0;
+			}
+			if(gimbal_p.IMU_actual_angle >= 22)
+			{
+				gimbal_p.target_angle = 22;
+				gimbal_p.target_speed = 0;
+			}
 		}
-		else 
+
+		else if (Gimbal_Precision_Mode)
 		{
-			canTX_Yaw_Current(gimbal_y.given_current);
-			Send_Pitch_Motor_Add_Angle(gimbal_p.gimbal_enconde_pid.out);
+			if(gimbal_p.IMU_actual_angle <= -33.f || gimbal_p.IMU_actual_angle >= 22)
+				Gimbal_Precision_Mode = 0;
+			//初次切换标志
+			if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1) Gimbal_Precision_Activated_Flag = 1;
+			if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)Gimbal_Precision_Inactivated_Flag = 1;
+			Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
+
 		}
-		
+		//云台电机数据发送
+		if (gimbal_set_mode != GIMBAL_ZERO_FORCE)//非无力模式
+		{
+			if (Gimbal_Precision_Mode == 0)
+			{
+				canTX_Yaw_Current(gimbal_y.given_current);
+				Send_Pitch_Motor_Add_Angle(-gimbal_p.gimbal_gyro_pid.out);//电机编码器角度低头是减，抬头是加；与IMU相反
+			}
+			else 
+			{
+				canTX_Yaw_Current(gimbal_y.given_current);
+				Send_Pitch_Motor_Add_Angle(gimbal_p.gimbal_enconde_pid.out);
+			}
+			
+		}
 	}
-		
+	//需要进行校准
+	else if (Gimbal_Calibration_Target_Times > Gimbal_Calibration_Times && MS_Cnt%7==0) 
+	{
+		Gimbal_Calibration_Task(S_Cnt, MS_Cnt);
+	}
 	//Send_Pitch_Motor_Add_Angle(1000);
 	//Send_Pitch_Motor_Start_Instruction();
 	//Send_Pitch_Motor_Target_Speed(-100000); //debug用
-	
-    
-	
-    //    //3508电机数据发送
-    //    if (Pitch_Motor_Model == MOTOR_LKTECH)
-    //    {
-    //        //gimbal_p.given_current=0;
-    //        canTX_pitch(gimbal_p.given_current);
-    //
-    //    }
 }
 /*
 	* @ brief       云台初始化函数
