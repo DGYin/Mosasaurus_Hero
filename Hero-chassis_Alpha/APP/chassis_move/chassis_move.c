@@ -297,7 +297,7 @@ void Target_Velocity_Smoothen(int Target_Speed, int Current_Speed, int Smoothen_
 *@date		:2023-04-13
 ***********************************************************/
 float vx, vy, wz;
-float Gimbal_Chassis_Relative_Angle;
+float Gimbal_Chassis_Relative_Angle, Relative_Angle_For_UI;
 float Get_Gimbal_Chassis_Relative_Angle(void);
 static void chassis_move_mode(void)
 {
@@ -305,7 +305,8 @@ static void chassis_move_mode(void)
 	vy = (float)chassis_control_order.vy_set;
     wz = (float)chassis_control_order.wz_set/10.0f;
 	Gimbal_Chassis_Relative_Angle = Get_Gimbal_Chassis_Relative_Angle();//Gimbal_Chassis_Relative_Angle以云台为0度，CW为0~180°，CCW为0~-180°。
-    //	chassis_control_order.chassis_mode=CHASSIS_REMOTE_CLOSE;
+    Relative_Angle_For_UI = Gimbal_Chassis_Relative_Angle;
+	//	chassis_control_order.chassis_mode=CHASSIS_REMOTE_CLOSE;
 	switch(chassis_control_order.chassis_mode)
 	{
 		//模式为底盘无力时

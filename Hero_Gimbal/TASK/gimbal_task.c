@@ -50,7 +50,7 @@ float YawEncondePidSpeed[5] = {170.0f,	0.2f,	0.0f, 15000.0f,	7500.0f};   //±àÂëÆ
 float YawSpeedPid[5] 		= {2100.0f,	300.0f,	0.0f, 13000.0f,	7000.0f};     //ËÙ¶È»·int test_set_speed = 10;
 
 float PitchGyroPid[6] 		  = {20.f,		50.0f,			0.0f,		240.0f,			0.0f,	0.07f};  	//imu½Ç¶È»·
-float PitchEncondePid[6] 	  = {0.1f,		0.0f,			0.0f,		10.0f,		0.0f,		0.0f}; //±àÂëÆ÷½Ç¶È»·
+float PitchEncondePid[6] 	  = {0.1f,		0.0f,			0.001f,		100.0f,		0.0f,		0.0f}; //±àÂëÆ÷½Ç¶È»·
 float PitchEncondePidSpeed[6] = {0.0f,	0.0f,		0.0f,	0.0f,	0.0f, 	0.0f}; //±àÂëÆ÷ËÙ¶È»·
 //float PitchSpeedPid[6] 	  = {0.2f,		0.03f,			0.8f,		12.0f,	8.0f, 0.0f};    //
 float PitchSpeedPid[6] 		  = {12000.0f,		500.0f,			5000.0f,		3000.0f,	700.0f,		0.2f};    //8900.0f,		320.0f,			0.0f
@@ -464,13 +464,15 @@ static void GIMBAL_PID(void)
 	if (Gimbal_Precision_Activated_Flag)
 	{
 		gimbal_y.target_angle = gimbal_y.CAN_Total_Angle;
-		gimbal_p.target_angle = LK_Pitch_Motor.SingleRound_Angle;
+		//gimbal_p.target_angle = LK_Pitch_Motor.SingleRound_Angle;
+		gimbal_p.target_angle = 18.25/360.f*216000 + Gimbal_Encoder_Horizontal_Angle;
 		Gimbal_Precision_Activated_Flag = 0;
 	}
 	if (Gimbal_Precision_Inactivated_Flag)
 	{
 		gimbal_y.target_angle = -gimbal_y.IMU_actual_angle + 180*gimbal_y.Bool_Invert_Flag ;
-		gimbal_p.target_angle = gimbal_p.IMU_actual_angle;
+		//gimbal_p.target_angle = gimbal_p.IMU_actual_angle;
+		gimbal_p.target_angle = 0;
 		Gimbal_Precision_Inactivated_Flag = 0;
 	}
 	/**************************/
