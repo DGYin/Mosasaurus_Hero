@@ -486,7 +486,7 @@ void Referee_UI_Init(void)
             UI_Draw_Line(&UI_Graph7.Graphic[3], "004", UI_Graph_Add, 0, UI_Color_Green, 1,  0,	0,		0,	0); //第一行十字竖
             UI_Draw_Line(&UI_Graph7.Graphic[4], "005", UI_Graph_Add, 0, UI_Color_Green, 1,  0,	0,		0,	0); //第二行左横线
             UI_Draw_Line(&UI_Graph7.Graphic[5], "006", UI_Graph_Add, 0, UI_Color_Green, 5,  0,	0,		0,	0); //第二行中心点
-            UI_Draw_Line(&UI_Graph7.Graphic[6], "007", UI_Graph_Add, 0, UI_Color_Green, 1,  0,	0,		0,	0); //第二行右横线
+            UI_Draw_Line(&UI_Graph7.Graphic[6], "007", UI_Graph_Change, 0, UI_Color_Green, 3, SXC, 335, 1920, 190); //第二行右横线
             UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
             Referee_UI_Init_Flag++;
             break;
@@ -499,7 +499,7 @@ void Referee_UI_Init(void)
             UI_Draw_Line(&UI_Graph7.Graphic[3], "011",	UI_Graph_Add,	0,	UI_Color_Yellow, 1, 0		, 0		, 0		, 0); //第四行左横线
             UI_Draw_Arc	(&UI_Graph7.Graphic[0],	"110",	UI_Graph_Add, 2, UI_Color_Green, 350, 10,	10, 1920/2,	1080/2,	500, 300);//底盘前部色环
             UI_Draw_Line(&UI_Graph7.Graphic[5], "013",	UI_Graph_Add,	0,	UI_Color_Yellow, 2, SXC - 10	, 309	, SXC + 10	, 309); //第四行右横线
-            UI_Draw_Line(&UI_Graph7.Graphic[6], "014",	UI_Graph_Add,	0,	UI_Color_Yellow, 1, SXC		, 250	, SXC	, 500); //中心竖线
+            UI_Draw_Line(&UI_Graph7.Graphic[6], "014",	UI_Graph_Add,	0,	UI_Color_Yellow, 1, SXC		, 250	, SXC	, 700); //中心竖线
             UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
             Referee_UI_Init_Flag++;
             break;

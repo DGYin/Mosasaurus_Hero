@@ -211,7 +211,7 @@ void Gimbal_Task(int S_Cnt, int MS_Cnt)
 		if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)Gimbal_Precision_Inactivated_Flag = 1;
 		Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
 		
-		if (MS_Cnt==51) Get_Pitch_Motor_Error_Status();//每秒读取一次Pitch电机温度
+		if (MS_Cnt==7) Get_Pitch_Motor_Error_Status();//每秒读取一次Pitch电机温度
 		
 		Pitch_Motor_Model = MOTOR_LKTECH;//选择Pitch电机型号
 		GIMBAL_CALBACK_GET(); //处理电机数据

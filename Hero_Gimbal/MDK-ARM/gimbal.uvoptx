@@ -169,7 +169,7 @@
           <Type>0</Type>
           <LineNumber>533</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134250152</Address>
+          <Address>134250772</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -185,7 +185,7 @@
           <Type>0</Type>
           <LineNumber>530</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134250072</Address>
+          <Address>134250728</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -201,7 +201,7 @@
           <Type>0</Type>
           <LineNumber>532</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134250132</Address>
+          <Address>134250732</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -215,25 +215,9 @@
         <Bp>
           <Number>3</Number>
           <Type>0</Type>
-          <LineNumber>531</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134250112</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\TASK\gimbal_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\gimbal\../TASK/gimbal_task.c\531</Expression>
-        </Bp>
-        <Bp>
-          <Number>4</Number>
-          <Type>0</Type>
           <LineNumber>7214</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134236472</Address>
+          <Address>134236936</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -245,25 +229,41 @@
           <Expression>\\gimbal\../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c\7214</Expression>
         </Bp>
         <Bp>
-          <Number>5</Number>
+          <Number>4</Number>
           <Type>0</Type>
           <LineNumber>534</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>0</Address>
+          <Address>134250792</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
+          <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\TASK\gimbal_task.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression></Expression>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\534</Expression>
+        </Bp>
+        <Bp>
+          <Number>5</Number>
+          <Type>0</Type>
+          <LineNumber>535</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134250812</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\535</Expression>
         </Bp>
         <Bp>
           <Number>6</Number>
           <Type>0</Type>
-          <LineNumber>535</LineNumber>
+          <LineNumber>531</LineNumber>
           <EnabledFlag>0</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -752,7 +752,7 @@
       <DebugFlag>
         <trace>0</trace>
         <periodic>1</periodic>
-        <aLwin>0</aLwin>
+        <aLwin>1</aLwin>
         <aCover>0</aCover>
         <aSer1>0</aSer1>
         <aSer2>0</aSer2>

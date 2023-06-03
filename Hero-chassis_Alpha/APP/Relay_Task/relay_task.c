@@ -24,7 +24,7 @@ void Relay_Task(int S_Cnt, int MS_Cnt)
 	Global_Time = S_Cnt*1000 + MS_Cnt;
 	
 	//继电器控制，100ms进行一次
-	if (Global_Time%100 == 0)  //确保继电器模式切换间隔大于100ms，防止误触
+	if (Global_Time%300 == 0)  //确保继电器模式切换间隔大于300ms，防止误触
 	{
 		Relay_State = Relay_Set_State;
 		switch(Relay_State)
@@ -41,10 +41,10 @@ void Relay_Task(int S_Cnt, int MS_Cnt)
 	
 void Supercap_Power_Mode(void)
 {
-	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_RESET);
 }
 
 void Battery_Power_Mode(void)
 {
-	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET);
 }
