@@ -49,7 +49,7 @@ float YawGyroPIDSpeed[5]    = {3000.0f,	70.0f,	0.0f, 15000.0f,	7500.0f};	//imu速
 float YawEncondePidSpeed[5] = {170.0f,	0.2f,	0.0f, 15000.0f,	7500.0f};   //编码器速度环
 float YawSpeedPid[5] 		= {2100.0f,	300.0f,	0.0f, 13000.0f,	7000.0f};     //速度环int test_set_speed = 10;
 
-float PitchGyroPid[6] 		  = {20.f,		50.0f,			0.0f,		240.0f,			0.0f,	0.07f};  	//imu角度环
+float PitchGyroPid[6] 		  = {20.f,		40.0f,			0.0f,		240.0f,			0.0f,	0.07f};  	//imu角度环
 float PitchEncondePid[6] 	  = {0.1f,		0.0f,			0.001f,		100.0f,		0.0f,		0.0f}; //编码器角度环
 float PitchEncondePidSpeed[6] = {0.0f,	0.0f,		0.0f,	0.0f,	0.0f, 	0.0f}; //编码器速度环
 //float PitchSpeedPid[6] 	  = {0.2f,		0.03f,			0.8f,		12.0f,	8.0f, 0.0f};    //

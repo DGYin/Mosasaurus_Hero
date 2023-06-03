@@ -25,7 +25,7 @@ void Gimbal_Calibration_Task(int S_Cnt, int MS_Cnt)
 		}
 		else 
 		{
-			if (Motor_Alive_Flag ==  0) Gimbal_Calibration_Start_Time = Global_Time; //电机未上电，继续等待
+			if (Motor_Alive_Flag <=  0) Gimbal_Calibration_Start_Time = Global_Time; //电机未上电，继续等待
 			if (Global_Time-Gimbal_Calibration_Start_Time<4000) //3s时间供云台回到水平角度
 			{
 				//IMU数据获取
