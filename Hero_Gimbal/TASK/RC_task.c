@@ -210,17 +210,27 @@ void key_control_data(void)
 	rc_sent.r_speed = 0;
 	if(KEY_board & KEY_PRESSED_OFFSET_Q)
 	{
-		if (rc_sent.x_speed >= 0)
-			rc_sent.r_speed = -2.0;
-		else rc_sent.r_speed = 2.0;
+		if (Gimbal_Precision_Mode==0)
+		{
+			if (rc_sent.x_speed >= 0)
+				rc_sent.r_speed = -2.0;
+			else rc_sent.r_speed = 2.0;
+		}
+		else 
+			rc_sent.r_speed = -0.5;
 	}
 	//E¼ü°¢¿ËÂüµ×ÅÌÄ£Ê½£¬µ×ÅÌÓÒ×ª
 	if(KEY_board & KEY_PRESSED_OFFSET_E)
 	{
-		if (rc_sent.x_speed >= 0)
-			rc_sent.r_speed = 2.0;
-		else 
-			rc_sent.r_speed = -2.0;
+		if (Gimbal_Precision_Mode==0)
+		{
+			if (rc_sent.x_speed >= 0)
+				rc_sent.r_speed = 2.0;
+			else 
+				rc_sent.r_speed = -2.0;
+		}
+		else
+			rc_sent.r_speed = 0.5;
 	}
 
 	//Ä¦²ÁÂÖ¿ª¹Ø

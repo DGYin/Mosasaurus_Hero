@@ -45,8 +45,8 @@ void remote_chassis(void)
 	}
 	else//µı…‰ƒ£ Ω
 	{
-		canTX_chassis(0, 0, 0, 0);
-		CAN_Tx_Mode(CHASSIS_REMOTE_CLOSE, Gimbal_Precision_Mode, Chassis_Follow_Switch);
+		canTX_chassis(rc_sent.x_speed, rc_sent.y_speed, rc_sent.r_speed, 0);
+		CAN_Tx_Mode(CHASSIS_NORMAL, Gimbal_Precision_Mode, Chassis_Follow_Switch);
 	}
 	canTX_Invert_Flag(gimbal_y.Bool_Invert_Flag);
 }

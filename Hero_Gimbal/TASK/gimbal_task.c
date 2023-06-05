@@ -33,6 +33,7 @@
 #include "RC_task.h"
 #include "lk_pitch_turn.h"
 #include "gimbal_calibration_task.h"
+#include "chassis_task.h"
 /*define-----------------------------------------------------------------------*/
 #define yaw_angle gimbal_y.add_angle
 #define pitch_angle gimbal_p.add_angle
@@ -390,7 +391,7 @@ static void GIMBAL_Set_Contorl(void)
 		if (Gimbal_Precision_Mode)
 		{
 			gimbal_y.target_angle += gimbal_y.add_angle/6.0f;
-			gimbal_p.target_angle += gimbal_p.add_angle*300.0f;
+			gimbal_p.target_angle += gimbal_p.add_angle*150.0f;
 		}
 		else 
 		{
@@ -468,6 +469,7 @@ static void GIMBAL_PID(void)
 	{
 		gimbal_y.target_angle = gimbal_y.CAN_Total_Angle;
 		gimbal_p.target_angle = 18.25/360.f*216000;
+		Chassis_Follow_Switch = Chassis_Follow_OFF;
 		//gimbal_p.target_angle = 18.25/360.f*216000 - Gimbal_Encoder_Horizontal_Angle;
 //		while (gimbal_p.target_angle - LK_Pitch_Motor.Total_Angle < -216000) gimbal_p.target_angle = gimbal_p.target_angle+216000;
 //		while (gimbal_p.target_angle - LK_Pitch_Motor.Total_Angle >  216000) gimbal_p.target_angle = gimbal_p.target_angle-216000;
@@ -475,6 +477,7 @@ static void GIMBAL_PID(void)
 	}
 	if (Gimbal_Precision_Inactivated_Flag)
 	{
+		Chassis_Follow_Switch = Chassis_Follow_ON;
 		gimbal_y.target_angle = -gimbal_y.IMU_actual_angle + 180*gimbal_y.Bool_Invert_Flag ;
 		//gimbal_p.target_angle = gimbal_p.IMU_actual_angle;
 		gimbal_p.target_angle = 0;
