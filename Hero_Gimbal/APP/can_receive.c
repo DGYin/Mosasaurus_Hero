@@ -57,18 +57,24 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 				{
 					Motor_Alive_Flag++;
 					LK_Pitch_Motor.SingleRound_Angle =(int16_t) rxData[4] | rxData[5]<<8 | rxData[6]<<16 | rxData[7]<<24;
+					//Total_Angle¼ÆËã
+					if ((int)LK_Pitch_Motor.SingleRound_Angle - (int)LK_Pitch_Motor.Last_SingleRound_Angle < -108000) LK_Pitch_Motor.Round_Cnt++;
+					if ((int)LK_Pitch_Motor.SingleRound_Angle - (int)LK_Pitch_Motor.Last_SingleRound_Angle > 108000) LK_Pitch_Motor.Round_Cnt--;
+					LK_Pitch_Motor.Total_Angle = LK_Pitch_Motor.Round_Cnt*216000 + (int)LK_Pitch_Motor.SingleRound_Angle - Gimbal_Encoder_Horizontal_Angle;
+					LK_Pitch_Motor.Last_SingleRound_Angle = LK_Pitch_Motor.SingleRound_Angle;
+				
 					if (Gimbal_Calibration_Read_Angle_Flag) 
 					{
-						Gimbal_Encoder_Horizontal_Angle = LK_Pitch_Motor.SingleRound_Angle;
+						Gimbal_Encoder_Horizontal_Angle = LK_Pitch_Motor.Total_Angle;
 						Gimbal_Calibration_Read_Angle_Flag = 0;
 					}
 					if (Gimbal_Calibration_Target_Times == Gimbal_Calibration_Times)
-						LK_Pitch_Motor.Calibrated_Angle = LK_Pitch_Motor.SingleRound_Angle - Gimbal_Encoder_Horizontal_Angle;
+						LK_Pitch_Motor.Calibrated_Angle = LK_Pitch_Motor.Total_Angle - Gimbal_Encoder_Horizontal_Angle;
 					LK_Pitch_Motor.Converted_Calibrated_Angle = (LK_Pitch_Motor.Calibrated_Angle/216000.f)*360.f;
 					if (LK_Pitch_Motor.Converted_Calibrated_Angle > 200.f) LK_Pitch_Motor.Converted_Calibrated_Angle = LK_Pitch_Motor.Converted_Calibrated_Angle - 360.f;
+					
 				}
-					if (LK_Pitch_Motor.SingleRound_Angle - LK_Pitch_Motor.Last_SingleRound_Angle)
-					LK_Pitch_Motor.Last_SingleRound_Angle = LK_Pitch_Motor.SingleRound_Angle;
+					
 				if (rxData[0] == 0x9A)
 					LK_Pitch_Motor.Tempreture = rxData[1];
 				break;

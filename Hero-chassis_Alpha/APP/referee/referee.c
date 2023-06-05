@@ -306,7 +306,7 @@ void get_shoot_data(uint8_t *bullet_freq,	float *bullet_speed, uint8_t *bullet_s
 {
     *bullet_freq = shoot_data_t.bullet_freq;
     *bullet_speed = shoot_data_t.bullet_speed;
-		*bullet_speedlimit = robot_state.shooter_id1_17mm_speed_limit;
+	*bullet_speedlimit = robot_state.shooter_id1_17mm_speed_limit;
 }
 
 /*获取比赛类型和比赛状态*/

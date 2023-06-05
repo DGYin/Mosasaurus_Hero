@@ -225,11 +225,14 @@ void Gimbal_Task(int S_Cnt, int MS_Cnt)
 			{
 				gimbal_p.target_angle = -33.f;
 				gimbal_p.target_speed = 0;
+				if (gimbal_p.gimbal_gyro_pid.out>0) gimbal_p.gimbal_gyro_pid.out= 100; //如果目标是抬头，要低头
 			}
 			if(gimbal_p.IMU_actual_angle >= 22)
 			{
 				gimbal_p.target_angle = 22;
 				gimbal_p.target_speed = 0;
+				if (gimbal_p.gimbal_gyro_pid.out<0) gimbal_p.gimbal_gyro_pid.out= -100; //如果目标是低头，要抬头
+			
 			}
 		}
 
@@ -238,8 +241,8 @@ void Gimbal_Task(int S_Cnt, int MS_Cnt)
 			if(gimbal_p.IMU_actual_angle <= -33.f || gimbal_p.IMU_actual_angle >= 22)
 				Gimbal_Precision_Mode = 0;
 			//初次切换标志
-			if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1) Gimbal_Precision_Activated_Flag = 1;
-			if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)Gimbal_Precision_Inactivated_Flag = 1;
+			if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1)	Gimbal_Precision_Activated_Flag = 1;
+			if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)	Gimbal_Precision_Inactivated_Flag = 1;
 			Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
 
 		}
@@ -386,8 +389,8 @@ static void GIMBAL_Set_Contorl(void)
     {
 		if (Gimbal_Precision_Mode)
 		{
-			gimbal_y.target_angle += gimbal_y.add_angle/3.0f;
-			gimbal_p.target_angle += -gimbal_p.add_angle*50.0f;
+			gimbal_y.target_angle += gimbal_y.add_angle/6.0f;
+			gimbal_p.target_angle += gimbal_p.add_angle*300.0f;
 		}
 		else 
 		{
@@ -464,8 +467,10 @@ static void GIMBAL_PID(void)
 	if (Gimbal_Precision_Activated_Flag)
 	{
 		gimbal_y.target_angle = gimbal_y.CAN_Total_Angle;
-		//gimbal_p.target_angle = LK_Pitch_Motor.SingleRound_Angle;
-		gimbal_p.target_angle = 18.25/360.f*216000 + Gimbal_Encoder_Horizontal_Angle;
+		gimbal_p.target_angle = 18.25/360.f*216000;
+		//gimbal_p.target_angle = 18.25/360.f*216000 - Gimbal_Encoder_Horizontal_Angle;
+//		while (gimbal_p.target_angle - LK_Pitch_Motor.Total_Angle < -216000) gimbal_p.target_angle = gimbal_p.target_angle+216000;
+//		while (gimbal_p.target_angle - LK_Pitch_Motor.Total_Angle >  216000) gimbal_p.target_angle = gimbal_p.target_angle-216000;
 		Gimbal_Precision_Activated_Flag = 0;
 	}
 	if (Gimbal_Precision_Inactivated_Flag)
@@ -545,7 +550,7 @@ void Pitch_Gyro_PID(GIMBAL_t *gimbal_)
 
 void Pitch_Encoder_PID(GIMBAL_t *gimbal_)
 {
-	PID_Calc(&gimbal_->gimbal_enconde_pid, Pitch_Target_Angle, LK_Pitch_Motor.SingleRound_Angle);   //pitch的第三个参数为gimbal_->CAN_actual_angle
+	PID_Calc(&gimbal_->gimbal_enconde_pid, Pitch_Target_Angle, LK_Pitch_Motor.Total_Angle);   //pitch的第三个参数为gimbal_->CAN_actual_angle
 }
 
 

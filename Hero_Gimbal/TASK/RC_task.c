@@ -141,8 +141,23 @@ void key_control_data(void)
 	if(R_cnt>=1000) {R_flag=0;R_cnt=0;}
 	rc_sent.x_speed=0;
 	rc_sent.y_speed=0;
-	//Shift键加速
+	//Shift键低速
 	if(KEY_board & KEY_PRESSED_OFFSET_SHIFT)
+	{
+		if(KEY_board & KEY_PRESSED_OFFSET_W)
+			rc_sent.x_speed=50;
+		if(KEY_board & KEY_PRESSED_OFFSET_S)
+			rc_sent.x_speed=-50;
+		if(KEY_board & KEY_PRESSED_OFFSET_A)
+			rc_sent.y_speed=-50;
+		if(KEY_board & KEY_PRESSED_OFFSET_D)
+			rc_sent.y_speed=50;
+		rc_sent.yaw.target_angle=limits_change(KEY_YAW_ANGLE_MAXX_RUN,KEY_YAW_ANGLE_MINN_RUN,MOUSE_x,KEY_MAXX,KEY_MINN);
+		if (Gimbal_Precision_Mode == 0)
+			rc_sent.pitch.target_angle=limits_change(KEY_PITCH_ANGLE_MAXX_RUN,KEY_PITCH_ANGLE_MINN_RUN,MOUSE_y,KEY_MAXX,KEY_MINN);
+		else rc_sent.pitch.target_angle=limits_change(KEY_PITCH_ANGLE_MAXX_RUN,KEY_PITCH_ANGLE_MINN_RUN,MOUSE_z,KEY_MAXX,KEY_MINN);
+	}
+	else
 	{
 		if(KEY_board & KEY_PRESSED_OFFSET_W)
 			rc_sent.x_speed=KEY_X_SPEED_MAXX;
@@ -152,21 +167,10 @@ void key_control_data(void)
 			rc_sent.y_speed=KEY_Y_SPEED_MINN;
 		if(KEY_board & KEY_PRESSED_OFFSET_D)
 			rc_sent.y_speed=KEY_Y_SPEED_MAXX;
-		rc_sent.yaw.target_angle=limits_change(KEY_YAW_ANGLE_MAXX_RUN,KEY_YAW_ANGLE_MINN_RUN,MOUSE_x,KEY_MAXX,KEY_MINN);
-		rc_sent.pitch.target_angle=limits_change(KEY_PITCH_ANGLE_MAXX_RUN,KEY_PITCH_ANGLE_MINN_RUN,MOUSE_y,KEY_MAXX,KEY_MINN);
-	}
-	else
-	{
-		if(KEY_board & KEY_PRESSED_OFFSET_W)
-			rc_sent.x_speed=130;
-		if(KEY_board & KEY_PRESSED_OFFSET_S)
-			rc_sent.x_speed=-130;
-		if(KEY_board & KEY_PRESSED_OFFSET_A)
-			rc_sent.y_speed=-130;
-		if(KEY_board & KEY_PRESSED_OFFSET_D)
-			rc_sent.y_speed=130;
 		rc_sent.yaw.target_angle=limits_change(KEY_YAW_ANGLE_MAXX_ON,KEY_YAW_ANGLE_MINN_ON,MOUSE_x,KEY_MAXX,KEY_MINN);
-		rc_sent.pitch.target_angle=limits_change(KEY_PITCH_ANGLE_MAXX_ON,KEY_PITCH_ANGLE_MINN_ON,MOUSE_y,KEY_MAXX,KEY_MINN);
+		if (Gimbal_Precision_Mode == 0)
+			rc_sent.pitch.target_angle=limits_change(KEY_PITCH_ANGLE_MAXX_ON,KEY_PITCH_ANGLE_MINN_ON,MOUSE_y,KEY_MAXX,KEY_MINN);
+		else rc_sent.pitch.target_angle=limits_change(KEY_PITCH_ANGLE_MAXX_ON,KEY_PITCH_ANGLE_MINN_ON,MOUSE_z,KEY_MAXX,KEY_MINN);
 	}
 	if(F_flag==1 && gimbal_set_mode != GIMBAL_TOP_ANGLE ) gimbal_set_mode=GIMBAL_RELATIVE_ANGLE;
 	else if(F_flag==0 && gimbal_set_mode != GIMBAL_TOP_ANGLE) gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
@@ -207,16 +211,16 @@ void key_control_data(void)
 	if(KEY_board & KEY_PRESSED_OFFSET_Q)
 	{
 		if (rc_sent.x_speed >= 0)
-			rc_sent.r_speed = -1.0;
-		else rc_sent.r_speed = 1.0;
+			rc_sent.r_speed = -2.0;
+		else rc_sent.r_speed = 2.0;
 	}
 	//E键阿克曼底盘模式，底盘右转
 	if(KEY_board & KEY_PRESSED_OFFSET_E)
 	{
 		if (rc_sent.x_speed >= 0)
-			rc_sent.r_speed = 1.0;
+			rc_sent.r_speed = 2.0;
 		else 
-			rc_sent.r_speed = -1.0;
+			rc_sent.r_speed = -2.0;
 	}
 
 	//摩擦轮开关
@@ -255,9 +259,17 @@ void key_control_data(void)
 	{
 		if (Chassis_TurnAround_Delay_Cnt == 0) 
 		{
-			if (gimbal_y.Bool_Invert_Flag == 0) gimbal_y.Bool_Invert_Flag = 1;
-			else if (gimbal_y.Bool_Invert_Flag == 1) gimbal_y.Bool_Invert_Flag = 0;
-			gimbal_y.Valuence_Invert_Flag = -gimbal_y.Valuence_Invert_Flag;
+			if(KEY_PRESSED_OFFSET_CTRL&KEY_board) //头和底盘一起转
+			{
+				if (Gimbal_Precision_Mode == 0)
+					gimbal_y.target_angle = gimbal_y.target_angle + 180.f;
+			}
+			else //底盘不转，头转
+			{
+				if (gimbal_y.Bool_Invert_Flag == 0) gimbal_y.Bool_Invert_Flag = 1;
+				else if (gimbal_y.Bool_Invert_Flag == 1) gimbal_y.Bool_Invert_Flag = 0;
+				gimbal_y.Valuence_Invert_Flag = -gimbal_y.Valuence_Invert_Flag;
+			}
 			Chassis_TurnAround_Delay_Cnt = 100;
 		}
 	}

@@ -94,6 +94,7 @@ typedef struct{
 	int Total_Angle;			//总共转过的计数
 	int Last_Total_Angle;
 	float ChassisCoordinate_Angle;
+	float AGV_Heading_Angle; //
 	
 	float actual_speed;			//电机真实速度,rpm
 	int Target_Speed;			//电机目标速度,rpm  转/min

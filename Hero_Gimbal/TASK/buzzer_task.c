@@ -27,7 +27,8 @@ void Buzzer_Task(int S_Cnt, int MS_Cnt)
 
 void Pitch_Calibration_Beep(int S_Cnt, int MS_Cnt)
 {
-	extern int Gimbal_Calibration_Times, Gimbal_Calibration_Target_Times;
+	int psc;
+	extern int Gimbal_Calibration_Times, Gimbal_Calibration_Target_Times, Motor_Alive_Flag;
 	if (Gimbal_Calibration_Target_Times > Gimbal_Calibration_Times)
 	{
 		if (Pitch_Calibration_Priority > Beep_Now_Priority)
@@ -38,18 +39,36 @@ void Pitch_Calibration_Beep(int S_Cnt, int MS_Cnt)
 	Global_Time = S_Cnt*1000 + MS_Cnt;
 	if (Beep_Now_Priority == Pitch_Calibration_Priority) //当前Pitch校准优先级最高，才控制发声
 	{
-		if (Global_Time % 1000 == 0)
+		if (Motor_Alive_Flag>0)
 		{
-			int psc=5;
-			buzzer_on(psc, pwm);
+			if (Global_Time % 1000 == 0)
+			{
+				psc=4;
+				buzzer_on(psc, pwm);
+			}
+			if (Global_Time % 1000 == 300)
+			{
+				psc=5;
+				buzzer_on(psc, pwm);
+			}
+			if (Global_Time % 1000 == 700)
+				buzzer_off();
 		}
-		if (Global_Time % 1000 == 300)
+		else if (Motor_Alive_Flag<=0)
 		{
-			int psc=6;
-			buzzer_on(psc, pwm);
+			if (Global_Time % 1500 == 0)
+			{
+				psc=5;
+				buzzer_on(psc, pwm);
+			}
+			if (Global_Time % 1500 == 300)
+			{
+				psc=6;
+				buzzer_on(psc, pwm);
+			}
+			if (Global_Time % 1500 == 700)
+				buzzer_off();
 		}
-		if (Global_Time % 1000 == 700)
-			buzzer_off();
 	}
 	if (Gimbal_Calibration_Target_Times == Gimbal_Calibration_Times) //如果蜂鸣器任务不再需要执行
 		if (Beep_Now_Priority == Pitch_Calibration_Priority) //且当前正在执行该蜂鸣器任务

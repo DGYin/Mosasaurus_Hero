@@ -44,6 +44,8 @@ extern int supercap_volt;
 uint8_t autoaim_mode;//2:normal,3:small energy,4:big energy
 uint8_t autoaim_armor;//0x10:auto,0x20:big,0x30:small
 uint8_t if_predict;
+
+extern void get_shoot_data(uint8_t *bullet_freq,	float *bullet_speed, uint8_t *bullet_speedlimit);
 //----------------------------
 
 static void referee_data_pack_handle(uint8_t sof, uint16_t cmd_id, uint8_t *p_data, uint16_t len)
@@ -493,10 +495,12 @@ void Referee_UI_Init(void)
         //静态UI预绘制2
         case 1:
             //中央标尺绘制2
+			float Bullet_Speed; uint8_t Useless_Var;
+			get_shoot_data(&Useless_Var, &Bullet_Speed ,&Useless_Var);
             UI_Draw_Line(&UI_Graph7.Graphic[0], "008",	UI_Graph_Add,	0,	UI_Color_Yellow, 1, 0		, 0		, 0		, 0); //第三行左横线
             UI_Draw_Line(&UI_Graph7.Graphic[1], "009",	UI_Graph_Add,	0,	UI_Color_Yellow, 5, 0		, 0		, 0		, 0); //第三行中心点
             UI_Draw_Line(&UI_Graph7.Graphic[2], "010",	UI_Graph_Add,	0,	UI_Color_Yellow, 1, 0		, 0		, 0		, 0); //第三行右横线
-            UI_Draw_Line(&UI_Graph7.Graphic[3], "011",	UI_Graph_Add,	0,	UI_Color_Yellow, 1, 0		, 0		, 0		, 0); //第四行左横线
+            UI_Draw_Float(&UI_Graph7.Graphic[4], "210", UI_Graph_Add, 1, UI_Color_Yellow, 18, 1, 3, Right_Num_List_X, 500, Bullet_Speed);
             UI_Draw_Arc	(&UI_Graph7.Graphic[0],	"110",	UI_Graph_Add, 2, UI_Color_Green, 350, 10,	10, 1920/2,	1080/2,	500, 300);//底盘前部色环
             UI_Draw_Line(&UI_Graph7.Graphic[5], "013",	UI_Graph_Add,	0,	UI_Color_Yellow, 2, SXC - 10	, 309	, SXC + 10	, 309); //第四行右横线
             UI_Draw_Line(&UI_Graph7.Graphic[6], "014",	UI_Graph_Add,	0,	UI_Color_Yellow, 1, SXC		, 250	, SXC	, 700); //中心竖线
@@ -562,6 +566,7 @@ void Referee_UI_Init(void)
             UI_PushUp_String(&UI_String, get_robot_id());
             Referee_UI_Init_Flag++;
             break;
+			
         }
     }
 }
@@ -603,7 +608,12 @@ void referee_usart_task(void const *argument)
         if (chassis_control_order.chassis_mode == CHASSIS_SPIN)
             UI_Draw_Arc	(&UI_Graph7.Graphic[4],	"107",	UI_Graph_Change,	2,	UI_Color_Green,		0,	360,	10,		Left_Ring_List_X,	590,	15,	15);//陀螺模式色环
         else 	UI_Draw_Arc	(&UI_Graph7.Graphic[4],	"107",	UI_Graph_Change,	2,	UI_Color_Pink,		0,	360,	5,		Left_Ring_List_X,	590,	15,	15);//陀螺模式色环
-        UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
+        
+		float Bullet_Speed; uint8_t Useless_Var;
+		get_shoot_data(&Useless_Var, &Bullet_Speed ,&Useless_Var);
+		UI_Draw_Float(&UI_Graph7.Graphic[4], "210", UI_Graph_Change, 1, UI_Color_Yellow, 18, 1, 3, Right_Num_List_X, 500, Bullet_Speed);
+            
+		UI_PushUp_Graphs(7, &UI_Graph7, get_robot_id());
     }
     if(UI_PushUp_Counter % 131 == 0) //动态UI预绘制 图形
     {

@@ -10,13 +10,14 @@ typedef struct
     int Tempreture;
     int Tempreture_Status; // 1为高温保护，0为正常
     int Voltage_Status; // 1为低压保护，0为正常
+	int Round_Cnt;
     uint32_t Tatget_Speed;
     uint32_t Send_Status;
 	uint64_t SingleRound_Angle;
 	uint64_t Last_SingleRound_Angle;
 	int Calibrated_Angle;
 	float Converted_Calibrated_Angle;
-	uint64_t Total_Angle;
+	int Total_Angle;
 } LK_Pitch_Motor_t;
 
 typedef struct
