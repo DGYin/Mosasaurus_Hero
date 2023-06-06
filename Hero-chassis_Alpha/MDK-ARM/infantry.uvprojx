@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../APP/pid;../BSP/bsp_can;../APP/chassis_move;../APP/Kinematics;../APP/chassis_task;../APP/remote_control;../BSP/bsp_referee;../APP/referee;../APP/trigger_turn;../APP/yaw_turn;../APP/can_receive;../APP/vision;../components/CRC8_CRC16;../components/fifo;../APP/protocol;../APP/struct_typedef;../APP/referee_UI;../APP/supercap;../APP/Briter_Encoder;../BSP/BSP_UART;..\APP\Relay_Task</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../APP/pid;../BSP/bsp_can;../APP/chassis_move;../APP/Kinematics;../APP/chassis_task;../APP/remote_control;../BSP/bsp_referee;../APP/referee;../APP/trigger_turn;../APP/yaw_turn;../APP/can_receive;../APP/vision;../components/CRC8_CRC16;../components/fifo;../APP/protocol;../APP/struct_typedef;../APP/referee_UI;../APP/supercap;../APP/Briter_Encoder;../BSP/BSP_UART;../APP/Relay_Task;..\BSP\bsp_buzzer;..\APP\Buzzer_Task</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -564,6 +564,11 @@
               <FileType>1</FileType>
               <FilePath>..\APP\Relay_Task\relay_task.c</FilePath>
             </File>
+            <File>
+              <FileName>buzzer_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\Buzzer_Task\buzzer_task.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -583,6 +588,11 @@
               <FileName>bsp_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\BSP_UART\bsp_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_buzzer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_buzzer\bsp_buzzer.c</FilePath>
             </File>
           </Files>
         </Group>

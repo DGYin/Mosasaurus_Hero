@@ -29,9 +29,10 @@ void shoot_task(void)
 {
 	fric_pid();
 	canTX_fric(rc_shoot.left_fric.set_currunt,rc_shoot.right_fric.set_currunt);
+	Shoot_Flag_For_Buzzer = rc_shoot.trigger.target_angle;
 	if(canTX_trigger(rc_shoot.trigger.target_angle))
 		rc_shoot.trigger.target_angle = 0;
-	Shoot_Flag_For_Buzzer = rc_shoot.trigger.target_angle;
+	
 
 }
 

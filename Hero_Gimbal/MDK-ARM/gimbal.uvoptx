@@ -119,6 +119,10 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
+          <Key>DLGUARM</Key>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
           <Key>CMSIS_AGDI</Key>
           <Name>-X"Any" -UAny -O206 -S8 -C0 -P00000000 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO65554 -TC10000000 -TT10000000 -TP20 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_1024.FLM -FS08000000 -FL0100000 -FP0($$Device:STM32F407IGHx$CMSIS\Flash\STM32F4xx_1024.FLM)</Name>
         </SetRegEntry>
@@ -162,57 +166,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>533</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134250864</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\TASK\gimbal_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\gimbal\../TASK/gimbal_task.c\533</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>530</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134250820</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\TASK\gimbal_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\gimbal\../TASK/gimbal_task.c\530</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>532</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134250824</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\TASK\gimbal_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\gimbal\../TASK/gimbal_task.c\532</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
           <LineNumber>7214</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134236972</Address>
+          <Address>134236592</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -224,11 +180,11 @@
           <Expression>\\gimbal\../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c\7214</Expression>
         </Bp>
         <Bp>
-          <Number>4</Number>
+          <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>534</LineNumber>
+          <LineNumber>538</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134250884</Address>
+          <Address>134250624</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -237,14 +193,62 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\TASK\gimbal_task.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\gimbal\../TASK/gimbal_task.c\534</Expression>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\538</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>540</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134250628</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\540</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>541</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134250668</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\541</Expression>
+        </Bp>
+        <Bp>
+          <Number>4</Number>
+          <Type>0</Type>
+          <LineNumber>542</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134250688</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\542</Expression>
         </Bp>
         <Bp>
           <Number>5</Number>
           <Type>0</Type>
-          <LineNumber>535</LineNumber>
+          <LineNumber>543</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134250904</Address>
+          <Address>134250708</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -253,29 +257,29 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\TASK\gimbal_task.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\gimbal\../TASK/gimbal_task.c\535</Expression>
+          <Expression>\\gimbal\../TASK/gimbal_task.c\543</Expression>
         </Bp>
         <Bp>
           <Number>6</Number>
           <Type>0</Type>
-          <LineNumber>536</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>0</Address>
+          <LineNumber>105</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134247254</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>..\TASK\gimbal_task.c</Filename>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\TASK\buzzer_task.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression></Expression>
+          <Expression>\\gimbal\../TASK/buzzer_task.c\105</Expression>
         </Bp>
         <Bp>
           <Number>7</Number>
           <Type>0</Type>
-          <LineNumber>537</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
+          <LineNumber>103</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
@@ -283,14 +287,14 @@
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>0</BreakIfRCount>
-          <Filename>..\TASK\gimbal_task.c</Filename>
+          <Filename>..\TASK\buzzer_task.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression></Expression>
         </Bp>
         <Bp>
           <Number>8</Number>
           <Type>0</Type>
-          <LineNumber>538</LineNumber>
+          <LineNumber>530</LineNumber>
           <EnabledFlag>0</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -306,7 +310,7 @@
         <Bp>
           <Number>9</Number>
           <Type>0</Type>
-          <LineNumber>539</LineNumber>
+          <LineNumber>532</LineNumber>
           <EnabledFlag>0</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -322,7 +326,7 @@
         <Bp>
           <Number>10</Number>
           <Type>0</Type>
-          <LineNumber>540</LineNumber>
+          <LineNumber>533</LineNumber>
           <EnabledFlag>0</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -338,7 +342,7 @@
         <Bp>
           <Number>11</Number>
           <Type>0</Type>
-          <LineNumber>541</LineNumber>
+          <LineNumber>534</LineNumber>
           <EnabledFlag>0</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -354,7 +358,7 @@
         <Bp>
           <Number>12</Number>
           <Type>0</Type>
-          <LineNumber>542</LineNumber>
+          <LineNumber>535</LineNumber>
           <EnabledFlag>0</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -370,7 +374,39 @@
         <Bp>
           <Number>13</Number>
           <Type>0</Type>
-          <LineNumber>543</LineNumber>
+          <LineNumber>536</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>14</Number>
+          <Type>0</Type>
+          <LineNumber>537</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\TASK\gimbal_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>15</Number>
+          <Type>0</Type>
+          <LineNumber>539</LineNumber>
           <EnabledFlag>0</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -695,6 +731,16 @@
           <WinNumber>1</WinNumber>
           <ItemText>LK_Pitch_Motor</ItemText>
         </Ww>
+        <Ww>
+          <count>62</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Shoot_Flag_For_Buzzer</ItemText>
+        </Ww>
+        <Ww>
+          <count>63</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>rc_shoot.trigger.target_angle</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -859,7 +905,7 @@
       <DebugFlag>
         <trace>0</trace>
         <periodic>1</periodic>
-        <aLwin>0</aLwin>
+        <aLwin>1</aLwin>
         <aCover>0</aCover>
         <aSer1>0</aSer1>
         <aSer2>0</aSer2>

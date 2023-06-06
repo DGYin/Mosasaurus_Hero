@@ -95,7 +95,9 @@ int main(void)
   MX_CAN1_Init();
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
 	mode_init();
 	all_init();
 	Motor_Zero_Position_Init();

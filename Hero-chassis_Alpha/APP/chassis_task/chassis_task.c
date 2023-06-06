@@ -19,7 +19,7 @@
 #include "referee_UI.h"
 #include "bsp_uart.h"
 #include "relay_task.h"
-
+#include "buzzer_task.h"
 int MS_Count=0;
 int S_Count=0;
 
@@ -47,6 +47,7 @@ void CHASSIS_TASK()//TIM3定时器中断控制战车（已经过宏定义）
 	{
 		referee_usart_task();
 	}	
+	Buzzer_Task(S_Count, MS_Count);
 	Relay_Task(S_Count, MS_Count);	
 	Briter_Encoder_Task(S_Count, MS_Count);	
 	supercap(S_Count, MS_Count);

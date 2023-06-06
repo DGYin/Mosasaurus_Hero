@@ -19,27 +19,33 @@
 #include "referee_UI.h"
 #include "bsp_uart.h"
 #include "yaw_turn.h"
+#include "buzzer_task.h"
 
+int S_Count=0, MS_Count=0;
 void CHASSIS_TASK()//TIM3定时器中断控制战车（已经过宏定义）
 {
-	static int time_count=1;
-	time_count++;
+	MS_Count++;
+	if(MS_Count==1000)			//清除计数标志    1s
+	{
+		MS_Count=0;
+		S_Count++;
+	}
+	Buzzer_Task(S_Count, MS_Count);
 //	if(time_count%3==0)
 //		canTX_Gimbal_Yaw_Data(yaw_can_rx.angle, yaw_can_rx.speed); //转发原始数据
-	if(time_count%10==5)
+	if(MS_Count%10==5)
 	{
 		yaw_turn(); //yaw轴旋转任务
 	}	
-	if(time_count%10==0)
+	if(MS_Count%10==0)
 	{		
 		chassis_move();
 		trigger_turn(); //拨弹轮旋转任务
 	}	
-	if(time_count%10==8)
+	if(MS_Count%10==8)
 	{
 		supercap(); //超级电容通讯
 	}		
-	if(time_count>=1000)			//清除计数标志    1s
-	{time_count=1;}
+	
 }
 

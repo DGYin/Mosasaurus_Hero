@@ -219,9 +219,6 @@ void vpid_chassis_realize_F(void)
     pid_realize(&(Chassis_Motor2.pid));
     pid_realize(&(Chassis_Motor3.pid));
     pid_realize(&(Chassis_Motor4.pid));
-    if (Chassis_Type == AGV_Chassis)
-    {
-
         Chassis_MotorA.pid.position_loop.apid.Target_Angle = Chassis_MotorA.Target_Angle;
         Chassis_MotorB.pid.position_loop.apid.Target_Angle = Chassis_MotorB.Target_Angle;
         Chassis_MotorC.pid.position_loop.apid.Target_Angle = Chassis_MotorC.Target_Angle;
@@ -230,7 +227,6 @@ void vpid_chassis_realize_F(void)
         pid_realize(&(Chassis_MotorB.pid));
         pid_realize(&(Chassis_MotorC.pid));
         pid_realize(&(Chassis_MotorD.pid));
-    }
 
     switch_flag = NUL;
 }
