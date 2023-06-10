@@ -15,7 +15,7 @@
 
 #include "trigger_turn.h"
 
-
+int Quick_Shoot_Flag = 0;
 
 trigger_t trigger;
 
@@ -56,26 +56,7 @@ void trigger_all_init(void)//拨弹轮pid参数及状态初始化
 	trigger.Target_Angle = 13.0f;
 	trigger.Target_Speed = 0.0f;
 }
-float Target_Angle;
-void shoot_angle_clc(void)
-{
-	
-	if(trigger.last_shoot_flag!=shoot_flag)
-	{
-		if(trigger.rounds>=400)
-		{
-				trigger.Target_Angle-=(trigger.rounds-3)*8192;
-				if(trigger.Target_Angle<=0) trigger.Target_Angle=1;
-				trigger.total_angle -=(trigger.rounds-3)*8192 ;
-				trigger.begin_angle=trigger.total_angle;
-				trigger.rounds=3;
-		}
-		Target_Angle=((SHOOT_NUM*Reduction_Ratio*360/6.f)*8191/360);          //发射1发；19.2是3508的减速比
-//		Target_Angle+=((9.5*360/7.f)*8191/360);
-		trigger.Target_Angle-=Target_Angle;
-	}
-	trigger.last_shoot_flag=shoot_flag;
-}
+
 
 int16_t sped;
 static void trigger_pid(void)//拨弹轮pid赋值计算
@@ -83,7 +64,9 @@ static void trigger_pid(void)//拨弹轮pid赋值计算
 //	if (abs(trigger.Target_Angle - trigger.total_angle) < 10000.f )
 //		trigger.angle_pid.max_out = 1400;
 	 if (abs(trigger.Target_Angle - trigger.total_angle) < 60000.f )
-		trigger.angle_pid.max_out = 300;
+		 if (Quick_Shoot_Flag)
+			trigger.angle_pid.max_out = 1500;
+		 else trigger.angle_pid.max_out = 300;
 	else 
 		trigger.angle_pid.max_out = 1500;
 	apid_vpid_realize(&trigger.angle_pid,trigger.Target_Angle,trigger.total_angle);

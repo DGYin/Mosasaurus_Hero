@@ -286,8 +286,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)//CAN接收函数
 			case TRIGGER_CONTROL_ID: //是否发射
 				if(gdata[0]==1) 
 				{
+					extern int Quick_Shoot_Flag;
+					Quick_Shoot_Flag = gdata[3];
 					shoot_flag=1;
-					shoot_angle_clc();
+					//shoot_angle_clc();
 					gdata[0]=0;
 				}
 				break;	

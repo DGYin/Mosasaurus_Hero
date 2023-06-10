@@ -20,20 +20,21 @@
 #define CAN_3508MotorD_ID         0x208
 #define YAW_ID    				  0x209
 
-#define CAN_GIMBAL_Y_ID           	  0x20E
-#define LOOP_BACK_ID              	  0x003
-#define YAW_CONTROL_ID            	  0x006
-#define GIMBAL_CONTROL_ID         	  0x007
-#define SHOOT_MOTOR_TRIGGER_ID    	  0x208
-#define MODE_RECEIVE_ID           	  0X009
-#define UI_ID                     	  0x010
-#define CAN_RefereeData_ID        	  0x011
-#define Chassis_Shoot_Task_Rx_ID       	  0x012
-#define Chassis_Motor_Speed_ID	  	  0x013
-#define CAN_Yaw_Raw_Angle		  	  0x014
-#define CAN_Yaw_Invert_Flag_Trans_ID  0x015
-#define CAN_Beta_Power_Limit_ID		  0x016
-#define Relay_Mode_Set_ID			  0x017
+#define CAN_GIMBAL_Y_ID						0x20E
+#define LOOP_BACK_ID              	  		0x003
+#define YAW_CONTROL_ID            	  		0x006
+#define GIMBAL_CONTROL_ID         	  		0x007
+#define SHOOT_MOTOR_TRIGGER_ID    	  		0x208
+#define MODE_RECEIVE_ID           	  		0X009
+#define UI_ID                     	  		0x010
+#define CAN_RefereeData_ID        	  		0x011
+#define Chassis_Shoot_Task_Rx_ID       	  	0x012
+#define Chassis_Motor_Speed_ID	  	  		0x013
+#define CAN_Yaw_Raw_Angle					0x014
+#define CAN_Yaw_Invert_Flag_Trans_ID  		0x015
+#define CAN_Beta_Power_Limit_ID		  		0x016
+#define Relay_Mode_Set_ID			  		0x017
+#define CAN_Broadcast_Referee_Shoot_Data	0x030	
 
 #define Briter_Encoder1_ID 0x0A
 #define Briter_Encoder2_ID 0x0B

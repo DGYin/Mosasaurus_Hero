@@ -279,7 +279,7 @@ void get_chassis_power_and_buffer_and_max(fp32 *power, uint16_t *buffer,uint16_t
 {
     *power = power_heat_data_t.chassis_power;
     *buffer = power_heat_data_t.chassis_power_buffer;
-		*power_max = robot_state.chassis_power_limit;
+	*power_max = robot_state.chassis_power_limit;
 }
 void get_chassis_power_limit(uint16_t *power_limit)
 {
@@ -290,10 +290,15 @@ uint8_t get_robot_id(void)
     return robot_state.robot_id;
 }
 
+void get_bullet_remaining(uint16_t *bullet_remain)
+{
+	*bullet_remain = bullet_remaining_t.bullet_remaining_num_42mm;
+}
+
 void get_shoot_heat0_limit_and_heat0(uint16_t *heat0_limit, uint16_t *heat0)
 {
-    *heat0_limit = robot_state.shooter_id1_17mm_cooling_limit;
-    *heat0 = power_heat_data_t.shooter_id1_17mm_cooling_heat;
+    *heat0_limit = robot_state.shooter_id1_42mm_cooling_limit;
+    *heat0 = power_heat_data_t.shooter_id1_42mm_cooling_heat;
 }
 
 void get_shoot_heat1_limit_and_heat1(uint16_t *heat1_limit, uint16_t *heat1)

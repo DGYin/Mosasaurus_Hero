@@ -60,8 +60,8 @@ void all_init(void)
 void Motor_Zero_Position_Init(void)//CW增大，CCW减小
 {
 	//适用于布瑞特编码器的转向舵零点位置
-	Chassis_MotorA.Zero_Position = -16900;
-	Chassis_MotorB.Zero_Position = 10800;
-	Chassis_MotorC.Zero_Position = 32500;
-	Chassis_MotorD.Zero_Position = 45500;
+	Chassis_MotorA.Zero_Position = 5000+40960;
+	Chassis_MotorB.Zero_Position = 19000+40960;
+	Chassis_MotorC.Zero_Position = 28700+40960;
+	Chassis_MotorD.Zero_Position = 27000+40960;
 }

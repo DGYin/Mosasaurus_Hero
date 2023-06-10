@@ -5,7 +5,7 @@
 #include "lk_pitch_turn.h"
 
 
-int Relay_Set_State = 1; //1为电容供电，2为电池直连
+int Relay_Set_State = 1, Quick_Shoot_Flag=0; //1为电容供电，2为电池直连
 
 uint8_t canTX_chassis(int16_t x, int16_t y, int8_t z, int8_t deviation)
 {
@@ -206,7 +206,7 @@ uint8_t canTX_trigger(uint8_t trigger)
     data[0] = trigger;
     data[1] = Fric_Switch_Flag;
     data[2] = Shoot_Num;
-    data[3] = 0;
+    data[3] = Quick_Shoot_Flag;
     data[4] = 0;
     data[5] = 0;
     data[6] = 0;

@@ -557,6 +557,24 @@ void canTX_To_BetaBoard_WheelVel(void)
 	HAL_CAN_AddTxMessage(&hcan2,&CAN_TxHeaderStruct,data,&pTxMailbox);
 }
 
+void canTX_Broadcast_Referee_Shoot_Data(int Remain_Bullet_State, int Heat_Data_State)
+{
+	uint8_t data[8];
+	uint8_t status;
+	CAN_TxHeaderTypeDef CAN_TxHeaderStruct;
+	uint32_t  pTxMailbox;
+	
+    CAN_TxHeaderStruct.StdId = CAN_Broadcast_Referee_Shoot_Data;
+    CAN_TxHeaderStruct.ExtId=0;
+    CAN_TxHeaderStruct.DLC=8;
+    CAN_TxHeaderStruct.IDE=CAN_ID_STD;
+    CAN_TxHeaderStruct.RTR=CAN_RTR_DATA;
+    CAN_TxHeaderStruct.TransmitGlobalTime=DISABLE;
+	data[0] = Remain_Bullet_State;
+	data[1] = Heat_Data_State;
+	HAL_CAN_AddTxMessage(&hcan2,&CAN_TxHeaderStruct,data,&pTxMailbox);
+}
+
 void canTX_AGV_Chassis_Motor_Current(void)
 {
 	uint8_t data[8];

@@ -74,11 +74,11 @@ void TIM3_CNT_TASK()
     if(MS_Count % 70 == 0)
     {
         if(gimbal_set_mode == GIMBAL_ABSOLUTE_ANGLE) //A
-            canTX_UI(LK_Pitch_Motor.Converted_Calibrated_Angle * 100, 1, LK_Pitch_Motor.Tempreture);
+            canTX_UI(LK_Pitch_Motor.Total_Angle/216000.f*360.f * 100, 1, LK_Pitch_Motor.Tempreture);
         else  if(gimbal_set_mode == GIMBAL_RELATIVE_ANGLE) //F
-            canTX_UI(LK_Pitch_Motor.Converted_Calibrated_Angle * 100, 2,  LK_Pitch_Motor.Tempreture);
+            canTX_UI(LK_Pitch_Motor.Total_Angle/216000.f*360.f * 100, 2,  LK_Pitch_Motor.Tempreture);
         else  if(gimbal_set_mode == GIMBAL_TOP_ANGLE) //T
-            canTX_UI(LK_Pitch_Motor.Converted_Calibrated_Angle * 100, 3,  LK_Pitch_Motor.Tempreture);
+            canTX_UI(LK_Pitch_Motor.Total_Angle/216000.f*360.f * 100, 3,  LK_Pitch_Motor.Tempreture);
     }
 	//计时部分
     if(MS_Count >= 1000)

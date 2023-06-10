@@ -51,7 +51,7 @@ float YawEncondePidSpeed[5] = {170.0f,	0.2f,	0.0f, 15000.0f,	7500.0f};   //±àÂëÆ
 float YawSpeedPid[5] 		= {2100.0f,	300.0f,	0.0f, 13000.0f,	7000.0f};     //ËÙ¶È»·int test_set_speed = 10;
 
 float PitchGyroPid[6] 		  = {20.f,		40.0f,			0.0f,		240.0f,			0.0f,	0.07f};  	//imu½Ç¶È»·
-float PitchEncondePid[6] 	  = {0.1f,		0.0f,			0.001f,		100.0f,		0.0f,		0.0f}; //±àÂëÆ÷½Ç¶È»·
+float PitchEncondePid[6] 	  = {0.1f,		0.0f,			0.001f,		200.0f,		0.0f,		0.0f}; //±àÂëÆ÷½Ç¶È»·
 float PitchEncondePidSpeed[6] = {0.0f,	0.0f,		0.0f,	0.0f,	0.0f, 	0.0f}; //±àÂëÆ÷ËÙ¶È»·
 //float PitchSpeedPid[6] 	  = {0.2f,		0.03f,			0.8f,		12.0f,	8.0f, 0.0f};    //
 float PitchSpeedPid[6] 		  = {12000.0f,		500.0f,			5000.0f,		3000.0f,	700.0f,		0.2f};    //8900.0f,		320.0f,			0.0f
@@ -220,47 +220,26 @@ void Gimbal_Task(int S_Cnt, int MS_Cnt)
 		GIMBAL_Set_Contorl();//Ä£Ê½¿ØÖÆ
 		GIMBAL_PID();//PID¼ÆËã
 		//Pitch½Ç¶ÈÏÞÖÆ£¬·ÀÖ¹ÔÆÌ¨½Ç¶È¹ýãÐÆÆ»µ»úÐµ½á¹¹
-		if (Gimbal_Precision_Mode == 0)
+		if(LK_Pitch_Motor.Total_Angle <= -18.f/360.f*216000)
 		{
-			if(gimbal_p.IMU_actual_angle <= -33.f)
-			{
-				gimbal_p.target_angle = -33.f;
-				gimbal_p.target_speed = 0;
-				if (gimbal_p.gimbal_gyro_pid.out>0) gimbal_p.gimbal_gyro_pid.out= 100; //Èç¹ûÄ¿±êÊÇÌ§Í·£¬ÒªµÍÍ·
-			}
-			if(gimbal_p.IMU_actual_angle >= 22)
-			{
-				gimbal_p.target_angle = 22;
-				gimbal_p.target_speed = 0;
-				if (gimbal_p.gimbal_gyro_pid.out<0) gimbal_p.gimbal_gyro_pid.out= -100; //Èç¹ûÄ¿±êÊÇµÍÍ·£¬ÒªÌ§Í·
-			
-			}
+			gimbal_p.target_angle = -18.f/360.f*216000+10;
+			gimbal_p.target_speed = 0;
+			gimbal_p.gimbal_enconde_pid.out= 10;
+			//if (gimbal_p.gimbal_gyro_pid.out>0) gimbal_p.gimbal_gyro_pid.out= 100; //Èç¹ûÄ¿±êÊÇÌ§Í·£¬ÒªµÍÍ·
 		}
-
-		else if (Gimbal_Precision_Mode)
+		if(LK_Pitch_Motor.Total_Angle >= 25/360.f*216000)
 		{
-			if(gimbal_p.IMU_actual_angle <= -33.f || gimbal_p.IMU_actual_angle >= 22)
-				Gimbal_Precision_Mode = 0;
-			//³õ´ÎÇÐ»»±êÖ¾
-			if (Last_Gimbal_Precision_Mode == 0&&Gimbal_Precision_Mode==1)	Gimbal_Precision_Activated_Flag = 1;
-			if (Last_Gimbal_Precision_Mode == 1&&Gimbal_Precision_Mode==0)	Gimbal_Precision_Inactivated_Flag = 1;
-			Last_Gimbal_Precision_Mode = Gimbal_Precision_Mode;
-
+			gimbal_p.target_angle = 25/360.f*216000-10;
+			gimbal_p.target_speed = 0;
+			gimbal_p.gimbal_enconde_pid.out= -10;
+			//if (gimbal_p.gimbal_gyro_pid.out<0) gimbal_p.gimbal_gyro_pid.out= -100; //Èç¹ûÄ¿±êÊÇµÍÍ·£¬ÒªÌ§Í·
+		
 		}
 		//ÔÆÌ¨µç»úÊý¾Ý·¢ËÍ
 		if (gimbal_set_mode != GIMBAL_ZERO_FORCE)//·ÇÎÞÁ¦Ä£Ê½
 		{
-			if (Gimbal_Precision_Mode == 0)
-			{
-				canTX_Yaw_Current(gimbal_y.given_current);
-				Send_Pitch_Motor_Add_Angle(-gimbal_p.gimbal_gyro_pid.out);//µç»ú±àÂëÆ÷½Ç¶ÈµÍÍ·ÊÇ¼õ£¬Ì§Í·ÊÇ¼Ó£»ÓëIMUÏà·´
-			}
-			else 
-			{
-				canTX_Yaw_Current(gimbal_y.given_current);
-				Send_Pitch_Motor_Add_Angle(gimbal_p.gimbal_enconde_pid.out);
-			}
-			
+			canTX_Yaw_Current(gimbal_y.given_current);
+			Send_Pitch_Motor_Add_Angle(gimbal_p.gimbal_enconde_pid.out);
 		}
 	}
 	//ÐèÒª½øÐÐÐ£×¼
@@ -291,7 +270,7 @@ void Gimbal_Init(void)
     gimbal_y.add_angle = 0.0f;
     gimbal_y.given_current = 0;
 	gimbal_y.Zero_Position = 66.0f;
-	gimbal_y.Valuence_Invert_Flag = -1;
+	gimbal_y.Valuence_Invert_Flag = 1;
 
     gimbal_y.gimbal_motor_mode = GIMBAL_MOTOR_ENCONDE; //GIMBAL_MOTOR_RAW GIMBAL_MOTOR_GYRO
 
@@ -396,7 +375,7 @@ static void GIMBAL_Set_Contorl(void)
 		else 
 		{
 			gimbal_y.target_angle += gimbal_y.add_angle;
-			gimbal_p.target_angle += gimbal_p.add_angle;
+			gimbal_p.target_angle = LK_Pitch_Motor.Total_Angle - gimbal_p.add_angle*2000.f;
 		}
     }
     else
@@ -468,7 +447,8 @@ static void GIMBAL_PID(void)
 	if (Gimbal_Precision_Activated_Flag)
 	{
 		gimbal_y.target_angle = gimbal_y.CAN_Total_Angle;
-		gimbal_p.target_angle = 18.25/360.f*216000;
+		//gimbal_p.target_angle = 18.25/360.f*216000;
+		gimbal_p.target_angle = LK_Pitch_Motor.Total_Angle;
 		Chassis_Follow_Switch = Chassis_Follow_OFF;
 		//gimbal_p.target_angle = 18.25/360.f*216000 - Gimbal_Encoder_Horizontal_Angle;
 //		while (gimbal_p.target_angle - LK_Pitch_Motor.Total_Angle < -216000) gimbal_p.target_angle = gimbal_p.target_angle+216000;
@@ -506,7 +486,8 @@ static void GIMBAL_PID(void)
 		/**************************/
 		/**** Pitchµç»úPID¼ÆËã ****/
 		/**************************/
-		Pitch_Gyro_PID(&gimbal_p);
+		//Pitch_Gyro_PID(&gimbal_p); //Ê¹ÓÃIMUÊý¾Ý½øÐÐ´¦Àí
+		Pitch_Encoder_PID(&gimbal_p);
 	}
 	else
 	//µõÉäÄ£Ê½¿ªÆô£¬Ê¹ÓÃ±àÂëÆ÷Ä£Ê½

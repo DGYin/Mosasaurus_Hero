@@ -68,12 +68,21 @@
 #define SCREEN_WIDTH 1080
 #define SCREEN_LENGTH 1920
 
-#define SXC	967 //图传视角X方向在屏幕的中心位置
+#define SXC	945 //图传视角X方向在屏幕的中心位置
 #define SYC	0	//图传视角y方向在屏幕的中心位置
 #define	Left_Title_List_X	80
 #define Left_Ring_List_X	180
 #define Right_Title_List_X	1600
 #define Right_Num_List_X	1700
+
+#define Left_Ring_List_1_Y	730
+#define Left_Ring_List_2_Y	660
+#define Left_Ring_List_3_Y	590
+#define Left_Title_List_1_Y	740
+#define Left_Title_List_2_Y	670	
+#define Left_Title_List_3_Y	600	
+
+
 extern int16_t vision_mode;
 void UI_Display(void);
 void referee_usart_task();

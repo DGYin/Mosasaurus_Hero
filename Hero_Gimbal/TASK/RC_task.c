@@ -26,6 +26,8 @@ int Gimbal_Precision_Mode_Delay_Cnt			= 0;
 int Chassis_TurnAround_Delay_Cnt			= 0;
 int Fric_Switch_Delay_Cnt					= 0;
 int Pitch_Calibration_Delay_Cnt				= 0;
+int Shoot_Delay_Cnt							= 0;
+int Relay_Delay_Cnt							= 0;
 
 KEY_CONTROL KEY_MODE=KEY_OFF;
 extern int Sent_dataC;
@@ -175,16 +177,13 @@ void key_control_data(void)
 	if(F_flag==1 && gimbal_set_mode != GIMBAL_TOP_ANGLE ) gimbal_set_mode=GIMBAL_RELATIVE_ANGLE;
 	else if(F_flag==0 && gimbal_set_mode != GIMBAL_TOP_ANGLE) gimbal_set_mode=GIMBAL_ABSOLUTE_ANGLE;
 	//Ctrl+R键底盘随动开关
-	if(KEY_board & KEY_PRESSED_OFFSET_R)
+	if(KEY_board & KEY_PRESSED_OFFSET_F)
 	{
-		if (KEY_board & KEY_PRESSED_OFFSET_CTRL)
+		if (Chassis_Spin_Delay_Cnt == 0)
 		{
-			if (Chassis_Spin_Delay_Cnt == 0)
-			{
-				Chassis_Spin_Delay_Cnt = 100;
-				if (Chassis_Follow_Switch == Chassis_Follow_ON) Chassis_Follow_Switch = Chassis_Follow_OFF;
-				else Chassis_Follow_Switch = Chassis_Follow_ON;
-			}
+			Chassis_Spin_Delay_Cnt = 100;
+			if (Chassis_Follow_Switch == Chassis_Follow_ON) Chassis_Follow_Switch = Chassis_Follow_OFF;
+			else Chassis_Follow_Switch = Chassis_Follow_ON;
 		}
 	}
 	//R键小陀螺模式开关
@@ -234,7 +233,7 @@ void key_control_data(void)
 	}
 
 	//摩擦轮开关
-	if (MOUSE_pre_right)
+	if (KEY_PRESSED_OFFSET_V&KEY_board)
 	{
 		if (Fric_Switch_Delay_Cnt==0)
 		{
@@ -245,63 +244,83 @@ void key_control_data(void)
 			Fric_Switch_Delay_Cnt = 100;
 		}
 	}
-	//发射及发射延迟
-	if((MOUSE_pre_left==1 || shoot_vision_flag==1 ) && rc_shoot.trigger.last_shoot_flag==0) 
-    {			
-		if (Fric_Switch_Flag)
-		{
-			rc_shoot.trigger.target_angle=SHOOT_NUM;
-			rc_shoot.trigger.last_shoot_flag=1;
-			shoot_true=0;
-			Shoot_Num++;
-		}
-		else rc_shoot.trigger.target_angle=0;
-	}
-	if(MOUSE_pre_left==0) 
+	
+	extern int Quick_Shoot_Flag;
+	if (MOUSE_pre_right)
 	{
-		MOUSE_pre_left_cnt++;
-		if(MOUSE_pre_left_cnt>=100)
-			{rc_shoot.trigger.last_shoot_flag=0;MOUSE_pre_left_cnt=0;}
+		if (Shoot_Delay_Cnt == 0)
+		{
+			if (Fric_Switch_Flag)
+			{
+				Quick_Shoot_Flag=0;
+				rc_shoot.trigger.target_angle=SHOOT_NUM;
+				Shoot_Num++; //记录左键按下次数
+				Shoot_Delay_Cnt = 100;
+			}
+			else rc_shoot.trigger.target_angle=0;
+		}
 	}
-    
-	//一键掉头
-	if(KEY_PRESSED_OFFSET_C&KEY_board)
+	if (MOUSE_pre_left)  //左键发射，拨弹轮速度快
+	{
+		if (Shoot_Delay_Cnt == 0)
+		{
+			if (Fric_Switch_Flag)
+			{
+				Quick_Shoot_Flag=1;
+				rc_shoot.trigger.target_angle=SHOOT_NUM;
+				Shoot_Num++; //记录左键按下次数
+				Shoot_Delay_Cnt = 50;
+			}
+			else rc_shoot.trigger.target_angle=0;
+		}
+	}
+	
+	if(KEY_PRESSED_OFFSET_C&KEY_board) //头和底盘一起转
 	{
 		if (Chassis_TurnAround_Delay_Cnt == 0) 
 		{
-			if(KEY_PRESSED_OFFSET_CTRL&KEY_board) //头和底盘一起转
-			{
-				if (Gimbal_Precision_Mode == 0)
-					gimbal_y.target_angle = gimbal_y.target_angle + 180.f;
-			}
-			else //底盘不转，头转
+			if (KEY_PRESSED_OFFSET_CTRL&KEY_board)
 			{
 				if (gimbal_y.Bool_Invert_Flag == 0) gimbal_y.Bool_Invert_Flag = 1;
 				else if (gimbal_y.Bool_Invert_Flag == 1) gimbal_y.Bool_Invert_Flag = 0;
 				gimbal_y.Valuence_Invert_Flag = -gimbal_y.Valuence_Invert_Flag;
 			}
+			else
+			{
+				if (Gimbal_Precision_Mode == 0)
+					gimbal_y.target_angle = gimbal_y.target_angle + 180.f;
+			}
 			Chassis_TurnAround_Delay_Cnt = 100;
 		}
 	}
 	//云台头部反转180度
-	if(KEY_PRESSED_OFFSET_X&KEY_board)
+	if(KEY_PRESSED_OFFSET_Z&KEY_board)
 	{ 
-		
-		if ((gimbal_y.Bool_Invert_Flag == 0)&&(Gimbal_Reverse_Bottom_Delay_Cnt == 0)) {gimbal_y.Bool_Invert_Flag = 1; Gimbal_Reverse_Bottom_Delay_Cnt = 100;}
-		if ((gimbal_y.Bool_Invert_Flag == 1)&&(Gimbal_Reverse_Bottom_Delay_Cnt == 0)) {gimbal_y.Bool_Invert_Flag = 0; Gimbal_Reverse_Bottom_Delay_Cnt = 100;}
-		
+		if(KEY_PRESSED_OFFSET_CTRL&KEY_board)
+		{
+			if (Chassis_Reverse_Bottom_Delay_Cnt == 0) 
+			{
+				gimbal_y.Valuence_Invert_Flag = -gimbal_y.Valuence_Invert_Flag;
+				Gimbal_Reverse_Bottom_Delay_Cnt = 100;
+				Chassis_Reverse_Bottom_Delay_Cnt = 100; //计时重置
+			}
+		}
+		else
+		{
+			if (Gimbal_Reverse_Bottom_Delay_Cnt == 0)
+			{
+				if ((gimbal_y.Bool_Invert_Flag == 0)&&(Gimbal_Reverse_Bottom_Delay_Cnt == 0)) {gimbal_y.Bool_Invert_Flag = 1; Gimbal_Reverse_Bottom_Delay_Cnt = 100;}
+				if ((gimbal_y.Bool_Invert_Flag == 1)&&(Gimbal_Reverse_Bottom_Delay_Cnt == 0)) {gimbal_y.Bool_Invert_Flag = 0; Gimbal_Reverse_Bottom_Delay_Cnt = 100;}
+				Gimbal_Reverse_Bottom_Delay_Cnt = 100;
+			}
+		}	
 	}
 	//底盘运动方向反转
 	if(KEY_PRESSED_OFFSET_Z&KEY_board)
 	{ 
-		if (Chassis_Reverse_Bottom_Delay_Cnt == 0) 
-		{
-			gimbal_y.Valuence_Invert_Flag = -gimbal_y.Valuence_Invert_Flag;
-			Chassis_Reverse_Bottom_Delay_Cnt = 100; //计时重置
-		}
 		
 	}	
-	if(KEY_PRESSED_OFFSET_B&KEY_board)
+	if(KEY_PRESSED_OFFSET_G&KEY_board)
 	{
 		if (Gimbal_Precision_Mode_Delay_Cnt == 0) 
 		{
@@ -313,7 +332,7 @@ void key_control_data(void)
 			Gimbal_Precision_Mode_Delay_Cnt = 100;
 		}
 	}
-	if(KEY_PRESSED_OFFSET_F&KEY_board)
+	if(KEY_PRESSED_OFFSET_X&KEY_board)
 	{
 		if (Pitch_Calibration_Delay_Cnt == 0) 
 		{
@@ -324,15 +343,15 @@ void key_control_data(void)
 		}
 	}
 	extern int Relay_Set_State;
-	if (KEY_board&KEY_PRESSED_OFFSET_CTRL)
+	if (KEY_board&KEY_PRESSED_OFFSET_B)
 	{
-		if (KEY_board&KEY_PRESSED_OFFSET_G)	//Ctrl+G	电池供电模式
-			Relay_Set_State = 2;
-	}
-	if (KEY_board&KEY_PRESSED_OFFSET_SHIFT)
-	{
-		if (KEY_board&KEY_PRESSED_OFFSET_G)	//Shift+G	电容供电模式
-			Relay_Set_State = 1;
+		if (Relay_Delay_Cnt==0)
+		{
+			if (KEY_board&KEY_PRESSED_OFFSET_CTRL)
+				Relay_Set_State = 2;
+			else Relay_Set_State = 1; //B	电容供电模式
+			Relay_Delay_Cnt = 100;
+		}
 	}	
 
 	//计时用
@@ -343,6 +362,8 @@ void key_control_data(void)
 	if (Chassis_TurnAround_Delay_Cnt>0)			Chassis_TurnAround_Delay_Cnt--;
 	if (Fric_Switch_Delay_Cnt>0)				Fric_Switch_Delay_Cnt--;
 	if (Pitch_Calibration_Delay_Cnt>0)			Pitch_Calibration_Delay_Cnt--;
+	if (Shoot_Delay_Cnt>0)						Shoot_Delay_Cnt--;
+	if (Relay_Delay_Cnt>0)						Relay_Delay_Cnt--;
 }
 /**
 	* @brief       幅度判断函数

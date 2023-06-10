@@ -14,8 +14,8 @@ void Shoot_Beep(int S_Cnt, int MS_Cnt);
 void Buzzer_Task(int S_Cnt, int MS_Cnt)
 {
 	Beep_Busy_Flag = 0;
-	//DJI_Beep(S_Cnt, MS_Cnt);
-	Shoot_Beep(S_Cnt, MS_Cnt);
+	DJI_Beep(S_Cnt, MS_Cnt);
+	//Shoot_Beep(S_Cnt, MS_Cnt);
 	if (Beep_Busy_Flag == 0) //如果没有任务，默认关掉蜂鸣器
 		buzzer_off();
 	//Shoot_Beep(S_Cnt, MS_Cnt,Shoot_Flag_For_Buzzer);
