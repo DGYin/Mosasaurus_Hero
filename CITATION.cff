@@ -1,9 +1,10 @@
 cff-version: 1.1.0
 message: "If you use this software, please cite it as below."
 authors:
-  - family-names: Sai
-    given-names: Junqian
-    orcid: https://orcid.org/0009-0001-0920-0194
-title: DGYin/Mosasaurus_Hero: Release 1.0.0
+  - family-names: "Sai"
+    given-names: "Junqian"
+    orcid: "https://orcid.org/0009-0001-0920-0194"
+title: "DGYin/Mosasaurus_Hero: Release 1.0.0"
 version: release2.0.0
 date-released: 2023-07-27
+DOI: 10.5281/zenodo.8188594
